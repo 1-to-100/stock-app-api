@@ -1,0 +1,15 @@
+POST {{host}}/firebase/sync
+Content-Type: application/json
+Authorization: Bearer hGOjZJOwdQ572rC1q6RhYs6kinzGYGtjAGsPX2MWqQc=
+
+{}
+
+###
+
+POST https://007d-185-208-231-151.ngrok-free.app/firebase/sync
+Content-Type: application/json
+Authorization: Bearer hGOjZJOwdQ572rC1q6RhYs6kinzGYGtjAGsPX2MWqQc=
+
+{}
+
+###
