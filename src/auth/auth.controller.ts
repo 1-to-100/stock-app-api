@@ -10,19 +10,24 @@ import { AuthService } from './auth.service';
 import { FirebaseAuthGuard } from './guards/firebase-auth/firebase-auth.guard';
 import { User, UserId } from '../common/decorators/user.decorator';
 import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
+import { UsersService } from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+  ) {}
 
   @UseGuards(FirebaseAuthGuard)
   @Post('sync')
-  syncUser(@User() user: FirebaseDecodedToken) {
+  async syncUser(@User() user: FirebaseDecodedToken) {
     if (!user) throw new UnauthorizedException();
 
+    const dbUser = await this.userService.createFirebaseUser(user);
     return {
       message: 'ok',
-      user,
+      user: dbUser,
     };
   }
 

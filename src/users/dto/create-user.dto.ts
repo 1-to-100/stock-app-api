@@ -15,10 +15,12 @@ export class CreateUserDto {
   lastName: string;
 
   @ApiProperty({ description: 'ID of the Customer this user belongs to' })
+  @IsOptional()
   @IsInt()
   customerId: number;
 
   @ApiProperty({ description: 'The role of the user' })
+  @IsOptional()
   @IsInt()
   roleId: number;
 

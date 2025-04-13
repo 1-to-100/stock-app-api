@@ -68,12 +68,20 @@ export class UsersService {
     if (existingUser) {
       return existingUser;
     } else {
+      let firstName: string | null = null;
+      let lastName: string | null = null;
+      if (firebaseUser.name) {
+        const nameParts = firebaseUser.name.split(' ');
+        firstName = nameParts[0];
+        lastName = nameParts.slice(1).join(' ');
+      }
+      console.log('createFirebaseUser', firebaseUser);
       return this.prisma.user.create({
         data: {
           uid: firebaseUser.uid,
           email: firebaseUser.email!,
-          firstName: firebaseUser.name,
-          lastName: firebaseUser.name,
+          firstName,
+          lastName,
         },
       });
     }
