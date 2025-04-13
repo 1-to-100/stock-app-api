@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsInt } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEmail, IsIn, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -7,16 +7,31 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty({ description: 'First Name' })
+  @IsString()
   firstName: string;
+
   @ApiProperty({ description: 'Last Name' })
+  @IsString()
   lastName: string;
 
+  @ApiProperty({ description: 'ID of the Customer this user belongs to' })
   @IsInt()
   customerId: number;
 
+  @ApiProperty({ description: 'The role of the user' })
   @IsInt()
   roleId: number;
 
+  @ApiPropertyOptional({ description: 'Manager ID' })
+  @IsOptional()
+  @IsInt()
   managerId: number;
-  status: string;
+
+  @ApiPropertyOptional({
+    description: 'Status (optional). Default: inactive',
+    enum: ['inactive', 'active', 'disabled'],
+  })
+  @IsOptional()
+  @IsIn(['inactive', 'active', 'disabled'])
+  status?: string;
 }
