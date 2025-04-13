@@ -6,12 +6,7 @@ import { UsersModule } from './users/users.module';
 import { FirebaseModule as LocalFirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from 'nestjs-firebase';
-
-const config = {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY,
-};
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -25,6 +20,8 @@ const config = {
         privateKey: process.env.FIREBASE_PRIVATE_KEY,
       },
     }),
+    FirebaseModule,
+    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

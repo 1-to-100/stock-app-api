@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,9 +8,15 @@ import { Prisma } from '@prisma/client';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    console.log('createUserDto', createUserDto);
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    if (
+      await this.prisma.user.findFirst({
+        where: { email: createUserDto.email },
+      })
+    ) {
+      throw new ConflictException('User already exist');
+    }
+    return this.prisma.user.create({ data: createUserDto });
   }
 
   findAll(params: {
@@ -31,12 +37,17 @@ export class UsersService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.prisma.user.findUniqueOrThrow({ where: { id } });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    console.log('updateUserDto', updateUserDto);
-    return `This action updates a #${id} user`;
+    if (updateUserDto.email) {
+      updateUserDto.email = undefined;
+    }
+    return this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
   }
 
   remove(id: number) {

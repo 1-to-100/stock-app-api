@@ -14,16 +14,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Customer {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  Users     User[]
+
+  @@map("customers")
+}
+
+model Role {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  Users     User[]
+
+  @@map("roles")
+}
+
+model Manager {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  Users     User[]
+
+  @@map("managers")
+}
+
 model User {
-  id          Int      @id @default(autoincrement())
-  uid         String?  @unique
-  email       String   @unique
-  name        String?
-  first_name  String?
-  last_name   String?
-  customer_id Int
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id         Int       @id @default(autoincrement())
+  uid        String?   @unique
+  email      String    @unique
+  firstName  String?   @map("first_name")
+  lastName   String?   @map("last_name")
+  customerId Int       @map("customer_id")
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roleId     Int       @map("role_id")
+  role       Role      @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  managerId  Int?      @map("manager_id")
+  manager    Manager?  @relation(fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status     String    @default("inactive")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
 
   @@map("users")
 }
