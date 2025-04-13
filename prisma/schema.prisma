@@ -50,10 +50,11 @@ model User {
   email      String    @unique
   firstName  String?   @map("first_name")
   lastName   String?   @map("last_name")
+  avatar     String?
   customerId Int       @map("customer_id")
   customer   Customer  @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  roleId     Int       @map("role_id")
-  role       Role      @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roleId     Int?      @map("role_id")
+  role       Role?     @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   managerId  Int?      @map("manager_id")
   manager    Manager?  @relation(fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   status     String    @default("inactive")

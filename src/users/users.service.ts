@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 
 @Injectable()
 export class UsersService {
@@ -60,5 +61,21 @@ export class UsersService {
         uid,
       },
     });
+  }
+
+  async createFirebaseUser(firebaseUser: FirebaseDecodedToken) {
+    const existingUser = await this.findByUid(firebaseUser.uid);
+    if (existingUser) {
+      return existingUser;
+    } else {
+      return this.prisma.user.create({
+        data: {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email!,
+          firstName: firebaseUser.name,
+          lastName: firebaseUser.name,
+        },
+      });
+    }
   }
 }

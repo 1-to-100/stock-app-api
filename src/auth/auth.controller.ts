@@ -2,81 +2,84 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Post,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { DecodedIdToken } from 'firebase-admin/lib/auth';
+import { FirebaseAuthGuard } from './guards/firebase-auth/firebase-auth.guard';
+import { User, UserId } from '../common/decorators/user.decorator';
+import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(FirebaseAuthGuard)
   @Post('sync')
-  async syncUser(
-    @Body()
-    body: {
-      idToken: string;
-      email?: string;
-      name?: string;
-      avatar?: string;
-    },
-    @Headers('authorization') authHeader: string,
-  ) {
-    const token = authHeader?.replace('Bearer ', '');
+  syncUser(@User() user: FirebaseDecodedToken) {
+    if (!user) throw new UnauthorizedException();
 
-    try {
-      const decoded: DecodedIdToken = await this.authService.verifyToken(token);
-      if (!decoded) {
-        throw new UnauthorizedException('Invalid token');
-      }
-
-      console.log('decoded token', decoded);
-      console.log('uid', decoded.uid);
-    } catch (error) {
-      console.log('error', error);
-      throw new UnauthorizedException('Invalid secret');
-    }
+    return {
+      message: 'ok',
+      user,
+    };
   }
 
-  @Post('set-claims')
-  async setUserClaims(
-    @Body()
-    body: {
-      uid: string;
-      permissions: string[];
-    },
-    @Headers('authorization') authHeader: string,
+  @UseGuards(FirebaseAuthGuard)
+  @Post('set-role')
+  async setUserRole(
+    @UserId() userUid: string,
+    @Body() body: { role?: string },
   ) {
-    const token = authHeader?.replace('Bearer ', '');
+    if (!userUid) throw new UnauthorizedException();
 
-    const decoded: DecodedIdToken = await this.authService.verifyToken(token);
-    if (!decoded) {
-      throw new UnauthorizedException('Invalid token');
-    }
+    const role = body.role || 'user';
+    await this.authService.setUserClaims(userUid, {
+      role,
+    });
+
+    return {
+      message: 'ok',
+    };
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Post('set-permissions')
+  async setUserPermissions(
+    @UserId() userUid: string,
+    @Body() body: { permissions?: string[] },
+  ) {
+    if (!userUid) throw new UnauthorizedException();
 
     const permissions = body.permissions || [];
-
-    return this.authService.setUserClaims(decoded.uid, {
+    await this.authService.setUserClaims(userUid, {
       permissions,
     });
+
+    return {
+      message: 'ok',
+    };
   }
 
+  @UseGuards(FirebaseAuthGuard)
   @Get('test')
-  async testUserClaims(@Headers('authorization') authHeader: string) {
-    const token = authHeader?.replace('Bearer ', '');
-
-    try {
-      const decoded: DecodedIdToken = await this.authService.verifyToken(token);
-      if (!decoded) {
-        throw new UnauthorizedException();
-      }
-
-      return decoded;
-    } catch (error) {
-      console.log('error', error);
-      throw new UnauthorizedException();
-    }
+  testUserClaims() {
+    return {
+      message: 'test',
+    };
+    // const token = authHeader?.replace('Bearer ', '');
+    //
+    // try {
+    //   const decoded: DecodedIdToken = await this.authService.verifyToken(token);
+    //   if (!decoded) {
+    //     throw new UnauthorizedException();
+    //   }
+    //
+    //   return decoded;
+    // } catch (error) {
+    //   console.log('error', error);
+    //   throw new UnauthorizedException();
+    // }
   }
 }
