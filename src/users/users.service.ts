@@ -42,4 +42,12 @@ export class UsersService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+
+  findByUid(uid: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        uid,
+      },
+    });
+  }
 }
