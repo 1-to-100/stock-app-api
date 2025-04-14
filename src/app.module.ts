@@ -9,6 +9,7 @@ import { FirebaseModule } from 'nestjs-firebase';
 import { ConfigModule } from '@nestjs/config';
 import { SystemModulesModule } from './system-modules/system-modules.module';
 import { RolesModule } from './roles/roles.module';
+import { ManagersModule } from './managers/managers.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RolesModule } from './roles/roles.module';
     ConfigModule.forRoot({ isGlobal: true }),
     SystemModulesModule,
     RolesModule,
+    ManagersModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

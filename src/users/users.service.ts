@@ -68,7 +68,9 @@ export class UsersService {
   }
 
   async createFirebaseUser(firebaseUser: FirebaseDecodedToken) {
-    const firebaseUserProfile = await this.firebase.auth.getUser(firebaseUser.uid);
+    const firebaseUserProfile = await this.firebase.auth.getUser(
+      firebaseUser.uid,
+    );
     console.log('firebaseUserProfile', firebaseUserProfile);
 
     const existingUser = await this.findByUid(firebaseUser.uid);

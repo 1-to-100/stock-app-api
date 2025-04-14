@@ -4,6 +4,6 @@ import { SystemModulesService } from './system-modules.service';
 
 @Module({
   controllers: [SystemModulesController],
-  providers: [SystemModulesService]
+  providers: [SystemModulesService],
 })
 export class SystemModulesModule {}
