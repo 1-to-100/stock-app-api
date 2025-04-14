@@ -9,6 +9,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
+import { InviteUserDto } from './dto/invite-user.dto';
+import { CheckUserExistsDto } from './dto/check-user-exists.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,14 +20,23 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    if (
-      await this.prisma.user.findFirst({
-        where: { email: createUserDto.email },
-      })
-    ) {
+    if (await this.checkEmailExists({ email: createUserDto.email })) {
       throw new ConflictException('User already exists');
     }
     return this.prisma.user.create({ data: createUserDto });
+  }
+
+  async invite(inviteUserDto: InviteUserDto) {
+    if (await this.checkEmailExists({ email: inviteUserDto.email })) {
+      throw new ConflictException('User already exists');
+    }
+    let user = await this.prisma.user.create({ data: inviteUserDto });
+    await this.sendInviteEmail(user);
+    return user
+  }
+
+  async checkEmailExists(checkUserExistsDto: CheckUserExistsDto) {
+    return {exists: !!(await this.prisma.user.findFirst({ where: { email: checkUserExistsDto.email } }))};
   }
 
   findAll(params: {
@@ -63,9 +74,9 @@ export class UsersService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} user`;
+  // }
 
   findByUid(uid: string) {
     return this.prisma.user.findUnique({
@@ -102,5 +113,11 @@ export class UsersService {
         },
       });
     }
+  }
+
+  async sendInviteEmail(user) {
+    // create and store link
+    // send email
+    return true;
   }
 }
