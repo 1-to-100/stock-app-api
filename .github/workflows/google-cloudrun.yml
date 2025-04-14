@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
       - 'dev'
+      - 'cicd'
 
 env:
   PROJECT_ID: 'stock-app-cms-9144fc8'
