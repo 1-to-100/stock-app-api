@@ -4,10 +4,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
+import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
+    private prisma: PrismaService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     if (
@@ -64,22 +68,25 @@ export class UsersService {
   }
 
   async createFirebaseUser(firebaseUser: FirebaseDecodedToken) {
+    const firebaseUserProfile = await this.firebase.auth.getUser(firebaseUser.uid);
+    console.log('firebaseUserProfile', firebaseUserProfile);
+
     const existingUser = await this.findByUid(firebaseUser.uid);
     if (existingUser) {
       return existingUser;
     } else {
       let firstName: string | null = null;
       let lastName: string | null = null;
-      if (firebaseUser.name) {
-        const nameParts = firebaseUser.name.split(' ');
+      if (firebaseUserProfile.displayName) {
+        const nameParts = firebaseUserProfile.displayName.split(' ');
         firstName = nameParts[0];
         lastName = nameParts.slice(1).join(' ');
       }
-      console.log('createFirebaseUser', firebaseUser);
       return this.prisma.user.create({
         data: {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email!,
+          uid: firebaseUserProfile.uid,
+          email: firebaseUserProfile.email!,
+          emailVerified: Boolean(firebaseUser.email_verified),
           firstName,
           lastName,
         },

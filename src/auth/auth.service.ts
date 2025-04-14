@@ -14,4 +14,8 @@ export class AuthService {
   async setUserClaims(uid: string, claims: Record<string, any>) {
     return this.firebase.auth.setCustomUserClaims(uid, claims);
   }
+
+  async getFirebaseUser(uid: string) {
+    return this.firebase.auth.getUser(uid);
+  }
 }
