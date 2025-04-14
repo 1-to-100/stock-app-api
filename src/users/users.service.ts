@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,29 +15,39 @@ import { CheckUserExistsDto } from './dto/check-user-exists.dto';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
     private prisma: PrismaService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    if (await this.checkEmailExists({ email: createUserDto.email })) {
+    if (await this.emailExists({ email: createUserDto.email })) {
       throw new ConflictException('User already exists');
     }
     return this.prisma.user.create({ data: createUserDto });
   }
 
   async invite(inviteUserDto: InviteUserDto) {
-    if (await this.checkEmailExists({ email: inviteUserDto.email })) {
+    if (await this.emailExists({ email: inviteUserDto.email })) {
       throw new ConflictException('User already exists');
     }
-    let user = await this.prisma.user.create({ data: inviteUserDto });
+    const user = await this.prisma.user.create({ data: inviteUserDto });
     await this.sendInviteEmail(user);
-    return user
+    return user;
   }
 
   async checkEmailExists(checkUserExistsDto: CheckUserExistsDto) {
-    return {exists: !!(await this.prisma.user.findFirst({ where: { email: checkUserExistsDto.email } }))};
+    return {
+      exists: await this.emailExists(checkUserExistsDto),
+    };
+  }
+
+  async emailExists(checkUserExistsDto: CheckUserExistsDto) {
+    return !!(await this.prisma.user.findFirst({
+      where: { email: checkUserExistsDto.email },
+    }));
   }
 
   findAll(params: {
@@ -116,8 +127,50 @@ export class UsersService {
   }
 
   async sendInviteEmail(user) {
-    // create and store link
+    await this.prisma.userOneTimeCodes.create({
+      data: {
+        userId: user.id,
+        code: this.getRandomString(16),
+        isUsed: false,
+      },
+    });
     // send email
     return true;
+  }
+
+  async validateAndVoidOneTimeCode(code: string) {
+    const now = new Date();
+    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const existing_code = await this.prisma.userOneTimeCodes.findFirst({
+      where: {
+        code: code,
+        isUsed: false,
+        createdAt: {
+          gte: yesterday,
+          lte: now,
+        },
+      },
+    });
+    if (!existing_code) {
+      return false;
+    }
+    existing_code.isUsed = true;
+    const id = existing_code.id;
+    await this.prisma.userOneTimeCodes.update({
+      where: { id },
+      data: existing_code,
+    });
+    return true;
+  }
+
+  getRandomString(length: number) {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
   }
 }

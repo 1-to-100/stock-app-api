@@ -4,7 +4,8 @@ import {
   Post,
   Body,
   Patch,
-  Param, Logger,
+  Param,
+  Logger,
   // Delete,
   // Query,
 } from '@nestjs/common';
@@ -25,20 +26,20 @@ export class UsersController {
     return await this.usersService.create(createUserDto);
   }
 
-  @Post("/invite")
+  @Post('/invite')
   async invite(@Body() inviteUserDto: InviteUserDto) {
     return await this.usersService.invite(inviteUserDto);
   }
 
-  @Post("/check-email")
+  @Post('/check-email')
   async checkEmailExists(@Body() checkEmailDto: CheckUserExistsDto) {
     return await this.usersService.checkEmailExists(checkEmailDto);
   }
 
-  @Post("/invite-multiple")
+  @Post('/invite-multiple')
   async inviteMultiple(@Body() inviteUsersDto: InviteMultipleUsersDto) {
-    const invitePromises = inviteUsersDto.emails.map(email => {
-      if (!this.usersService.checkEmailExists({ email: email })) {
+    const invitePromises = inviteUsersDto.emails.map((email) => {
+      if (!this.usersService.emailExists({ email: email })) {
         const inviteUserDto = new InviteUserDto();
         inviteUserDto.email = email;
         inviteUserDto.customerId = inviteUsersDto.customerId;
@@ -51,6 +52,14 @@ export class UsersController {
     });
 
     return await Promise.all(invitePromises);
+  }
+
+  @Get('/validate-code/:code')
+  async validateCode(@Param('code') code: string) {
+    if (await this.usersService.validateAndVoidOneTimeCode(code)) {
+      return { exists: true, message: 'code validated and voided' };
+    }
+    return { exists: false, message: 'code is not valid' };
   }
 
   @Get()

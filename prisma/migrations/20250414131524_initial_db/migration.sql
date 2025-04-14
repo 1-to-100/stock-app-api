@@ -52,6 +52,17 @@ CREATE TABLE "managers" (
 );
 
 -- CreateTable
+CREATE TABLE "user_one_time_codes" (
+    "id" SERIAL NOT NULL,
+    "code" TEXT NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "is_used" BOOLEAN NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_one_time_codes_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "uid" TEXT,

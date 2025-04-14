@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsArray, IsEmail, IsIn, IsInt, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsEmail,
+  IsInt,
+  IsOptional,
+} from 'class-validator';
 
 export class InviteMultipleUsersDto {
   @IsArray()
@@ -13,12 +19,16 @@ export class InviteMultipleUsersDto {
   @IsInt()
   customerId: number;
 
-  @ApiProperty({ description: 'The role that should be assigned to these users' })
+  @ApiProperty({
+    description: 'The role that should be assigned to these users',
+  })
   @IsOptional()
   @IsInt()
   roleId: number;
 
-  @ApiPropertyOptional({ description: 'Manager ID that should be assigned to these users' })
+  @ApiPropertyOptional({
+    description: 'Manager ID that should be assigned to these users',
+  })
   @IsOptional()
   @IsInt()
   managerId: number;
