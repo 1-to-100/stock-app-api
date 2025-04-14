@@ -45,8 +45,8 @@ jobs:
 
       - name: 'Deploy to Cloud Run'
         run: |
-          gcloud run deploy ${ github.ref_name}}-${{ env.SERVICE }} \
-            --image=${{ env.ARTIFACT_REGISTRY }}:${[ github.ref_name }} \
+          gcloud run deploy dev-${{ env.SERVICE }} \
+            --image=${{ env.ARTIFACT_REGISTRY }}:${{ github.ref_name }} \
             --region=${{ env.REGION }} \
             --platform=managed \
             --allow-unauthenticated
