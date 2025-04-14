@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from 'nestjs-firebase';
 import { ConfigModule } from '@nestjs/config';
 import { SystemModulesModule } from './system-modules/system-modules.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SystemModulesModule } from './system-modules/system-modules.module';
     FirebaseModule,
     ConfigModule.forRoot({ isGlobal: true }),
     SystemModulesModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
