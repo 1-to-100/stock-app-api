@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FirebaseAuthGuard } from './guards/firebase-auth/firebase-auth.guard';
-import { User, UserId } from '../common/decorators/user.decorator';
+import { User } from '../common/decorators/user.decorator';
 import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 import { UsersService } from '../users/users.service';
 
@@ -34,13 +34,23 @@ export class AuthController {
   @UseGuards(FirebaseAuthGuard)
   @Post('set-role')
   async setUserRole(
-    @UserId() userUid: string,
+    @User() user: FirebaseDecodedToken,
     @Body() body: { role?: string },
   ) {
-    if (!userUid) throw new UnauthorizedException();
+    if (!user) throw new UnauthorizedException();
 
     const role = body.role || 'user';
-    await this.authService.setUserClaims(userUid, {
+
+    const claims: {
+      role?: string;
+      permissions?: string[];
+    } = {};
+
+    if (user.permissions && user.permissions.length > 0) {
+      claims.permissions = user.permissions;
+    }
+    await this.authService.setUserClaims(user.uid, {
+      ...claims,
       role,
     });
 
@@ -52,13 +62,23 @@ export class AuthController {
   @UseGuards(FirebaseAuthGuard)
   @Post('set-permissions')
   async setUserPermissions(
-    @UserId() userUid: string,
+    @User() user: FirebaseDecodedToken,
     @Body() body: { permissions?: string[] },
   ) {
-    if (!userUid) throw new UnauthorizedException();
+    if (!user) throw new UnauthorizedException();
 
     const permissions = body.permissions || [];
-    await this.authService.setUserClaims(userUid, {
+
+    const claims: {
+      role?: string;
+      permissions?: string[];
+    } = {};
+    if (user.role) {
+      claims.role = user.role;
+    }
+
+    await this.authService.setUserClaims(user.uid, {
+      ...claims,
       permissions,
     });
 
