@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -36,8 +40,12 @@ export class RolesService {
     });
   }
 
-  findOne(id: number) {
-    return this.prisma.role.findUniqueOrThrow({ where: { id } });
+  async findOne(id: number) {
+    const role = await this.prisma.role.findFirst({ where: { id } });
+    if (!role) {
+      throw new NotFoundException('No role with given ID exists');
+    }
+    return role;
   }
 
   update(id: number, updateRoleDto: UpdateRoleDto) {

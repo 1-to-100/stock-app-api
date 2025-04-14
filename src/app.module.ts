@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { SystemModulesModule } from './system-modules/system-modules.module';
 import { RolesModule } from './roles/roles.module';
 import { ManagersModule } from './managers/managers.module';
+import { CustomersModule } from './customers/customers.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ManagersModule } from './managers/managers.module';
     SystemModulesModule,
     RolesModule,
     ManagersModule,
+    CustomersModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

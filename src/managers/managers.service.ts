@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateManagerDto } from './dto/create-manager.dto';
 import { UpdateManagerDto } from './dto/update-manager.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,8 +29,12 @@ export class ManagersService {
     return this.prisma.manager.findMany();
   }
 
-  findOne(id: number) {
-    return this.prisma.manager.findUniqueOrThrow({ where: { id } });
+  async findOne(id: number) {
+    const manager = await this.prisma.manager.findFirst({ where: { id } });
+    if (!manager) {
+      throw new NotFoundException('No manager with given ID exists');
+    }
+    return manager;
   }
 
   update(id: number, updateManagerDto: UpdateManagerDto) {
