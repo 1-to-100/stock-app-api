@@ -19,7 +19,7 @@ export class UsersService {
         where: { email: createUserDto.email },
       })
     ) {
-      throw new ConflictException('User already exist');
+      throw new ConflictException('User already exists');
     }
     return this.prisma.user.create({ data: createUserDto });
   }

@@ -1,31 +1,53 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RolesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createRoleDto: CreateRoleDto) {
-    return this.prisma.role.create({
-      data: createRoleDto,
+  async create(createRoleDto: CreateRoleDto) {
+    if (
+      await this.prisma.role.findFirst({
+        where: { name: createRoleDto.name },
+      })
+    ) {
+      throw new ConflictException('Role with name already exists');
+    }
+    return this.prisma.role.create({ data: createRoleDto });
+  }
+
+  findAll(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.RoleWhereUniqueInput;
+    where?: Prisma.RoleWhereInput;
+    orderBy?: Prisma.RoleOrderByWithRelationInput;
+  }) {
+    const { skip, take, cursor, where, orderBy } = params;
+    return this.prisma.role.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
     });
   }
 
-  findAll() {
-    return this.prisma.role.findMany();
-  }
-
   findOne(id: number) {
-    return `This action returns a #${id} role`;
+    return this.prisma.role.findUniqueOrThrow({ where: { id } });
   }
 
   update(id: number, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
+    return this.prisma.role.update({
+      where: { id },
+      data: updateRoleDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} role`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} role`;
+  // }
 }
