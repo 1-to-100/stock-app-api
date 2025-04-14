@@ -7,6 +7,7 @@ import { FirebaseModule as LocalFirebaseModule } from './firebase/firebase.modul
 import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from 'nestjs-firebase';
 import { ConfigModule } from '@nestjs/config';
+import { SystemModulesModule } from './system-modules/system-modules.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     FirebaseModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    SystemModulesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
