@@ -15,6 +15,7 @@ COPY . .
 
 # Build the application
 RUN npm run build
+RUN npx prisma migrate deploy
 
 # Copying the sahred dependencies
 COPY --from=us-central1-docker.pkg.dev/shared-0c2710c/main/shared-deps /json_secret_export/entrypoint.sh /entrypoint.sh
