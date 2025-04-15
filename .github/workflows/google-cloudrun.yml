@@ -11,9 +11,9 @@ env:
   PROJECT_ID: 'stock-app-cms-9144fc8'
   REGION: 'us-central1'
   SERVICE: 'api'
-  SERVICE_ACCOUNT: 'stock-app-cms-dev-gh-sa@stock-app-cms-9144fc8.iam.gserviceaccount.com'
+  SERVICE_ACCOUNT: 'stock-app-cms-shared-gh-sa@stock-app-cms-9144fc8.iam.gserviceaccount.com'
   ARTIFACT_REGISTRY: 'us-central1-docker.pkg.dev/stock-app-cms-9144fc8/shared/api'
-  WORKLOAD_ID_PROVIDER: 'projects/381393991104/locations/global/workloadIdentityPools/github'
+  WORKLOAD_ID_PROVIDER: 'projects/381393991104/locations/global/workloadIdentityPools/github-shared'
 
 jobs:
   deploy:
