@@ -46,14 +46,12 @@ model Role {
 }
 
 model Permission {
-  id      Int    @id @default(autoincrement())
-  action  Action
-  subject String
-  label   String
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  label String
 
   roles RolePermission[]
 
-  @@unique([action, subject])
   @@map("permissions")
 }
 

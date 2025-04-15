@@ -23,3 +23,8 @@ Authorization: Bearer xxx111222333
 GET {{host}}/auth/test
 Content-Type: application/json
 Authorization: Bearer xxx111222333
+
+###
+
+GET {{host}}/system-modules/seed
+Content-Type: application/json
