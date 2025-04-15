@@ -20,4 +20,4 @@ COPY --from=us-central1-docker.pkg.dev/shared-0c2710c/main/shared-deps /json_sec
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the application
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run build && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm prisma generate && npm run build && node dist/main.js"]
