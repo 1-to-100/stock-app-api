@@ -11,13 +11,6 @@ import { SystemModulesModule } from './system-modules/system-modules.module';
 import { RolesModule } from './roles/roles.module';
 import { ManagersModule } from './managers/managers.module';
 import { CustomersModule } from './customers/customers.module';
-console.log({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY,
-        jsonData: process.env.JSON_ENV_SECRET_DATA,
-})
-
 
 @Module({
   imports: [
