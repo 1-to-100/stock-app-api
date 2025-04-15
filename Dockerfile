@@ -14,7 +14,7 @@ RUN npm install --force
 COPY . .
 
 # Build the application
-RUN sh -c "npx prisma migrate deploy && npm run build && node dist/main.js"
+RUN npm run build 
 
 # Copying the sahred dependencies
 COPY --from=us-central1-docker.pkg.dev/shared-0c2710c/main/shared-deps /json_secret_export/entrypoint.sh /entrypoint.sh
@@ -23,4 +23,4 @@ COPY --from=us-central1-docker.pkg.dev/shared-0c2710c/main/shared-deps /json_sec
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the application
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
