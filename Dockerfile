@@ -14,6 +14,7 @@ RUN npm install --force
 COPY . .
 
 # Build the application
+RUN export DATABASE_URL=postgresql://root:1TJYpZFR2TrrvxraFPoCDhQDvNlxcsPK@10.97.0.3:5432/root
 RUN npx prisma migrate deploy
 RUN npm run build
 
