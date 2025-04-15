@@ -14,7 +14,7 @@ RUN npm install --force
 COPY . .
 
 # Build the application
-RUN sh -c "export DATABASE_URL=postgresql://root:1TJYpZFR2TrrvxraFPoCDhQDvNlxcsPK@10.97.0.3:5432/root && npx prisma migrate deploy && npm run build && node dist/main.js"
+RUN sh -c "npx prisma migrate deploy && npm run build && node dist/main.js"
 
 # Copying the sahred dependencies
 COPY --from=us-central1-docker.pkg.dev/shared-0c2710c/main/shared-deps /json_secret_export/entrypoint.sh /entrypoint.sh
