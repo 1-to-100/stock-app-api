@@ -13,8 +13,8 @@ RUN npm install --force
 # Copy the rest of the application code
 COPY . .
 
-RUN npm run build
 RUN prisma migrate diff --from-empty --to-schema-datamodel ./prisma/schema --script
+RUN npm run build
 
 # Copying the sahred dependencies
 COPY --from=us-central1-docker.pkg.dev/shared-0c2710c/main/shared-deps /json_secret_export/entrypoint.sh /entrypoint.sh
