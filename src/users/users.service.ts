@@ -7,11 +7,15 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { InviteUserDto } from './dto/invite-user.dto';
 import { CheckUserExistsDto } from './dto/check-user-exists.dto';
+import { ListUsersInputDto } from './dto/list-users-input.dto';
+import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
+import { OutputUserDto } from './dto/output-user.dto';
+import { createPaginator } from 'prisma-pagination';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +23,7 @@ export class UsersService {
 
   constructor(
     @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -50,21 +54,22 @@ export class UsersService {
     }));
   }
 
-  findAll(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }) {
-    const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-    });
+  async findAll(
+    listUsersInput: ListUsersInputDto,
+  ): Promise<PaginatedOutputDto<OutputUserDto>> {
+    const paginate = createPaginator({ perPage: listUsersInput.perPage });
+    return paginate<OutputUserDto, Prisma.UserFindManyArgs>(
+      this.prisma.user,
+      {
+        where: {},
+        orderBy: {
+          id: 'desc',
+        },
+      },
+      {
+        page: listUsersInput.page,
+      },
+    );
   }
 
   async findOne(id: number) {

@@ -5,7 +5,7 @@ import {
   Body,
   Patch,
   Param,
-  Logger,
+  Logger, Query,
   // Delete,
   // Query,
 } from '@nestjs/common';
@@ -15,6 +15,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InviteUserDto } from './dto/invite-user.dto';
 import { InviteMultipleUsersDto } from './dto/invite-multiple-users.dto';
 import { CheckUserExistsDto } from './dto/check-user-exists.dto';
+import { ApiPaginatedResponse } from '../common/decorators/api-paginated-response.decorator';
+import { OutputUserDto } from './dto/output-user.dto';
+import { ListUsersInputDto } from './dto/list-users-input.dto';
 
 @Controller('users')
 export class UsersController {
@@ -38,20 +41,23 @@ export class UsersController {
 
   @Post('/invite-multiple')
   async inviteMultiple(@Body() inviteUsersDto: InviteMultipleUsersDto) {
-    const invitePromises = inviteUsersDto.emails.map((email) => {
-      if (!this.usersService.emailExists({ email: email })) {
+    const invitePromises = inviteUsersDto.emails.map(async (email) => {
+      if (await this.usersService.emailExists({ email })) {
+        this.logger.log(`Invite email already exists: ${email}`);
+        return null; // Return null or something to maintain array structure
+      } else {
         const inviteUserDto = new InviteUserDto();
         inviteUserDto.email = email;
         inviteUserDto.customerId = inviteUsersDto.customerId;
         inviteUserDto.roleId = inviteUsersDto.roleId;
         inviteUserDto.managerId = inviteUsersDto.managerId;
         return this.usersService.invite(inviteUserDto);
-      } else {
-        this.logger.log(`Invite email already exists ` + email);
       }
     });
 
-    return await Promise.all(invitePromises);
+    const results = await Promise.all(invitePromises);
+    // Filter out null results as we don’t care about failed/skipped invites. Or care?
+    return results.filter((result) => result !== null);
   }
 
   @Get('/validate-code/:code')
@@ -63,8 +69,9 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll({});
+  @ApiPaginatedResponse(OutputUserDto)
+  findAll(@Query() listUserInputDto: ListUsersInputDto) {
+    return this.usersService.findAll(listUserInputDto);
   }
 
   @Get(':id')
