@@ -65,11 +65,17 @@ export class UsersService {
   async findAll(
     listUsersInput: ListUsersInputDto,
   ): Promise<PaginatedOutputDto<OutputUserDto>> {
+    const where: Prisma.UserFindManyArgs['where'] = {};
+
+    if (listUsersInput.roleId !== undefined) {
+      where.roleId = listUsersInput.roleId;
+    }
+
     const paginate = createPaginator({ perPage: listUsersInput.perPage });
     return paginate<OutputUserDto, Prisma.UserFindManyArgs>(
       this.prisma.user,
       {
-        where: {},
+        where,
         orderBy: {
           id: 'desc',
         },

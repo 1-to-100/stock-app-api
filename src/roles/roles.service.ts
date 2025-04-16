@@ -40,6 +40,9 @@ export class RolesService {
             permission: true,
           },
         },
+        _count: {
+          select: { users: true },
+        },
       },
       skip,
       take,
