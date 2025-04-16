@@ -19,6 +19,8 @@ import { CheckUserExistsDto } from './dto/check-user-exists.dto';
 import { ApiPaginatedResponse } from '../common/decorators/api-paginated-response.decorator';
 import { OutputUserDto } from './dto/output-user.dto';
 import { ListUsersInputDto } from './dto/list-users-input.dto';
+import { ApiConflictResponse, ApiOkResponse } from '@nestjs/swagger';
+import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 
 @Controller('users')
 export class UsersController {
@@ -26,21 +28,41 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @ApiOkResponse({
+    description: 'The user record',
+    type: OutputUserDto,
+  })
+  @ApiConflictResponse({
+    description: 'Error creating user with provided data',
+  })
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.create(createUserDto);
   }
 
   @Post('/invite')
+  @ApiOkResponse({
+    description: 'The user record',
+    type: OutputUserDto,
+  })
   async invite(@Body() inviteUserDto: InviteUserDto) {
     return await this.usersService.invite(inviteUserDto);
   }
 
   @Post('/check-email')
+  @ApiOkResponse({
+    description: 'Validation result',
+    type: Boolean,
+  })
   async checkEmailExists(@Body() checkEmailDto: CheckUserExistsDto) {
     return await this.usersService.checkEmailExists(checkEmailDto);
   }
 
   @Post('/invite-multiple')
+  @ApiOkResponse({
+    description: 'Created users list',
+    type: OutputUserDto,
+    isArray: true,
+  })
   async inviteMultiple(@Body() inviteUsersDto: InviteMultipleUsersDto) {
     const invitePromises = inviteUsersDto.emails.map(async (email) => {
       if (await this.usersService.emailExists({ email })) {
@@ -71,16 +93,29 @@ export class UsersController {
 
   @Get()
   @ApiPaginatedResponse(OutputUserDto)
+  @ApiOkResponse({
+    description: 'Created users list',
+    type: PaginatedOutputDto,
+    isArray: true,
+  })
   findAll(@Query() listUserInputDto: ListUsersInputDto) {
     return this.usersService.findAll(listUserInputDto);
   }
 
   @Get(':id')
+  @ApiOkResponse({
+    description: 'User',
+    type: OutputUserDto,
+  })
   findOne(@Param('id') id: number) {
     return this.usersService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiOkResponse({
+    description: 'User',
+    type: OutputUserDto,
+  })
   update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
