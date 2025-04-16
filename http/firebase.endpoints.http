@@ -28,3 +28,28 @@ Authorization: Bearer xxx111222333
 
 GET {{host}}/system-modules/seed
 Content-Type: application/json
+
+###
+
+POST {{host}}/roles
+Content-Type: application/json
+
+{
+  "name": "admin",
+  "description": "Admin role"
+}
+
+###
+
+POST {{host}}/roles/1/permissions
+Content-Type: application/json
+
+{
+  "permissionNames": [
+    "UserManagement:viewUsers"
+  ]
+}
+
+###
+
+GET {{host}}/roles/1
