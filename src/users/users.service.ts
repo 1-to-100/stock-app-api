@@ -26,14 +26,22 @@ export class UsersService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<OutputUserDto> {
     if (await this.emailExists({ email: createUserDto.email })) {
       throw new ConflictException('User already exists');
     }
-    return this.prisma.user.create({ data: createUserDto });
+
+    try {
+      this.logger.log(`Create user with email ${createUserDto.email}`);
+      const user = await this.prisma.user.create({ data: createUserDto });
+      return user;
+    } catch (error) {
+      this.logger.error(`Error creating user: ${error}`);
+      throw new ConflictException('User cannot be created.');
+    }
   }
 
-  async invite(inviteUserDto: InviteUserDto) {
+  async invite(inviteUserDto: InviteUserDto): Promise<OutputUserDto> {
     if (await this.emailExists({ email: inviteUserDto.email })) {
       throw new ConflictException('User already exists');
     }
@@ -72,7 +80,7 @@ export class UsersService {
     );
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<OutputUserDto> {
     const user = await this.prisma.user.findFirst({ where: { id } });
     if (!user) {
       throw new NotFoundException('No user with given ID exists');
@@ -80,14 +88,23 @@ export class UsersService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<OutputUserDto> {
     if (updateUserDto.email) {
       updateUserDto.email = undefined;
     }
-    return this.prisma.user.update({
-      where: { id },
-      data: updateUserDto,
-    });
+    try {
+      const user = await this.prisma.user.update({
+        where: { id },
+        data: updateUserDto,
+      });
+      return user;
+    } catch (error) {
+      this.logger.error(`Error updating user: ${error}`);
+      throw new ConflictException('Error updating user');
+    }
   }
 
   // remove(id: number) {

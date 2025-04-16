@@ -6,22 +6,22 @@ export class OutputUserDto {
   email: string;
 
   @ApiProperty({ description: 'First Name' })
-  firstName: string;
+  firstName: string | null = null;
 
   @ApiProperty({ description: 'Last Name' })
-  lastName: string;
+  lastName: string | null = null;
 
   @ApiProperty({ description: 'ID of the Customer this user belongs to' })
   @IsOptional()
-  customerId: number;
+  customerId: number | null = null;
 
   @ApiProperty({ description: 'The role of the user' })
   @IsOptional()
-  roleId: number;
+  roleId: number | null = null;
 
   @ApiPropertyOptional({ description: 'Manager ID' })
   @IsOptional()
-  managerId: number;
+  managerId: number | null = null;
 
   @ApiPropertyOptional({
     description: 'Status (optional). Default: inactive',
