@@ -12,7 +12,10 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    // origin: 'http://example.com', // or ['http://example.com', 'http://another.com']
+    origin: [
+      'http://localhost:3000',
+      'https://dev-app-381393991104.us-central1.run.app/',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     // allowedHeaders: 'Content-Type, Accept, Authorization',
     // exposedHeaders: 'Content-Length, X-Knowledge-Base',
