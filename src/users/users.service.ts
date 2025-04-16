@@ -96,6 +96,7 @@ export class UsersService {
       updateUserDto.email = undefined;
     }
     try {
+      // it should be separate assignment, otherwise the catch is not working
       const user = await this.prisma.user.update({
         where: { id },
         data: updateUserDto,
