@@ -63,6 +63,12 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
+  "overrides": {
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/common": "^11.0.1",
+    "firebase-admin": "^13.2.0",
+    "rxjs": "^7.8.1"
+  },
   "jest": {
     "moduleFileExtensions": [
       "js",
