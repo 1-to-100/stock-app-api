@@ -6,7 +6,7 @@ export class PaginatedInputDto {
   @ApiPropertyOptional({ description: 'Page number' })
   @IsOptional()
   @IsInt()
-  @Transform(({ value }) => {
+  @Transform(({ value }): number => {
     if (typeof value === 'string') {
       let v = parseInt(value, 10);
       if (v <= 0) {
@@ -28,7 +28,7 @@ export class PaginatedInputDto {
   @ApiPropertyOptional({ description: 'Items per page' })
   @IsInt()
   @IsOptional()
-  @Transform(({ value }) => {
+  @Transform(({ value }): number => {
     if (typeof value === 'string') {
       let v = parseInt(value, 10);
       if (v <= 0) {
