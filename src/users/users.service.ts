@@ -118,7 +118,7 @@ export class UsersService {
   //   return `This action removes a #${id} user`;
   // }
 
-  findByUid(uid: string) {
+  async findByUid(uid: string) {
     return this.prisma.user.findUnique({
       where: {
         uid,

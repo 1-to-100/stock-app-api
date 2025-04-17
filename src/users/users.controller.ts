@@ -7,6 +7,7 @@ import {
   Param,
   Logger,
   Query,
+  UseGuards,
   // Delete,
   // Query,
 } from '@nestjs/common';
@@ -21,8 +22,12 @@ import { OutputUserDto } from './dto/output-user.dto';
 import { ListUsersInputDto } from './dto/list-users-input.dto';
 import { ApiConflictResponse, ApiOkResponse } from '@nestjs/swagger';
 import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
+import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
+import { Permissions } from '../common/decorators/permissions.decorator';
+import { PermissionGuard } from '../auth/guards/permission/permission.guard';
 
 @Controller('users')
+@UseGuards(FirebaseAuthGuard, PermissionGuard)
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
   constructor(private readonly usersService: UsersService) {}
@@ -35,6 +40,7 @@ export class UsersController {
   @ApiConflictResponse({
     description: 'Error creating user with provided data',
   })
+  @Permissions('UserManagement:createUser')
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.create(createUserDto);
   }
@@ -98,6 +104,7 @@ export class UsersController {
     type: PaginatedOutputDto,
     isArray: true,
   })
+  @Permissions('UserManagement:viewUsers')
   findAll(@Query() listUserInputDto: ListUsersInputDto) {
     return this.usersService.findAll(listUserInputDto);
   }
