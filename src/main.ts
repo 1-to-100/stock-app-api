@@ -14,12 +14,13 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000',
-      'https://dev-app-381393991104.us-central1.run.app/',
+      'http://localhost:3001',
+      'https://dev-app-381393991104.us-central1.run.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     // allowedHeaders: 'Content-Type, Accept, Authorization',
     // exposedHeaders: 'Content-Length, X-Knowledge-Base',
-    // credentials: true, // Allow cookies
+    credentials: true, // Allow cookies
     // preflightContinue: false,
     // optionsSuccessStatus: 204,
   });
