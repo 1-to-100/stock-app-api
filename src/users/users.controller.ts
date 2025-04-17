@@ -50,6 +50,7 @@ export class UsersController {
     description: 'The user record',
     type: OutputUserDto,
   })
+  @Permissions('UserManagement:inviteUser')
   async invite(@Body() inviteUserDto: InviteUserDto) {
     return await this.usersService.invite(inviteUserDto);
   }
@@ -59,6 +60,7 @@ export class UsersController {
     description: 'Validation result',
     type: Boolean,
   })
+  @Permissions('UserManagement:inviteUser')
   async checkEmailExists(@Body() checkEmailDto: CheckUserExistsDto) {
     return await this.usersService.checkEmailExists(checkEmailDto);
   }
@@ -69,6 +71,7 @@ export class UsersController {
     type: OutputUserDto,
     isArray: true,
   })
+  @Permissions('UserManagement:inviteUser')
   async inviteMultiple(@Body() inviteUsersDto: InviteMultipleUsersDto) {
     const invitePromises = inviteUsersDto.emails.map(async (email) => {
       if (await this.usersService.emailExists({ email })) {
@@ -114,6 +117,7 @@ export class UsersController {
     description: 'User',
     type: OutputUserDto,
   })
+  @Permissions('UserManagement:viewUsers')
   findOne(@Param('id') id: number) {
     return this.usersService.findOne(+id);
   }
@@ -123,6 +127,7 @@ export class UsersController {
     description: 'User',
     type: OutputUserDto,
   })
+  @Permissions('UserManagement:editUser')
   update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
