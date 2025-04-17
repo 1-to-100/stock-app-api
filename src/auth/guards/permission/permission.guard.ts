@@ -85,8 +85,13 @@ export class PermissionGuard implements CanActivate {
     if (!requestUser) {
       throw new ForbiddenException('Access denied: request user not found');
     }
+    if (!requestUser.uid) {
+      throw new ForbiddenException(
+        'Access denied: request user uid not found, is it from Firebase?',
+      );
+    }
 
-    const user = await this.usersService.findByUid(requestUser.uid);
+    const user = await this.usersService.findByUid(requestUser.uid as string);
     console.log(user);
     if (!user) {
       throw new ForbiddenException('Access denied: user not found');
@@ -106,7 +111,6 @@ export class PermissionGuard implements CanActivate {
 
     let allowed = false;
     rolePermissions.forEach((permission) => {
-      // const permission_name: string = permission.permission.name;
       if (allowedPermissions.includes(permission.permission.name)) {
         allowed = true;
       }
