@@ -25,6 +25,8 @@ import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { PermissionGuard } from '../auth/guards/permission/permission.guard';
+import { User } from '../common/decorators/user.decorator';
+import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 
 @Controller('users')
 @UseGuards(FirebaseAuthGuard, PermissionGuard)
@@ -110,6 +112,15 @@ export class UsersController {
   @Permissions('UserManagement:viewUsers')
   findAll(@Query() listUserInputDto: ListUsersInputDto) {
     return this.usersService.findAll(listUserInputDto);
+  }
+
+  @Get('/me')
+  @ApiOkResponse({
+    description: 'User',
+    type: OutputUserDto,
+  })
+  async findSelf(@User() user: FirebaseDecodedToken) {
+    return await this.usersService.findByUid(user.uid);
   }
 
   @Get(':id')
