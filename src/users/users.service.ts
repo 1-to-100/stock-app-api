@@ -71,6 +71,29 @@ export class UsersService {
       where.roleId = listUsersInput.roleId;
     }
 
+    if (listUsersInput.search !== undefined) {
+      where.OR = [
+        {
+          firstName: {
+            contains: listUsersInput.search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          lastName: {
+            contains: listUsersInput.search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          email: {
+            contains: listUsersInput.search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
     const paginate = createPaginator({ perPage: listUsersInput.perPage });
     return paginate<OutputUserDto, Prisma.UserFindManyArgs>(
       this.prisma.user,
