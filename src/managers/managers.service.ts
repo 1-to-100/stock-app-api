@@ -7,6 +7,7 @@ import {
 import { CreateManagerDto } from './dto/create-manager.dto';
 import { UpdateManagerDto } from './dto/update-manager.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { OutputTaxonomyDto } from '../taxonomies/dto/output-taxonomy.dto';
 
 @Injectable()
 export class ManagersService {
@@ -27,6 +28,15 @@ export class ManagersService {
 
   findAll() {
     return this.prisma.manager.findMany();
+  }
+
+  getForTaxonomy(): Promise<OutputTaxonomyDto[]> {
+    return this.prisma.manager.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    });
   }
 
   async findOne(id: number) {

@@ -11,6 +11,7 @@ import { SystemModulesModule } from './system-modules/system-modules.module';
 import { RolesModule } from './roles/roles.module';
 import { ManagersModule } from './managers/managers.module';
 import { CustomersModule } from './customers/customers.module';
+import { TaxonomiesModule } from './taxonomies/taxonomies.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CustomersModule } from './customers/customers.module';
     RolesModule,
     ManagersModule,
     CustomersModule,
+    TaxonomiesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

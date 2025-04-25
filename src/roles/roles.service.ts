@@ -9,6 +9,7 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { UpdateRolePermissionsByNameDto } from './dto/update-role-permissions-by-name.dto';
+import { OutputTaxonomyDto } from '../taxonomies/dto/output-taxonomy.dto';
 
 @Injectable()
 export class RolesService {
@@ -49,6 +50,15 @@ export class RolesService {
       cursor,
       where,
       orderBy,
+    });
+  }
+
+  getForTaxonomy(): Promise<OutputTaxonomyDto[]> {
+    return this.prisma.role.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
     });
   }
 
