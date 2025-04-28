@@ -23,7 +23,8 @@ enum CustomerStatus {
 
 model Customer {
   id             Int            @id @default(autoincrement())
-  name           String?
+  name           String         @unique
+  email          String         @unique
   status         CustomerStatus @default(inactive)
   subscriptionId Int?           @map("subscription_id")
   Subscription   Subscription?  @relation(fields: [subscriptionId], references: [id])

@@ -17,20 +17,18 @@ import { ListUsersInputDto } from './dto/list-customers-input.dto';
 type SubscriptionDataType = {
   id: number;
   name: string;
+  email: string;
   status: string;
   subscriptionId?: number;
   managerId: number | null;
   createdAt?: Date;
   updatedAt?: Date;
-  User: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    status: string;
-  }[];
   Subscription?: {
     id: number;
     name: string;
+  };
+  _count: {
+    User: number;
   };
 };
 
@@ -41,32 +39,20 @@ export class CustomersService {
   private readonly logger = new Logger(CustomersService.name);
 
   async create(createCustomerDto: CreateCustomerDto) {
-    if (
-      await this.prisma.customer.findFirst({
-        where: { name: createCustomerDto.name },
-      })
-    ) {
-      throw new ConflictException('Customer with the same name already exists');
-    }
+    const { name, email, subscriptionId, managerId } = createCustomerDto;
 
-    const existUser = await this.prisma.user.findFirst({
-      where: { email: createCustomerDto.email },
+    const existingCustomer = await this.prisma.customer.findFirst({
+      where: { OR: [{ name }, { email }] },
     });
 
-    if (!existUser) {
-      throw new ConflictException('User with the given email does not exist');
-    } else if (!existUser.emailVerified) {
-      throw new ConflictException('User with the given email is not verified');
-    } else if (existUser.status == 'inactive') {
-      throw new ConflictException('User with status inactive');
-    } else if (existUser.customerId != null) {
-      throw new ConflictException('User already has a customer');
-    } else if (existUser.managerId != null) {
-      throw new ConflictException('User already has a manager');
+    if (existingCustomer) {
+      throw new ConflictException(
+        `Customer with the same ${existingCustomer.name === name ? 'name' : 'email'} already exists`,
+      );
     }
 
     const subscriptionExists = await this.prisma.subscription.findUnique({
-      where: { id: createCustomerDto.subscriptionId },
+      where: { id: subscriptionId },
     });
     if (!subscriptionExists) {
       throw new ConflictException(
@@ -74,19 +60,9 @@ export class CustomersService {
       );
     }
 
-    const { name, subscriptionId, managerId } = createCustomerDto;
-    const newCustomer = { name, subscriptionId, managerId };
-
-    const createdCustomer = await this.prisma.customer.create({
-      data: newCustomer,
+    return this.prisma.customer.create({
+      data: { name, email, subscriptionId, managerId },
     });
-
-    await this.prisma.user.update({
-      where: { id: existUser.id },
-      data: { customerId: createdCustomer.id },
-    });
-
-    return createdCustomer;
   }
 
   async findAll(
@@ -98,6 +74,12 @@ export class CustomersService {
       where.OR = [
         {
           name: {
+            contains: listCustomersInput.search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          email: {
             contains: listCustomersInput.search,
             mode: 'insensitive',
           },
@@ -114,18 +96,15 @@ export class CustomersService {
       {
         where,
         include: {
-          User: {
-            select: {
-              firstName: true,
-              lastName: true,
-              email: true,
-              status: true,
-            },
-          },
           Subscription: {
             select: {
               id: true,
               name: true,
+            },
+          },
+          _count: {
+            select: {
+              User: true,
             },
           },
         },
@@ -139,19 +118,17 @@ export class CustomersService {
     );
 
     const mergeResult = paginateResult.data.map((customer) => {
-      const user = customer.User[0];
       const subscription = customer.Subscription;
 
       return {
         id: customer.id,
         name: customer.name,
+        email: customer.email,
         status: customer.status,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
         subscriptionId: subscription!.id,
         subscriptionName: subscription!.name,
         managerId: customer.managerId,
+        numberOfUsers: customer._count.User,
       };
     });
 
@@ -171,11 +148,37 @@ export class CustomersService {
   }
 
   async findOne(id: number) {
-    const customer = await this.prisma.customer.findFirst({ where: { id } });
+    const customer = await this.prisma.customer.findFirst({
+      where: { id },
+      include: {
+        Subscription: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            User: true,
+          },
+        },
+      },
+    });
+
     if (!customer) {
       throw new NotFoundException('No customer with given ID exists');
     }
-    return customer;
+
+    return {
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      status: customer.status,
+      subscriptionId: customer.Subscription?.id,
+      subscriptionName: customer.Subscription?.name,
+      managerId: customer.managerId,
+      numberOfUsers: customer._count.User,
+    };
   }
 
   update(id: number, updateCustomerDto: UpdateCustomerDto) {

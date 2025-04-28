@@ -10,23 +10,13 @@ export class ListCustomersOutputDto extends PaginatedInputDto {
 
   @IsString()
   @IsNotEmpty()
-  @ApiProperty({ description: 'Status' })
-  status: string;
-
-  @IsString()
-  @IsNotEmpty()
   @ApiPropertyOptional({ description: 'Customer email' })
   email: string;
 
-  @IsOptional()
   @IsString()
-  @ApiPropertyOptional({ description: 'Customer name' })
-  firstName: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiPropertyOptional({ description: 'Customer last name' })
-  lastName: string;
+  @IsNotEmpty()
+  @ApiProperty({ description: 'Status' })
+  status: string;
 
   @IsInt()
   @ApiPropertyOptional({ description: 'Subscription ID' })
@@ -41,4 +31,8 @@ export class ListCustomersOutputDto extends PaginatedInputDto {
   @IsInt()
   @ApiPropertyOptional({ description: 'Manager ID' })
   managerId: number | null;
+
+  @IsInt()
+  @ApiPropertyOptional({ description: 'Numbers of users' })
+  numberOfUsers: number;
 }
