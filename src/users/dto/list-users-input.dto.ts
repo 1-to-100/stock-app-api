@@ -9,4 +9,10 @@ export class ListUsersInputDto extends PaginatedInputDto {
   @IsOptional()
   @Type(() => Number)
   roleId?: number;
+
+  @IsInt()
+  @IsOptional()
+  @Type(() => Number)
+  @ApiPropertyOptional({ description: 'Customer ID' })
+  customerId?: number;
 }

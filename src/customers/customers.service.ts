@@ -1,7 +1,6 @@
 import {
   ConflictException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -186,7 +185,7 @@ export class CustomersService {
       const existingCustomer = await this.prisma.customer.findFirst({
         where: { name },
       });
-      if (existingCustomer) {
+      if (existingCustomer && existingCustomer.id !== id) {
         throw new ConflictException(
           'Customer with the same name already exists',
         );
@@ -197,7 +196,7 @@ export class CustomersService {
       const existingEmailCustomer = await this.prisma.customer.findFirst({
         where: { email },
       });
-      if (existingEmailCustomer) {
+      if (existingEmailCustomer && existingEmailCustomer.id !== id) {
         throw new ConflictException(
           'Customer with the same email already exists',
         );

@@ -71,6 +71,10 @@ export class UsersService {
       where.roleId = listUsersInput.roleId;
     }
 
+    if (listUsersInput.customerId !== undefined) {
+      where.customerId = listUsersInput.customerId;
+    }
+
     if (listUsersInput.search !== undefined) {
       where.OR = [
         {
