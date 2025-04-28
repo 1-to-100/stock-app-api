@@ -12,6 +12,7 @@ import { RolesModule } from './roles/roles.module';
 import { ManagersModule } from './managers/managers.module';
 import { CustomersModule } from './customers/customers.module';
 import { TaxonomiesModule } from './taxonomies/taxonomies.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TaxonomiesModule } from './taxonomies/taxonomies.module';
     ManagersModule,
     CustomersModule,
     TaxonomiesModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

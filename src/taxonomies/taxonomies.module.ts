@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CustomersService } from '../customers/customers.service';
 import { RolesService } from '../roles/roles.service';
 import { ManagersService } from '../managers/managers.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 @Module({
   controllers: [TaxonomiesController],
@@ -13,6 +14,7 @@ import { ManagersService } from '../managers/managers.service';
     CustomersService,
     RolesService,
     ManagersService,
+    SubscriptionsService,
     PrismaService,
   ],
   exports: [TaxonomiesService],

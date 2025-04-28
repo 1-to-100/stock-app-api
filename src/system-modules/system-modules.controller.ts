@@ -41,6 +41,20 @@ export class SystemModulesController {
       `✅ Seed завершено: створено ${flatPermissions.length} permission(s)`,
     );
 
+    // add subscriptions
+    const subscriptions = ['Basic', 'Premium', 'Enterprise'];
+    for (const subscription of subscriptions) {
+      await this.prisma.subscription.upsert({
+        where: { name: subscription },
+        update: {},
+        create: {
+          name: subscription,
+        },
+      });
+    }
+
+    console.log(`✅ Seed завершено: створені subscriptions `, subscriptions);
+
     if (removeCustomers) {
       await this.prisma.user.updateMany({
         where: { customerId: { not: null } },

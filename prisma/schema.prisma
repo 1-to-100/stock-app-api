@@ -15,14 +15,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Customer {
-  id        Int       @id @default(autoincrement())
-  name      String?
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt @map("updated_at")
-  Users     User[]
+enum CustomerStatus {
+  active
+  inactive
+  suspended
+}
 
+model Customer {
+  id             Int            @id @default(autoincrement())
+  name           String?
+  status         CustomerStatus @default(inactive)
+  subscriptionId Int?           @map("subscription_id")
+  Subscription   Subscription?  @relation(fields: [subscriptionId], references: [id])
+  managerId      Int?           @map("manager_id")
+  Manager        Manager?       @relation(fields: [managerId], references: [id])
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime?      @updatedAt @map("updated_at")
+  User           User[]
+
+  @@index([status])
+  @@index([subscriptionId])
+  @@index([managerId])
+  @@index([createdAt])
   @@map("customers")
+}
+
+model Subscription {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime?  @updatedAt @map("updated_at")
+  Customer    Customer[]
+
+  @@map("subscriptions")
 }
 
 enum Action {
@@ -68,11 +94,12 @@ model RolePermission {
 }
 
 model Manager {
-  id        Int       @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   name      String?
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt @map("updated_at")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime?  @updatedAt @map("updated_at")
   Users     User[]
+  Customer  Customer[]
 
   @@map("managers")
 }
