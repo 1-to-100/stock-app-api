@@ -36,8 +36,6 @@ type SubscriptionDataType = {
 export class CustomersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private readonly logger = new Logger(CustomersService.name);
-
   async create(createCustomerDto: CreateCustomerDto) {
     const { name, email, subscriptionId, managerId } = createCustomerDto;
 
@@ -181,7 +179,42 @@ export class CustomersService {
     };
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
+  async update(id: number, updateCustomerDto: UpdateCustomerDto) {
+    const { name, email, subscriptionId } = updateCustomerDto;
+
+    if (name) {
+      const existingCustomer = await this.prisma.customer.findFirst({
+        where: { name },
+      });
+      if (existingCustomer) {
+        throw new ConflictException(
+          'Customer with the same name already exists',
+        );
+      }
+    }
+
+    if (email) {
+      const existingEmailCustomer = await this.prisma.customer.findFirst({
+        where: { email },
+      });
+      if (existingEmailCustomer) {
+        throw new ConflictException(
+          'Customer with the same email already exists',
+        );
+      }
+    }
+
+    if (subscriptionId) {
+      const subscriptionExists = await this.prisma.subscription.findUnique({
+        where: { id: subscriptionId },
+      });
+      if (!subscriptionExists) {
+        throw new ConflictException(
+          'Subscription with the given ID does not exist',
+        );
+      }
+    }
+
     return this.prisma.customer.update({
       where: { id },
       data: updateCustomerDto,
@@ -189,11 +222,6 @@ export class CustomersService {
   }
 
   remove(id: number) {
-    try {
-      return this.prisma.customer.delete({ where: { id } });
-    } catch (error) {
-      this.logger.error(error);
-      throw new ConflictException('Customer can not be deleted');
-    }
+    throw new ConflictException('Customer can not be deleted');
   }
 }
