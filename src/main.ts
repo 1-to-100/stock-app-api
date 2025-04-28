@@ -2,6 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
+import { ApiDbLoggerMiddleware } from './common/middlewares/api-db-logger.middleware';
+import { PrismaService } from './prisma/prisma.service';
+import { NextFunction, Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -10,6 +13,12 @@ async function bootstrap() {
       prefix: 'stock-app-api',
     }),
   });
+
+  const prismaService = app.get(PrismaService);
+  const apiDbLoggerMiddleware = new ApiDbLoggerMiddleware(prismaService);
+  app.use((req: Request, res: Response, next: NextFunction) =>
+    apiDbLoggerMiddleware.use(req, res, next),
+  );
 
   app.enableCors({
     origin: [

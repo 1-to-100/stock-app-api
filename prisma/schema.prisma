@@ -134,3 +134,16 @@ model User {
 
   @@map("users")
 }
+
+model ApiLog {
+  id          Int      @id @default(autoincrement())
+  method      String
+  url         String
+  statusCode  Int      @map("status_code")
+  duration    Int
+  requestBody String?  @map("request_body")
+  headers     String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("api_logs")
+}
