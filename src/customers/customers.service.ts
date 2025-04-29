@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { OutputTaxonomyDto } from '../taxonomies/dto/output-taxonomy.dto';
 import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 import { ListCustomersOutputDto } from './dto/list-customers-output.dto';
-import { Prisma } from '@prisma/client';
+import { CustomerStatus, Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
 import { ListCustomersInputDto } from './dto/list-customers-input.dto';
 
@@ -73,11 +73,13 @@ export class CustomersService {
       listCustomersInput;
 
     const where: Prisma.CustomerFindManyArgs['where'] = {
-      ...(id && { id }),
-      ...(subscriptionId && { subscriptionId }),
-      ...(managerId && { managerId }),
+      ...(id && { id: { in: id } }),
+      ...(subscriptionId && { subscriptionId: { in: subscriptionId } }),
+      ...(managerId && { managerId: { in: managerId } }),
       ...(status && {
-        status: status as Prisma.EnumCustomerStatusFilter<'Customer'>,
+        status: {
+          in: status.map((s) => s as CustomerStatus),
+        },
       }),
       ...(search && {
         OR: [

@@ -69,9 +69,9 @@ export class UsersService {
       listUsersInput;
 
     const where: Prisma.UserFindManyArgs['where'] = {
-      ...(roleId && { roleId }),
-      ...(customerId && { customerId }),
-      ...(status && { status }),
+      ...(roleId && { roleId: { in: roleId } }),
+      ...(customerId && { customerId: { in: customerId } }),
+      ...(status && { status: { in: status } }),
       ...(search && {
         OR: [
           { firstName: { contains: search, mode: 'insensitive' } },
