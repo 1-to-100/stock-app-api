@@ -65,51 +65,27 @@ export class UsersService {
   async findAll(
     listUsersInput: ListUsersInputDto,
   ): Promise<PaginatedOutputDto<OutputUserDto>> {
-    const where: Prisma.UserFindManyArgs['where'] = {};
+    const { roleId, customerId, status, search, perPage, page } =
+      listUsersInput;
 
-    if (listUsersInput.roleId !== undefined) {
-      where.roleId = listUsersInput.roleId;
-    }
+    const where: Prisma.UserFindManyArgs['where'] = {
+      ...(roleId && { roleId }),
+      ...(customerId && { customerId }),
+      ...(status && { status }),
+      ...(search && {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
+    };
 
-    if (listUsersInput.customerId !== undefined) {
-      where.customerId = listUsersInput.customerId;
-    }
-
-    if (listUsersInput.search !== undefined) {
-      where.OR = [
-        {
-          firstName: {
-            contains: listUsersInput.search,
-            mode: 'insensitive',
-          },
-        },
-        {
-          lastName: {
-            contains: listUsersInput.search,
-            mode: 'insensitive',
-          },
-        },
-        {
-          email: {
-            contains: listUsersInput.search,
-            mode: 'insensitive',
-          },
-        },
-      ];
-    }
-
-    const paginate = createPaginator({ perPage: listUsersInput.perPage });
+    const paginate = createPaginator({ perPage });
     return paginate<OutputUserDto, Prisma.UserFindManyArgs>(
       this.prisma.user,
-      {
-        where,
-        orderBy: {
-          id: 'desc',
-        },
-      },
-      {
-        page: listUsersInput.page,
-      },
+      { where, orderBy: { id: 'desc' } },
+      { page },
     );
   }
 

@@ -11,7 +11,7 @@ import {
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { ListUsersInputDto } from '../users/dto/list-users-input.dto';
+import { ListCustomersInputDto } from './dto/list-customers-input.dto';
 
 @Controller('customers')
 export class CustomersController {
@@ -23,7 +23,7 @@ export class CustomersController {
   }
 
   @Get()
-  findAll(@Query() listCustomersInputDto: ListUsersInputDto) {
+  findAll(@Query() listCustomersInputDto: ListCustomersInputDto) {
     return this.customersService.findAll(listCustomersInputDto);
   }
 

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
+import { StatusList } from '../../common/constants/status';
 
 export class OutputUserDto {
   @ApiProperty({ description: 'Email address' })
@@ -25,7 +26,7 @@ export class OutputUserDto {
 
   @ApiPropertyOptional({
     description: 'Status (optional). Default: inactive',
-    enum: ['inactive', 'active', 'disabled'],
+    enum: StatusList,
   })
   @IsOptional()
   status?: string;

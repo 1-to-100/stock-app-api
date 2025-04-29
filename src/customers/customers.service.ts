@@ -11,7 +11,7 @@ import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 import { ListCustomersOutputDto } from './dto/list-customers-output.dto';
 import { Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
-import { ListUsersInputDto } from './dto/list-customers-input.dto';
+import { ListCustomersInputDto } from './dto/list-customers-input.dto';
 
 type SubscriptionDataType = {
   id: number;
@@ -19,7 +19,10 @@ type SubscriptionDataType = {
   email: string;
   status: string;
   subscriptionId?: number;
-  managerId: number | null;
+  Manager: {
+    id: number;
+    name: string;
+  };
   createdAt?: Date;
   updatedAt?: Date;
   Subscription?: {
@@ -63,28 +66,27 @@ export class CustomersService {
   }
 
   async findAll(
-    listCustomersInput: ListUsersInputDto,
+    listCustomersInput: ListCustomersInputDto,
   ): Promise<PaginatedOutputDto<ListCustomersOutputDto>> {
-    const where: Prisma.CustomerFindManyArgs['where'] = {};
+    const { id, search, status, subscriptionId, managerId, perPage, page } =
+      listCustomersInput;
 
-    if (listCustomersInput.search !== undefined) {
-      where.OR = [
-        {
-          name: {
-            contains: listCustomersInput.search,
-            mode: 'insensitive',
-          },
-        },
-        {
-          email: {
-            contains: listCustomersInput.search,
-            mode: 'insensitive',
-          },
-        },
-      ];
-    }
+    const where: Prisma.CustomerFindManyArgs['where'] = {
+      ...(id && { id }),
+      ...(subscriptionId && { subscriptionId }),
+      ...(managerId && { managerId }),
+      ...(status && {
+        status: status as Prisma.EnumCustomerStatusFilter<'Customer'>,
+      }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
+    };
 
-    const paginate = createPaginator({ perPage: listCustomersInput.perPage });
+    const paginate = createPaginator({ perPage });
     const paginateResult = await paginate<
       SubscriptionDataType,
       Prisma.CustomerFindManyArgs
@@ -93,46 +95,27 @@ export class CustomersService {
       {
         where,
         include: {
-          Subscription: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          _count: {
-            select: {
-              User: true,
-            },
-          },
+          Manager: { select: { id: true, name: true } },
+          Subscription: { select: { id: true, name: true } },
+          _count: { select: { User: true } },
         },
-        orderBy: {
-          id: 'desc',
-        },
+        orderBy: { id: 'desc' },
       },
-      {
-        page: listCustomersInput.page,
-      },
+      { page },
     );
 
-    const mergeResult = paginateResult.data.map((customer) => {
-      const subscription = customer.Subscription;
+    const data = paginateResult.data.map((customer) => ({
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      status: customer.status,
+      manager: customer.Manager,
+      subscriptionId: customer.Subscription!.id,
+      subscriptionName: customer.Subscription!.name,
+      numberOfUsers: customer._count.User,
+    }));
 
-      return {
-        id: customer.id,
-        name: customer.name,
-        email: customer.email,
-        status: customer.status,
-        subscriptionId: subscription!.id,
-        subscriptionName: subscription!.name,
-        managerId: customer.managerId,
-        numberOfUsers: customer._count.User,
-      };
-    });
-
-    return {
-      data: mergeResult,
-      meta: paginateResult.meta,
-    };
+    return { data, meta: paginateResult.meta };
   }
 
   getForTaxonomy(): Promise<OutputTaxonomyDto[]> {
@@ -148,17 +131,9 @@ export class CustomersService {
     const customer = await this.prisma.customer.findFirst({
       where: { id },
       include: {
-        Subscription: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            User: true,
-          },
-        },
+        Manager: { select: { id: true, name: true } },
+        Subscription: { select: { id: true, name: true } },
+        _count: { select: { User: true } },
       },
     });
 
@@ -166,15 +141,17 @@ export class CustomersService {
       throw new NotFoundException('No customer with given ID exists');
     }
 
+    const { Subscription, _count } = customer;
+
     return {
       id: customer.id,
       name: customer.name,
       email: customer.email,
       status: customer.status,
-      subscriptionId: customer.Subscription?.id,
-      subscriptionName: customer.Subscription?.name,
-      managerId: customer.managerId,
-      numberOfUsers: customer._count.User,
+      manager: customer.Manager,
+      subscriptionId: Subscription?.id,
+      subscriptionName: Subscription?.name,
+      numberOfUsers: _count.User,
     };
   }
 
@@ -221,6 +198,6 @@ export class CustomersService {
   }
 
   remove(id: number) {
-    throw new ConflictException('Customer can not be deleted');
+    throw new ConflictException(`Customer with ${id} can not be deleted`);
   }
 }
