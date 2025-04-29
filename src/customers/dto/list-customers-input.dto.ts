@@ -25,6 +25,6 @@ export class ListCustomersInputDto extends PaginatedInputDto {
 
   @IsEnum(StatusList)
   @IsOptional()
-  @Type(() => Number)
+  @ApiPropertyOptional({ description: 'Status', enum: StatusList })
   status?: string;
 }

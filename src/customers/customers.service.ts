@@ -22,6 +22,7 @@ type SubscriptionDataType = {
   Manager: {
     id: number;
     name: string;
+    Users: { email: string }[];
   };
   createdAt?: Date;
   updatedAt?: Date;
@@ -95,7 +96,13 @@ export class CustomersService {
       {
         where,
         include: {
-          Manager: { select: { id: true, name: true } },
+          Manager: {
+            select: {
+              id: true,
+              name: true,
+              Users: { select: { email: true }, take: 1 },
+            },
+          },
           Subscription: { select: { id: true, name: true } },
           _count: { select: { User: true } },
         },
@@ -104,16 +111,24 @@ export class CustomersService {
       { page },
     );
 
-    const data = paginateResult.data.map((customer) => ({
-      id: customer.id,
-      name: customer.name,
-      email: customer.email,
-      status: customer.status,
-      manager: customer.Manager,
-      subscriptionId: customer.Subscription!.id,
-      subscriptionName: customer.Subscription!.name,
-      numberOfUsers: customer._count.User,
-    }));
+    const data = paginateResult.data.map((customer) => {
+      return {
+        id: customer.id,
+        name: customer.name,
+        email: customer.email,
+        status: customer.status,
+        manager: customer.Manager
+          ? {
+              id: customer.Manager?.id,
+              name: customer.Manager?.name,
+              email: customer.Manager?.Users[0].email || null,
+            }
+          : null,
+        subscriptionId: customer.Subscription!.id,
+        subscriptionName: customer.Subscription!.name,
+        numberOfUsers: customer._count.User,
+      };
+    });
 
     return { data, meta: paginateResult.meta };
   }
@@ -131,7 +146,13 @@ export class CustomersService {
     const customer = await this.prisma.customer.findFirst({
       where: { id },
       include: {
-        Manager: { select: { id: true, name: true } },
+        Manager: {
+          select: {
+            id: true,
+            name: true,
+            Users: { select: { email: true }, take: 1 },
+          },
+        },
         Subscription: { select: { id: true, name: true } },
         _count: { select: { User: true } },
       },
@@ -148,7 +169,13 @@ export class CustomersService {
       name: customer.name,
       email: customer.email,
       status: customer.status,
-      manager: customer.Manager,
+      manager: customer.Manager
+        ? {
+            id: customer.Manager?.id,
+            name: customer.Manager?.name,
+            email: customer.Manager?.Users[0].email || null,
+          }
+        : null,
       subscriptionId: Subscription?.id,
       subscriptionName: Subscription?.name,
       numberOfUsers: _count.User,

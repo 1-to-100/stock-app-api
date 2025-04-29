@@ -19,5 +19,6 @@ export class ListUsersInputDto extends PaginatedInputDto {
 
   @IsEnum(StatusList)
   @IsOptional()
+  @ApiPropertyOptional({ description: 'Status', enum: StatusList })
   status?: string;
 }
