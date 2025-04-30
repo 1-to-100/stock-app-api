@@ -4,6 +4,9 @@ import { StatusList } from '../../common/constants/status';
 
 export class OutputUserDto {
   @ApiProperty({ description: 'Email address' })
+  id: number;
+
+  @ApiProperty({ description: 'Email address' })
   email: string;
 
   @ApiProperty({ description: 'First Name' })

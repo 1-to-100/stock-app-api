@@ -15,7 +15,7 @@ import { ListUsersInputDto } from './dto/list-users-input.dto';
 import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 import { OutputUserDto } from './dto/output-user.dto';
 import { createPaginator } from 'prisma-pagination';
-import { Prisma, User } from '@prisma/client';
+import { CustomerStatus, Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -158,11 +158,11 @@ export class UsersService {
     }
   }
 
-  async sendInviteEmail(user: User) {
+  async sendInviteEmail(user: OutputUserDto) {
     await this.prisma.userOneTimeCodes.create({
       data: {
         userId: user.id,
-        code: this.getRandomString(16),
+        code: this.getRandomString(6),
         isUsed: false,
       },
     });
@@ -192,6 +192,13 @@ export class UsersService {
     await this.prisma.userOneTimeCodes.update({
       where: { id },
       data: existing_code,
+    });
+    await this.prisma.user.update({
+      where: { id: existing_code.userId },
+      data: {
+        emailVerified: true,
+        status: CustomerStatus.active,
+      },
     });
     return true;
   }

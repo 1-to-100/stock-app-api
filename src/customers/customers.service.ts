@@ -12,7 +12,10 @@ import { ListCustomersOutputDto } from './dto/list-customers-output.dto';
 import { CustomerStatus, Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
 import { ListCustomersInputDto } from './dto/list-customers-input.dto';
-import { getDomainFromEmail, isPublicEmailDomain } from '../common/helpers/string-helpers';
+import {
+  getDomainFromEmail,
+  isPublicEmailDomain,
+} from '../common/helpers/string-helpers';
 
 type SubscriptionDataType = {
   id: number;

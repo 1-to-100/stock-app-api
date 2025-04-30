@@ -17,17 +17,17 @@ export class CreateUserDto {
   @ApiProperty({ description: 'ID of the Customer this user belongs to' })
   @IsOptional()
   @IsInt()
-  customerId: number;
+  customerId?: number;
 
   @ApiProperty({ description: 'The role of the user' })
   @IsOptional()
   @IsInt()
-  roleId: number;
+  roleId?: number;
 
   @ApiPropertyOptional({ description: 'Manager ID' })
   @IsOptional()
   @IsInt()
-  managerId: number;
+  managerId?: number;
 
   @ApiPropertyOptional({
     description: 'Status (optional). Default: inactive',

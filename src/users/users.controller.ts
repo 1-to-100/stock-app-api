@@ -94,14 +94,6 @@ export class UsersController {
     return results.filter((result) => result !== null);
   }
 
-  @Get('/validate-code/:code')
-  async validateCode(@Param('code') code: string) {
-    if (await this.usersService.validateAndVoidOneTimeCode(code)) {
-      return { exists: true, message: 'code validated and voided' };
-    }
-    return { exists: false, message: 'code is not valid' };
-  }
-
   @Get()
   @ApiPaginatedResponse(OutputUserDto)
   @ApiOkResponse({
