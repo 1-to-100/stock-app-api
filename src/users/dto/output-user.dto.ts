@@ -33,4 +33,12 @@ export class OutputUserDto {
   })
   @IsOptional()
   status?: string;
+
+  @ApiPropertyOptional({ description: 'Is Superadmin' })
+  @IsOptional()
+  isSuperadmin?: boolean | null;
+
+  @ApiPropertyOptional({ description: 'Is Customer Success' })
+  @IsOptional()
+  isCustomerSuccess?: boolean | null;
 }

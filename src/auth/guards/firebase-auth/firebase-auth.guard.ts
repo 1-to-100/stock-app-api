@@ -1,20 +1,27 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from '../../auth.service';
 import { DecodedIdToken } from 'firebase-admin/lib/auth';
+import { OutputUserDto } from '../../../users/dto/output-user.dto';
+import { UsersService } from '../../../users/users.service';
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{
       user: DecodedIdToken;
       headers: { authorization?: string };
+      currentUser: null | OutputUserDto;
     }>();
     const token = request.headers.authorization?.split('Bearer ')[1];
 
@@ -23,8 +30,22 @@ export class FirebaseAuthGuard implements CanActivate {
     }
 
     try {
-      const decodedToken = await this.authService.verifyToken(token);
-      request.user = decodedToken;
+      request.user = await this.authService.verifyToken(token);
+
+      const requestUser: { [p: string]: any } = request.user;
+      console.log(requestUser);
+
+      if (!requestUser.uid) {
+        throw new ForbiddenException(
+          'Access denied: request user uid not found, is it from Firebase?',
+        );
+      }
+
+      request.currentUser = await this.usersService.findByUid(
+        requestUser.uid as string,
+      );
+      console.log(request.currentUser);
+
       return true;
     } catch (error) {
       console.log('error', error);

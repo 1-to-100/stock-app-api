@@ -8,6 +8,8 @@ import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../../../common/decorators/permissions.decorator';
 import { UsersService } from '../../../users/users.service';
 import { RolesService } from '../../../roles/roles.service';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { OutputUserDto } from '../../../users/dto/output-user.dto';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -29,9 +31,11 @@ export class PermissionGuard implements CanActivate {
     if (!allowedPermissions || allowedPermissions.length === 0) {
       return true;
     }
-    const request = context
-      .switchToHttp()
-      .getRequest<{ user: { [key: string]: any } }>();
+    const request = context.switchToHttp().getRequest<{
+      user: DecodedIdToken;
+      headers: { authorization?: string };
+      currentUser: null | OutputUserDto;
+    }>();
 
     const requestUser: { [p: string]: any } = request.user;
     console.log(requestUser);
@@ -44,7 +48,7 @@ export class PermissionGuard implements CanActivate {
       );
     }
 
-    const user = await this.usersService.findByUid(requestUser.uid as string);
+    const user = request.currentUser;
     console.log(user);
     if (!user) {
       throw new ForbiddenException('Access denied: user not found');

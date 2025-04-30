@@ -16,6 +16,10 @@ import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 import { OutputUserDto } from './dto/output-user.dto';
 import { createPaginator } from 'prisma-pagination';
 import { CustomerStatus, Prisma } from '@prisma/client';
+import {
+  getDomainFromEmail,
+  isPublicEmailDomain,
+} from '../common/helpers/string-helpers';
 
 @Injectable()
 export class UsersService {
@@ -138,24 +142,67 @@ export class UsersService {
     const existingUser = await this.findByUid(firebaseUser.uid);
     if (existingUser) {
       return existingUser;
-    } else {
-      let firstName: string | null = null;
-      let lastName: string | null = null;
-      if (firebaseUserProfile.displayName) {
-        const nameParts = firebaseUserProfile.displayName.split(' ');
-        firstName = nameParts[0];
-        lastName = nameParts.slice(1).join(' ');
-      }
-      return this.prisma.user.create({
+    }
+
+    let firstName: string | null = null;
+    let lastName: string | null = null;
+    if (firebaseUserProfile.displayName) {
+      const nameParts = firebaseUserProfile.displayName.split(' ');
+      firstName = nameParts[0];
+      lastName = nameParts.slice(1).join(' ');
+    }
+
+    const email = firebaseUserProfile.email!;
+    const domain = getDomainFromEmail(email);
+    if (!domain) {
+      throw new ConflictException(
+        'Email address does not contain a valid domain',
+      );
+    }
+    if (isPublicEmailDomain(domain)) {
+      throw new ConflictException('Email address is not a company address');
+    }
+
+    let existingCustomer = await this.prisma.customer.findFirst({
+      where: { domain },
+    });
+
+    let newUser: OutputUserDto;
+    if (existingCustomer) {
+      newUser = await this.prisma.user.create({
         data: {
-          uid: firebaseUserProfile.uid,
-          email: firebaseUserProfile.email!,
-          emailVerified: Boolean(firebaseUser.email_verified),
-          firstName,
-          lastName,
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          customerId: existingCustomer.id,
         },
       });
+    } else {
+      newUser = await this.prisma.user.create({
+        data: {
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+        },
+      });
+
+      existingCustomer = await this.prisma.customer.create({
+        data: {
+          name: domain,
+          email: email,
+          domain: domain,
+          ownerId: newUser.id,
+        },
+      });
+
+      await this.prisma.user.update({
+        where: { id: newUser.id },
+        data: { customerId: existingCustomer.id },
+      });
     }
+
+    await this.sendInviteEmail(newUser);
+    return newUser;
   }
 
   async sendInviteEmail(user: OutputUserDto) {
