@@ -116,22 +116,24 @@ model UserOneTimeCodes {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  uid           String?   @unique
-  email         String    @unique
-  emailVerified Boolean?  @default(false) @map("email_verified")
-  firstName     String?   @map("first_name")
-  lastName      String?   @map("last_name")
-  avatar        String?
-  customerId    Int?      @map("customer_id")
-  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  roleId        Int?      @map("role_id")
-  role          Role?     @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  managerId     Int?      @map("manager_id")
-  manager       Manager?  @relation(fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  status        String    @default("inactive")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime? @updatedAt @map("updated_at")
+  id                Int       @id @default(autoincrement())
+  uid               String?   @unique
+  email             String    @unique
+  emailVerified     Boolean?  @default(false) @map("email_verified")
+  firstName         String?   @map("first_name")
+  lastName          String?   @map("last_name")
+  avatar            String?
+  customerId        Int?      @map("customer_id")
+  customer          Customer? @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roleId            Int?      @map("role_id")
+  role              Role?     @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  managerId         Int?      @map("manager_id")
+  manager           Manager?  @relation(fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status            String    @default("inactive")
+  isSuperadmin      Boolean?  @default(false) @map("is_superadmin")
+  isCustomerSuccess Boolean?  @default(false) @map("is_customer_success")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime? @updatedAt @map("updated_at")
 
   @@map("users")
 }
