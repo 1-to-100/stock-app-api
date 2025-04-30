@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../../../common/decorators/permissions.decorator';
-import { UsersService } from '../../../users/users.service';
 import { RolesService } from '../../../roles/roles.service';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { OutputUserDto } from '../../../users/dto/output-user.dto';
@@ -15,7 +14,6 @@ import { OutputUserDto } from '../../../users/dto/output-user.dto';
 export class PermissionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly usersService: UsersService,
     private readonly rolesService: RolesService,
   ) {}
 
@@ -36,17 +34,6 @@ export class PermissionGuard implements CanActivate {
       headers: { authorization?: string };
       currentUser: null | OutputUserDto;
     }>();
-
-    const requestUser: { [p: string]: any } = request.user;
-    console.log(requestUser);
-    if (!requestUser) {
-      throw new ForbiddenException('Access denied: request user not found');
-    }
-    if (!requestUser.uid) {
-      throw new ForbiddenException(
-        'Access denied: request user uid not found, is it from Firebase?',
-      );
-    }
 
     const user = request.currentUser;
     console.log(user);

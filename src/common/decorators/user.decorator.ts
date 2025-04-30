@@ -1,15 +1,19 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { FirebaseDecodedToken } from '../types/forebase-decoded-token.type';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { OutputUserDto } from '../../users/dto/output-user.dto';
 
 export const User = createParamDecorator(
   (
     data: keyof FirebaseDecodedToken | undefined,
     ctx: ExecutionContext,
   ): any => {
-    const request = ctx
-      .switchToHttp()
-      .getRequest<{ user: FirebaseDecodedToken }>();
-    const user = request.user;
+    const request = ctx.switchToHttp().getRequest<{
+      user: DecodedIdToken;
+      headers: { authorization?: string };
+      currentUser: null | OutputUserDto;
+    }>();
+    const user = request.currentUser;
 
     if (!user) return null;
     return data ? user[data] : user;

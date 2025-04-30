@@ -26,7 +26,6 @@ import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.gu
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { PermissionGuard } from '../auth/guards/permission/permission.guard';
 import { User } from '../common/decorators/user.decorator';
-import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 
 @Controller('users')
 @UseGuards(FirebaseAuthGuard, PermissionGuard)
@@ -111,8 +110,8 @@ export class UsersController {
     description: 'User',
     type: OutputUserDto,
   })
-  async findSelf(@User() user: FirebaseDecodedToken) {
-    return await this.usersService.findByUid(user.uid);
+  async findSelf(@User() user: OutputUserDto) {
+    return await this.usersService.findOne(user.id);
   }
 
   @Get(':id')

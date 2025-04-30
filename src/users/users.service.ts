@@ -94,11 +94,19 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<OutputUserDto> {
-    const user = await this.prisma.user.findFirst({ where: { id } });
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+      include: {
+        role: true,
+        customer: true,
+        manager: true,
+      },
+    });
     if (!user) {
       throw new NotFoundException('No user with given ID exists');
     }
-    return user;
+
+    return user as OutputUserDto;
   }
 
   async update(
