@@ -16,6 +16,9 @@ export class CreateCustomerDto {
   @IsEmail()
   @ApiProperty({ description: 'Email address' })
   email: string;
+  //
+  // @ApiProperty({ description: 'Domain name' })
+  // domain: string;
 
   @IsInt()
   @ApiPropertyOptional({ description: 'Subscription ID' })
@@ -25,4 +28,8 @@ export class CreateCustomerDto {
   @IsInt()
   @ApiPropertyOptional({ description: 'Manager ID' })
   managerId: number | null = null;
+
+  @IsInt()
+  @ApiPropertyOptional({ description: 'Owner User ID' })
+  ownerId: number;
 }

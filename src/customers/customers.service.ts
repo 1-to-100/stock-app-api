@@ -12,6 +12,7 @@ import { ListCustomersOutputDto } from './dto/list-customers-output.dto';
 import { CustomerStatus, Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
 import { ListCustomersInputDto } from './dto/list-customers-input.dto';
+import { getDomainFromEmail, isPublicEmailDomain } from '../common/helpers/string-helpers';
 
 type SubscriptionDataType = {
   id: number;
@@ -40,10 +41,11 @@ export class CustomersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createCustomerDto: CreateCustomerDto) {
-    const { name, email, subscriptionId, managerId } = createCustomerDto;
+    const { name, email, subscriptionId, managerId, ownerId } =
+      createCustomerDto;
 
     const existingCustomer = await this.prisma.customer.findFirst({
-      where: { OR: [{ name }, { email }] },
+      where: { OR: [{ name }, { email }, { ownerId }] },
     });
 
     if (existingCustomer) {
@@ -60,9 +62,17 @@ export class CustomersService {
         'Subscription with the given ID does not exist',
       );
     }
-
+    const domain = getDomainFromEmail(email);
+    if (!domain) {
+      throw new ConflictException(
+        'Email address does not contain a valid domain',
+      );
+    }
+    if (isPublicEmailDomain(domain)) {
+      throw new ConflictException('Email address is not a company address');
+    }
     return this.prisma.customer.create({
-      data: { name, email, subscriptionId, managerId },
+      data: { name, email, subscriptionId, domain, ownerId, managerId },
     });
   }
 
@@ -106,7 +116,7 @@ export class CustomersService {
             },
           },
           Subscription: { select: { id: true, name: true } },
-          _count: { select: { User: true } },
+          _count: { select: { Users: true } },
         },
         orderBy: { id: 'desc' },
       },
@@ -156,7 +166,7 @@ export class CustomersService {
           },
         },
         Subscription: { select: { id: true, name: true } },
-        _count: { select: { User: true } },
+        _count: { select: { Users: true } },
       },
     });
 
@@ -175,12 +185,12 @@ export class CustomersService {
         ? {
             id: customer.Manager?.id,
             name: customer.Manager?.name,
-            email: customer.Manager?.Users[0].email || null,
+            email: customer.Manager?.Users[0].email ?? null,
           }
         : null,
       subscriptionId: Subscription?.id,
       subscriptionName: Subscription?.name,
-      numberOfUsers: _count.User,
+      numberOfUsers: _count.Users,
     };
   }
 
