@@ -22,17 +22,23 @@ enum CustomerStatus {
 }
 
 model Customer {
-  id             Int            @id @default(autoincrement())
-  name           String         @unique
-  email          String         @unique
-  status         CustomerStatus @default(inactive)
-  subscriptionId Int?           @map("subscription_id")
-  Subscription   Subscription?  @relation(fields: [subscriptionId], references: [id])
-  managerId      Int?           @map("manager_id")
-  Manager        Manager?       @relation(fields: [managerId], references: [id])
-  createdAt      DateTime       @default(now()) @map("created_at")
-  updatedAt      DateTime?      @updatedAt @map("updated_at")
-  User           User[]
+  id                Int            @id @default(autoincrement())
+  name              String         @unique
+  email             String         @unique
+  domain            String         @unique
+  ownerId           Int            @unique @map("owner_id")
+  status            CustomerStatus @default(inactive)
+  subscriptionId    Int?           @map("subscription_id")
+  managerId         Int?           @map("manager_id")
+  customerSuccessId Int?           @map("customer_success_id")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime?      @updatedAt @map("updated_at")
+  Subscription      Subscription?  @relation(fields: [subscriptionId], references: [id])
+  Manager           Manager?       @relation(fields: [managerId], references: [id])
+  Owner             User           @relation("CustomerOwner", fields: [ownerId], references: [id])
+  CustomerSuccess   User?          @relation("CustomerSuccess", fields: [customerSuccessId], references: [id])
+  Users             User[]         @relation("CustomerUsers")
+  Roles             Role[]
 
   @@index([status])
   @@index([subscriptionId])
@@ -47,7 +53,7 @@ model Subscription {
   description String?
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime?  @updatedAt @map("updated_at")
-  Customer    Customer[]
+  Customers   Customer[]
 
   @@map("subscriptions")
 }
@@ -63,12 +69,14 @@ enum Action {
 model Role {
   id          Int              @id @default(autoincrement())
   name        String?
+  customerId  Int?             @map("customer_id")
   description String?          @map("description")
   imageUlrl   String?          @map("image_url")
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime?        @updatedAt @map("updated_at")
   users       User[]
   permissions RolePermission[]
+  customer    Customer?        @relation(fields: [customerId], references: [id])
 
   @@map("roles")
 }
@@ -100,7 +108,7 @@ model Manager {
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime?  @updatedAt @map("updated_at")
   Users     User[]
-  Customer  Customer[]
+  Customers Customer[]
 
   @@map("managers")
 }
@@ -116,24 +124,26 @@ model UserOneTimeCodes {
 }
 
 model User {
-  id                Int       @id @default(autoincrement())
-  uid               String?   @unique
-  email             String    @unique
-  emailVerified     Boolean?  @default(false) @map("email_verified")
-  firstName         String?   @map("first_name")
-  lastName          String?   @map("last_name")
+  id                Int        @id @default(autoincrement())
+  uid               String?    @unique
+  email             String     @unique
+  emailVerified     Boolean?   @default(false) @map("email_verified")
+  firstName         String?    @map("first_name")
+  lastName          String?    @map("last_name")
   avatar            String?
-  customerId        Int?      @map("customer_id")
-  customer          Customer? @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  roleId            Int?      @map("role_id")
-  role              Role?     @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  managerId         Int?      @map("manager_id")
-  manager           Manager?  @relation(fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  status            String    @default("inactive")
-  isSuperadmin      Boolean?  @default(false) @map("is_superadmin")
-  isCustomerSuccess Boolean?  @default(false) @map("is_customer_success")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime? @updatedAt @map("updated_at")
+  customerId        Int?       @map("customer_id")
+  roleId            Int?       @map("role_id")
+  managerId         Int?       @map("manager_id")
+  status            String     @default("inactive")
+  isSuperadmin      Boolean?   @default(false) @map("is_superadmin")
+  isCustomerSuccess Boolean?   @default(false) @map("is_customer_success")
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime?  @updatedAt @map("updated_at")
+  customer          Customer?  @relation("CustomerUsers", fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  successCustomers  Customer[] @relation("CustomerSuccess")
+  role              Role?      @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  manager           Manager?   @relation(fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownedCustomer     Customer?  @relation("CustomerOwner")
 
   @@map("users")
 }
