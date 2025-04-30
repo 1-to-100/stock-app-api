@@ -12,6 +12,8 @@ export type SystemModule = {
 };
 
 const USER_MANAGEMENT_MODULE = 'UserManagement';
+const CUSTOMER_MANAGEMENT_MODULE = 'CustomerManagement';
+const ROLE_MANAGEMENT_MODULE = 'RoleManagement';
 
 const permissionWithPrefix = (permission: string, module: string): string => {
   return `${module}:${permission}`;
@@ -151,14 +153,14 @@ export const SYSTEM_MODULES: SystemModule[] = [
     ],
   },
   {
-    name: 'CustomerManagement',
+    name: CUSTOMER_MANAGEMENT_MODULE,
     label: 'Customer Management',
     enabled: true,
     permissions: [
       {
         name: permissionWithPrefix(
           'viewCustomerDashboard',
-          'CustomerManagement',
+          CUSTOMER_MANAGEMENT_MODULE,
         ),
         label: 'View Customer Dashboard',
         order: 1,
@@ -166,60 +168,128 @@ export const SYSTEM_MODULES: SystemModule[] = [
       {
         name: permissionWithPrefix(
           'viewCustomerDashboard:own',
-          'CustomerManagement',
+          CUSTOMER_MANAGEMENT_MODULE,
         ),
         label: 'View Customer Dashboard (Own)',
         order: 2,
       },
       {
-        name: permissionWithPrefix('createCustomer', 'CustomerManagement'),
+        name: permissionWithPrefix(
+          'createCustomer',
+          CUSTOMER_MANAGEMENT_MODULE,
+        ),
         label: 'Create Customer',
         order: 3,
       },
       {
-        name: permissionWithPrefix('createCustomer:own', 'CustomerManagement'),
+        name: permissionWithPrefix(
+          'createCustomer:own',
+          CUSTOMER_MANAGEMENT_MODULE,
+        ),
         label: 'Create Customer (Own)',
         order: 4,
       },
       {
-        name: permissionWithPrefix('editCustomer', 'CustomerManagement'),
+        name: permissionWithPrefix('editCustomer', CUSTOMER_MANAGEMENT_MODULE),
         label: 'Edit Customer',
         order: 5,
       },
       {
-        name: permissionWithPrefix('editCustomer:own', 'CustomerManagement'),
+        name: permissionWithPrefix(
+          'editCustomer:own',
+          CUSTOMER_MANAGEMENT_MODULE,
+        ),
         label: 'Edit Customer (Own)',
         order: 6,
       },
       {
-        name: permissionWithPrefix('getCustomer', 'CustomerManagement'),
+        name: permissionWithPrefix('getCustomer', CUSTOMER_MANAGEMENT_MODULE),
         label: 'Get Customer',
         order: 7,
       },
       {
-        name: permissionWithPrefix('getCustomer:own', 'CustomerManagement'),
+        name: permissionWithPrefix(
+          'getCustomer:own',
+          CUSTOMER_MANAGEMENT_MODULE,
+        ),
         label: 'Get Customer (Own)',
         order: 8,
       },
       {
-        name: permissionWithPrefix('listCustomers', 'CustomerManagement'),
+        name: permissionWithPrefix('listCustomers', CUSTOMER_MANAGEMENT_MODULE),
         label: 'List Customers',
         order: 9,
       },
       {
-        name: permissionWithPrefix('listCustomers:own', 'CustomerManagement'),
+        name: permissionWithPrefix(
+          'listCustomers:own',
+          CUSTOMER_MANAGEMENT_MODULE,
+        ),
         label: 'List Customers (Own)',
         order: 10,
       },
       {
-        name: permissionWithPrefix('deleteCustomer', 'CustomerManagement'),
+        name: permissionWithPrefix(
+          'deleteCustomer',
+          CUSTOMER_MANAGEMENT_MODULE,
+        ),
         label: 'Delete Customer',
         order: 11,
       },
       {
-        name: permissionWithPrefix('deleteCustomer:own', 'CustomerManagement'),
+        name: permissionWithPrefix(
+          'deleteCustomer:own',
+          CUSTOMER_MANAGEMENT_MODULE,
+        ),
         label: 'Delete Customer (Own)',
         order: 12,
+      },
+    ],
+  },
+  {
+    name: ROLE_MANAGEMENT_MODULE,
+    label: 'Role Management',
+    enabled: true,
+    permissions: [
+      {
+        name: permissionWithPrefix('viewRoles', ROLE_MANAGEMENT_MODULE),
+        label: 'View Roles',
+        order: 1,
+      },
+      {
+        name: permissionWithPrefix('viewRoles:own', ROLE_MANAGEMENT_MODULE),
+        label: 'View Roles (Own)',
+        order: 2,
+      },
+      {
+        name: permissionWithPrefix('createRoles', ROLE_MANAGEMENT_MODULE),
+        label: 'Create Roles',
+        order: 3,
+      },
+      {
+        name: permissionWithPrefix('createRoles:own', ROLE_MANAGEMENT_MODULE),
+        label: 'Create Roles (Own)',
+        order: 4,
+      },
+      {
+        name: permissionWithPrefix('editRoles', ROLE_MANAGEMENT_MODULE),
+        label: 'Edit Roles',
+        order: 5,
+      },
+      {
+        name: permissionWithPrefix('editRoles:own', ROLE_MANAGEMENT_MODULE),
+        label: 'Edit Roles (Own)',
+        order: 6,
+      },
+      {
+        name: permissionWithPrefix('deleteRoles', ROLE_MANAGEMENT_MODULE),
+        label: 'Delete Role',
+        order: 7,
+      },
+      {
+        name: permissionWithPrefix('deleteRoles:own', ROLE_MANAGEMENT_MODULE),
+        label: 'Delete Role (Own)',
+        order: 8,
       },
     ],
   },
