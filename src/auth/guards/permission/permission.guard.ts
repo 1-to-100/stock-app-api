@@ -9,7 +9,6 @@ import { PERMISSIONS_KEY } from '../../../common/decorators/permissions.decorato
 import { RolesService } from '../../../roles/roles.service';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { OutputUserDto } from '../../../users/dto/output-user.dto';
-import { CustomersService } from '../../../customers/customers.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
@@ -51,8 +50,12 @@ export class PermissionGuard implements CanActivate {
         id: user.customerId!,
       },
     });
+    console.log('======================');
+    console.log(customer);
+    console.log(user);
+    console.log('======================');
     // allow customer owner to access its endpoints
-    if (customer && user.customerId == customer.ownerId) {
+    if (customer && user.id == customer.ownerId) {
       return true;
     }
     if (!user.roleId) {
