@@ -35,7 +35,7 @@ type SubscriptionDataType = {
     name: string;
   };
   _count: {
-    User: number;
+    Users: number;
   };
 };
 
@@ -141,7 +141,7 @@ export class CustomersService {
           : null,
         subscriptionId: customer.Subscription?.id,
         subscriptionName: customer.Subscription?.name,
-        numberOfUsers: customer._count.User,
+        numberOfUsers: customer._count.Users,
       };
     });
 
