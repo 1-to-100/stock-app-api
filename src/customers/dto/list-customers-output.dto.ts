@@ -20,12 +20,12 @@ export class ListCustomersOutputDto extends PaginatedInputDto {
 
   @IsInt()
   @ApiPropertyOptional({ description: 'Subscription ID' })
-  subscriptionId: number;
+  subscriptionId?: number;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ description: 'Subscription name' })
-  subscriptionName: string;
+  subscriptionName?: string;
 
   @IsOptional()
   @IsInt()

@@ -139,8 +139,8 @@ export class CustomersService {
               email: customer.Manager?.Users[0].email || null,
             }
           : null,
-        subscriptionId: customer.Subscription!.id,
-        subscriptionName: customer.Subscription!.name,
+        subscriptionId: customer.Subscription?.id,
+        subscriptionName: customer.Subscription?.name,
         numberOfUsers: customer._count.User,
       };
     });
