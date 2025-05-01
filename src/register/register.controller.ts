@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Get, Param, ConflictException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  ConflictException,
+} from '@nestjs/common';
 import { RegisterService } from './register.service';
 import { RegisterDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
