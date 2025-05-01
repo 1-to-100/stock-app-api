@@ -11,6 +11,7 @@ import { FirebaseAuthGuard } from './guards/firebase-auth/firebase-auth.guard';
 import { User } from '../common/decorators/user.decorator';
 import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 import { UsersService } from '../users/users.service';
+import { FirebaseUser } from '../common/decorators/firebase-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -21,7 +22,7 @@ export class AuthController {
 
   @UseGuards(FirebaseAuthGuard)
   @Post('sync')
-  async syncUser(@User() user: FirebaseDecodedToken) {
+  async syncUser(@FirebaseUser() user: FirebaseDecodedToken) {
     if (!user) throw new UnauthorizedException();
 
     const dbUser = await this.userService.createFirebaseUser(user);
@@ -30,81 +31,68 @@ export class AuthController {
       user: dbUser,
     };
   }
-
-  @UseGuards(FirebaseAuthGuard)
-  @Post('set-role')
-  async setUserRole(
-    @User() user: FirebaseDecodedToken,
-    @Body() body: { role?: string },
-  ) {
-    if (!user) throw new UnauthorizedException();
-
-    const role = body.role || 'user';
-
-    const claims: {
-      role?: string;
-      permissions?: string[];
-    } = {};
-
-    if (user.permissions && user.permissions.length > 0) {
-      claims.permissions = user.permissions;
-    }
-    await this.authService.setUserClaims(user.uid, {
-      ...claims,
-      role,
-    });
-
-    return {
-      message: 'ok',
-    };
-  }
-
-  @UseGuards(FirebaseAuthGuard)
-  @Post('set-permissions')
-  async setUserPermissions(
-    @User() user: FirebaseDecodedToken,
-    @Body() body: { permissions?: string[] },
-  ) {
-    if (!user) throw new UnauthorizedException();
-
-    const permissions = body.permissions || [];
-
-    const claims: {
-      role?: string;
-      permissions?: string[];
-    } = {};
-    if (user.role) {
-      claims.role = user.role;
-    }
-
-    await this.authService.setUserClaims(user.uid, {
-      ...claims,
-      permissions,
-    });
-
-    return {
-      message: 'ok',
-    };
-  }
-
-  @UseGuards(FirebaseAuthGuard)
-  @Get('test')
-  testUserClaims() {
-    return {
-      message: 'test',
-    };
-    // const token = authHeader?.replace('Bearer ', '');
-    //
-    // try {
-    //   const decoded: DecodedIdToken = await this.authService.verifyToken(token);
-    //   if (!decoded) {
-    //     throw new UnauthorizedException();
-    //   }
-    //
-    //   return decoded;
-    // } catch (error) {
-    //   console.log('error', error);
-    //   throw new UnauthorizedException();
-    // }
-  }
+  //
+  // @UseGuards(FirebaseAuthGuard)
+  // @Post('set-role')
+  // async setUserRole(
+  //   @FirebaseUser() user: FirebaseDecodedToken,
+  //   @Body() body: { role?: string },
+  // ) {
+  //   if (!user) throw new UnauthorizedException();
+  //
+  //   const role = body.role || 'user';
+  //
+  //   const claims: {
+  //     role?: string;
+  //     permissions?: string[];
+  //   } = {};
+  //
+  //   if (user.permissions && user.permissions.length > 0) {
+  //     claims.permissions = user.permissions;
+  //   }
+  //   await this.authService.setUserClaims(user.uid, {
+  //     ...claims,
+  //     role,
+  //   });
+  //
+  //   return {
+  //     message: 'ok',
+  //   };
+  // }
+  //
+  // @UseGuards(FirebaseAuthGuard)
+  // @Post('set-permissions')
+  // async setUserPermissions(
+  //   @FirebaseUser() user: FirebaseDecodedToken,
+  //   @Body() body: { permissions?: string[] },
+  // ) {
+  //   if (!user) throw new UnauthorizedException();
+  //
+  //   const permissions = body.permissions || [];
+  //
+  //   const claims: {
+  //     role?: string;
+  //     permissions?: string[];
+  //   } = {};
+  //   if (user.role) {
+  //     claims.role = user.role;
+  //   }
+  //
+  //   await this.authService.setUserClaims(user.uid, {
+  //     ...claims,
+  //     permissions,
+  //   });
+  //
+  //   return {
+  //     message: 'ok',
+  //   };
+  // }
+  //
+  // @UseGuards(FirebaseAuthGuard)
+  // @Get('test')
+  // testUserClaims() {
+  //   return {
+  //     message: 'test',
+  //   };
+  // }
 }
