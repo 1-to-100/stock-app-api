@@ -183,6 +183,7 @@ export class UsersService {
           firstName: firstName,
           lastName: lastName,
           customerId: existingCustomer.id,
+          uid: firebaseUser.uid,
         },
       });
     } else {
@@ -191,6 +192,7 @@ export class UsersService {
           email: email,
           firstName: firstName,
           lastName: lastName,
+          uid: firebaseUser.uid,
         },
       });
 
