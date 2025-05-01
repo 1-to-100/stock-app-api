@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Post,
   UnauthorizedException,
@@ -20,16 +19,10 @@ export class AuthController {
 
   @UseGuards(FirebaseAuthGuard)
   @Post('sync')
-  async syncUser(
-    @FirebaseUser() user: FirebaseDecodedToken,
-    @Body('subscriptionId') subscriptionId: number,
-  ) {
+  async syncUser(@FirebaseUser() user: FirebaseDecodedToken) {
     if (!user) throw new UnauthorizedException();
 
-    const dbUser = await this.userService.createFirebaseUser(
-      user,
-      subscriptionId,
-    );
+    const dbUser = await this.userService.createFirebaseUser(user);
     return {
       message: 'ok',
       user: dbUser,
