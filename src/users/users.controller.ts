@@ -137,7 +137,7 @@ export class UsersController {
     @Query() listUserInputDto: ListUsersInputDto,
   ) {
     if (!user.isSuperadmin && !user.customerId) {
-      throw new ForbiddenException('You have no access to create users.');
+      throw new ForbiddenException('You have no access to list users.');
     }
     if (!user.isSuperadmin && user.customerId) {
       // user cannot set another customer when creating users, assign the same he belongs to

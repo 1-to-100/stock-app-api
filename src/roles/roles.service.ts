@@ -95,9 +95,10 @@ export class RolesService {
   async updateRolePermissionsByName(
     roleId: number,
     dto: UpdateRolePermissionsByNameDto,
+    customerId: number,
   ) {
     const role = await this.prisma.role.findUnique({
-      where: { id: roleId },
+      where: { id: roleId, customerId: customerId },
     });
 
     if (!role) {

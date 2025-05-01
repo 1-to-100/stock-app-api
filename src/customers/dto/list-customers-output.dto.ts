@@ -32,6 +32,11 @@ export class ListCustomersOutputDto extends PaginatedInputDto {
   @ApiPropertyOptional({ description: 'Manager Fields' })
   manager: { id: number; name: string; email: string | null } | null = null;
 
+  // @IsOptional()
+  // @IsInt()
+  // @ApiPropertyOptional({ description: 'Owner Fields' })
+  // owner: { id: number; firstName: string; lastName: string | null };
+
   @IsInt()
   @ApiPropertyOptional({ description: 'Numbers of users' })
   numberOfUsers: number;

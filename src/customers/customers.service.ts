@@ -169,6 +169,7 @@ export class CustomersService {
           },
         },
         Subscription: { select: { id: true, name: true } },
+        Owner: { select: { id: true, firstName: true, lastName: true } },
         _count: { select: { Users: true } },
       },
     });
@@ -189,6 +190,13 @@ export class CustomersService {
             id: customer.Manager?.id,
             name: customer.Manager?.name,
             email: customer.Manager?.Users[0].email ?? null,
+          }
+        : null,
+      owner: customer.Owner
+        ? {
+            id: customer.Owner?.id,
+            firstName: customer.Owner?.firstName,
+            lastName: customer.Owner?.lastName,
           }
         : null,
       subscriptionId: Subscription?.id,

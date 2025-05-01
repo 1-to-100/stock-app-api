@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -17,8 +18,11 @@ import { OutputRoleDto } from './dto/output-role.dto';
 import { CustomerId } from '../common/decorators/customer-id.decorator';
 import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
+import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
+import { PermissionGuard } from '../auth/guards/permission/permission.guard';
 
 @Controller('roles')
+@UseGuards(FirebaseAuthGuard, PermissionGuard)
 export class RolesController {
   constructor(
     private readonly rolesService: RolesService,
@@ -52,8 +56,8 @@ export class RolesController {
 
   @Get()
   findAll(
-    @User() user: OutputUserDto,
     @CustomerId() customerId: string | null,
+    @User() user: OutputUserDto,
   ) {
     let customerIdNum: number = 0;
     if (!user.isSuperadmin) {
@@ -109,7 +113,24 @@ export class RolesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+    @User() user: OutputUserDto,
+    @CustomerId() customerId: string | null,
+  ) {
+    let customerIdNum: number = 0;
+    if (!user.isSuperadmin) {
+      customerIdNum = user.customerId ?? 0;
+    } else if (customerId) {
+      customerIdNum = parseInt(customerId, 10);
+    }
+    if (customerIdNum == 0) {
+      throw new ConflictException(
+        'customerId cannot be determined to update a role',
+      );
+    }
+    updateRoleDto.customerId = customerIdNum;
     return this.rolesService.update(+id, updateRoleDto);
   }
 
@@ -123,7 +144,19 @@ export class RolesController {
   updatePermissionsByName(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateRolePermissionsByNameDto,
+    @User() user: OutputUserDto,
+    @CustomerId() customerId: string | null,
   ) {
-    return this.rolesService.updateRolePermissionsByName(id, dto);
+    let customerIdNum: number = 0;
+    if (!user.isSuperadmin) {
+      customerIdNum = user.customerId ?? 0;
+    } else if (customerId) {
+      customerIdNum = parseInt(customerId, 10);
+    }
+    return this.rolesService.updateRolePermissionsByName(
+      id,
+      dto,
+      customerIdNum,
+    );
   }
 }
