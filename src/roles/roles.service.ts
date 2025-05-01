@@ -53,12 +53,19 @@ export class RolesService {
     });
   }
 
-  getForTaxonomy(): Promise<OutputTaxonomyDto[]> {
+  getForTaxonomy(customerId: number | null): Promise<OutputTaxonomyDto[]> {
+    let where = {};
+    if (customerId) {
+      where = {
+        id: customerId,
+      };
+    }
     return this.prisma.role.findMany({
       select: {
         id: true,
         name: true,
       },
+      where,
     });
   }
 

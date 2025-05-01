@@ -6,6 +6,8 @@ import { CustomersService } from '../customers/customers.service';
 import { RolesService } from '../roles/roles.service';
 import { ManagersService } from '../managers/managers.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { AuthService } from 'src/auth/auth.service';
+import { UsersService } from '../users/users.service';
 
 @Module({
   controllers: [TaxonomiesController],
@@ -16,6 +18,8 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
     ManagersService,
     SubscriptionsService,
     PrismaService,
+    AuthService,
+    UsersService,
   ],
   exports: [TaxonomiesService],
 })

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { CustomersService } from '../customers/customers.service';
 import { RolesService } from '../roles/roles.service';
 import { ManagersService } from '../managers/managers.service';
@@ -6,8 +6,12 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { OutputTaxonomyDto } from './dto/output-taxonomy.dto';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { StatusList } from '../common/constants/status';
+import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
+import { User } from '../common/decorators/user.decorator';
+import { OutputUserDto } from '../users/dto/output-user.dto';
 
 @Controller('taxonomies')
+@UseGuards(FirebaseAuthGuard)
 export class TaxonomiesController {
   constructor(
     private readonly customersService: CustomersService,
@@ -21,8 +25,14 @@ export class TaxonomiesController {
     description: 'Customers',
     type: OutputTaxonomyDto,
   })
-  findAllCustomers() {
-    return this.customersService.getForTaxonomy();
+  findAllCustomers(@User() user: OutputUserDto) {
+    let customerId: number | null = 0;
+    if (!user.isSuperadmin) {
+      customerId = user.customerId ?? 0;
+    } else {
+      customerId = null;
+    }
+    return this.customersService.getForTaxonomy(customerId);
   }
 
   @Get('/roles')
@@ -30,8 +40,14 @@ export class TaxonomiesController {
     description: 'Roles',
     type: OutputTaxonomyDto,
   })
-  findAllRoles() {
-    return this.rolesService.getForTaxonomy();
+  findAllRoles(@User() user: OutputUserDto) {
+    let customerId: number | null = 0;
+    if (!user.isSuperadmin) {
+      customerId = user.customerId ?? 0;
+    } else {
+      customerId = null;
+    }
+    return this.rolesService.getForTaxonomy(customerId);
   }
 
   @Get('/managers')
