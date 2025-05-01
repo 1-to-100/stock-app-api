@@ -62,9 +62,9 @@ export class RolesService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, customerId: number | null = null) {
     const role = await this.prisma.role.findFirst({
-      where: { id },
+      where: { id, customerId },
       include: {
         permissions: {
           include: {
@@ -74,7 +74,9 @@ export class RolesService {
       },
     });
     if (!role) {
-      throw new NotFoundException('No role with given ID exists');
+      throw new NotFoundException(
+        'No role with given ID exists for given customer',
+      );
     }
     return role;
   }

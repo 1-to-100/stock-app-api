@@ -1,14 +1,12 @@
 import {
   Body,
   Controller,
-  Get,
   Post,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FirebaseAuthGuard } from './guards/firebase-auth/firebase-auth.guard';
-import { User } from '../common/decorators/user.decorator';
 import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 import { UsersService } from '../users/users.service';
 import { FirebaseUser } from '../common/decorators/firebase-user.decorator';
@@ -22,10 +20,16 @@ export class AuthController {
 
   @UseGuards(FirebaseAuthGuard)
   @Post('sync')
-  async syncUser(@FirebaseUser() user: FirebaseDecodedToken) {
+  async syncUser(
+    @FirebaseUser() user: FirebaseDecodedToken,
+    @Body('subscriptionId') subscriptionId: number,
+  ) {
     if (!user) throw new UnauthorizedException();
 
-    const dbUser = await this.userService.createFirebaseUser(user);
+    const dbUser = await this.userService.createFirebaseUser(
+      user,
+      subscriptionId,
+    );
     return {
       message: 'ok',
       user: dbUser,

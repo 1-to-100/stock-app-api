@@ -151,7 +151,10 @@ export class UsersService {
     });
   }
 
-  async createFirebaseUser(firebaseUser: FirebaseDecodedToken) {
+  async createFirebaseUser(
+    firebaseUser: FirebaseDecodedToken,
+    subscriptionId: number | null = null,
+  ) {
     const firebaseUserProfile = await this.firebase.auth.getUser(
       firebaseUser.uid,
     );
@@ -212,6 +215,7 @@ export class UsersService {
           email: email,
           domain: domain,
           ownerId: newUser.id,
+          subscriptionId: subscriptionId,
         },
       });
 

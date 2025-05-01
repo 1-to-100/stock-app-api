@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Body,
   Controller,
   Get,
@@ -13,6 +14,9 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { UpdateRolePermissionsByNameDto } from './dto/update-role-permissions-by-name.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { OutputRoleDto } from './dto/output-role.dto';
+import { CustomerId } from '../common/decorators/customer-id.decorator';
+import { User } from '../common/decorators/user.decorator';
+import { OutputUserDto } from '../users/dto/output-user.dto';
 
 @Controller('roles')
 export class RolesController {
@@ -22,18 +26,57 @@ export class RolesController {
   ) {}
 
   @Post()
-  create(@Body() createRoleDto: CreateRoleDto) {
+  create(
+    @User() user: OutputUserDto,
+    @CustomerId() customerId: string | null,
+    @Body() createRoleDto: CreateRoleDto,
+  ) {
+    if (user.isSuperadmin) {
+      if (!customerId) {
+        throw new ConflictException(
+          'To create role, you have to pass customerId',
+        );
+      } else {
+        createRoleDto.customerId = parseInt(customerId, 10);
+      }
+    } else {
+      if (user.customerId === null) {
+        throw new ConflictException(
+          'User must have a customerId to create a role',
+        );
+      }
+      createRoleDto.customerId = user.customerId;
+    }
     return this.rolesService.create(createRoleDto);
   }
 
   @Get()
-  findAll() {
-    return this.rolesService.findAll({});
+  findAll(
+    @User() user: OutputUserDto,
+    @CustomerId() customerId: string | null,
+  ) {
+    let customerIdNum: number = 0;
+    if (!user.isSuperadmin) {
+      customerIdNum = user.customerId ?? 0;
+    } else if (customerId) {
+      customerIdNum = parseInt(customerId, 10);
+    }
+    return this.rolesService.findAll({ where: { customerId: customerIdNum } });
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<OutputRoleDto> {
-    const role = await this.rolesService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+    @User() user: OutputUserDto,
+    @CustomerId() customerId: string | null,
+  ): Promise<OutputRoleDto> {
+    let customerIdNum: number = 0;
+    if (!user.isSuperadmin) {
+      customerIdNum = user.customerId ?? 0;
+    } else if (customerId) {
+      customerIdNum = parseInt(customerId, 10);
+    }
+    const role = await this.rolesService.findOne(+id, customerIdNum);
     const outputRole = {
       id: role.id,
       name: role.name,
