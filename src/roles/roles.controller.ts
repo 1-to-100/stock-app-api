@@ -20,6 +20,7 @@ import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
 import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
 import { PermissionGuard } from '../auth/guards/permission/permission.guard';
+import { Permissions } from '../common/decorators/permissions.decorator';
 
 @Controller('roles')
 @UseGuards(FirebaseAuthGuard, PermissionGuard)
@@ -30,6 +31,7 @@ export class RolesController {
   ) {}
 
   @Post()
+  @Permissions('RoleManagement:createRoles')
   create(
     @User() user: OutputUserDto,
     @CustomerId() customerId: string | null,
@@ -55,6 +57,7 @@ export class RolesController {
   }
 
   @Get()
+  @Permissions('RoleManagement:viewRoles')
   findAll(
     @CustomerId() customerId: string | null,
     @User() user: OutputUserDto,
@@ -69,6 +72,7 @@ export class RolesController {
   }
 
   @Get(':id')
+  @Permissions('RoleManagement:viewRoles')
   async findOne(
     @Param('id') id: string,
     @User() user: OutputUserDto,
@@ -96,9 +100,7 @@ export class RolesController {
     >((acc, permission) => {
       const prefix = permission.permission.name.split(':')[0];
 
-      if (!acc[prefix]) {
-        acc[prefix] = [];
-      }
+      acc[prefix] ??= [];
 
       acc[prefix].push({
         id: permission.permissionId,
@@ -113,6 +115,7 @@ export class RolesController {
   }
 
   @Patch(':id')
+  @Permissions('RoleManagement:editRoles')
   update(
     @Param('id') id: string,
     @Body() updateRoleDto: UpdateRoleDto,
@@ -141,6 +144,7 @@ export class RolesController {
   // }
 
   @Post(':id/permissions')
+  @Permissions('RoleManagement:editRoles')
   updatePermissionsByName(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateRolePermissionsByNameDto,
