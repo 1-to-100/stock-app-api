@@ -7,7 +7,7 @@ import {
   Param,
   Logger,
   Query,
-  UseGuards,
+  UseGuards, ConflictException, ForbiddenException,
   // Delete,
   // Query,
 } from '@nestjs/common';
@@ -42,7 +42,17 @@ export class UsersController {
     description: 'Error creating user with provided data',
   })
   @Permissions('UserManagement:createUser')
-  async create(@Body() createUserDto: CreateUserDto) {
+  async create(
+    @User() user: OutputUserDto,
+    @Body() createUserDto: CreateUserDto,
+  ) {
+    if (!user.isSuperadmin && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    }
+    if (!user.isSuperadmin && user.customerId) {
+      // user cannot set another customer when creating users, assign the same he belongs to
+      createUserDto.customerId = user.customerId;
+    }
     return await this.usersService.create(createUserDto);
   }
 
@@ -52,7 +62,17 @@ export class UsersController {
     type: OutputUserDto,
   })
   @Permissions('UserManagement:inviteUser')
-  async invite(@Body() inviteUserDto: InviteUserDto) {
+  async invite(
+    @User() user: OutputUserDto,
+    @Body() inviteUserDto: InviteUserDto,
+  ) {
+    if (!user.isSuperadmin && !user.customerId) {
+      throw new ForbiddenException('You have no access to invite users.');
+    }
+    if (!user.isSuperadmin && user.customerId) {
+      // user cannot set another customer when creating users, assign the same he belongs to
+      inviteUserDto.customerId = user.customerId;
+    }
     return await this.usersService.invite(inviteUserDto);
   }
 
@@ -73,7 +93,17 @@ export class UsersController {
     isArray: true,
   })
   @Permissions('UserManagement:inviteUser')
-  async inviteMultiple(@Body() inviteUsersDto: InviteMultipleUsersDto) {
+  async inviteMultiple(
+    @User() user: OutputUserDto,
+    @Body() inviteUsersDto: InviteMultipleUsersDto,
+  ) {
+    if (!user.isSuperadmin && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    }
+    if (!user.isSuperadmin && user.customerId) {
+      // user cannot set another customer when creating users, assign the same he belongs to
+      inviteUsersDto.customerId = user.customerId;
+    }
     const invitePromises = inviteUsersDto.emails.map(async (email) => {
       if (await this.usersService.emailExists({ email })) {
         this.logger.log(`Invite email already exists: ${email}`);
@@ -101,7 +131,17 @@ export class UsersController {
     isArray: true,
   })
   @Permissions('UserManagement:viewUsers')
-  findAll(@Query() listUserInputDto: ListUsersInputDto) {
+  findAll(
+    @User() user: OutputUserDto,
+    @Query() listUserInputDto: ListUsersInputDto,
+  ) {
+    if (!user.isSuperadmin && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    }
+    if (!user.isSuperadmin && user.customerId) {
+      // user cannot set another customer when creating users, assign the same he belongs to
+      listUserInputDto.customerId = [user.customerId];
+    }
     return this.usersService.findAll(listUserInputDto);
   }
 
@@ -120,8 +160,12 @@ export class UsersController {
     type: OutputUserDto,
   })
   @Permissions('UserManagement:viewUsers')
-  findOne(@Param('id') id: number) {
-    return this.usersService.findOne(+id);
+  findOne(@User() user: OutputUserDto, @Param('id') id: number) {
+    let customerId: number | null = null;
+    if (!user.isSuperadmin) {
+      customerId = user.customerId;
+    }
+    return this.usersService.findOne(+id, customerId);
   }
 
   @Patch(':id')

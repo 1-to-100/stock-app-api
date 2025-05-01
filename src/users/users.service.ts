@@ -93,9 +93,19 @@ export class UsersService {
     );
   }
 
-  async findOne(id: number): Promise<OutputUserDto> {
+  async findOne(
+    id: number,
+    customerId: number | null = null,
+  ): Promise<OutputUserDto> {
+    let where = {};
+    if (customerId) {
+      where = { AND: [{ id }, { customerId }] };
+    } else {
+      where = { id };
+    }
+
     const user = await this.prisma.user.findFirst({
-      where: { id },
+      where: where,
       include: {
         role: true,
         customer: true,

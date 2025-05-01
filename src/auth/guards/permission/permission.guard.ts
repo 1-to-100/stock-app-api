@@ -9,12 +9,15 @@ import { PERMISSIONS_KEY } from '../../../common/decorators/permissions.decorato
 import { RolesService } from '../../../roles/roles.service';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { OutputUserDto } from '../../../users/dto/output-user.dto';
+import { CustomersService } from '../../../customers/customers.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly rolesService: RolesService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -41,6 +44,15 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenException('Access denied: user not found');
     }
     if (user.isSuperadmin) {
+      return true;
+    }
+    const customer = await this.prisma.customer.findFirst({
+      where: {
+        id: user.customerId!,
+      },
+    });
+    // allow customer owner to access its endpoints
+    if (customer && user.customerId == customer.ownerId) {
       return true;
     }
     if (!user.roleId) {
