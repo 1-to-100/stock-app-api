@@ -47,6 +47,7 @@ export class TaxonomiesController {
     } else {
       customerId = null;
     }
+    console.log(customerId);
     return this.rolesService.getForTaxonomy(customerId);
   }
 
