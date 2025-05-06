@@ -53,23 +53,18 @@ export class RolesService {
     });
   }
 
-  getForTaxonomy(customerId: number | null): Promise<OutputTaxonomyDto[]> {
-    let where = {};
-    if (customerId) {
-      where = { customerId };
-    }
+  getForTaxonomy(): Promise<OutputTaxonomyDto[]> {
     return this.prisma.role.findMany({
       select: {
         id: true,
         name: true,
       },
-      where,
     });
   }
 
-  async findOne(id: number, customerId: number | null = null) {
+  async findOne(id: number) {
     const role = await this.prisma.role.findFirst({
-      where: { id, customerId },
+      where: { id },
       include: {
         permissions: {
           include: {
@@ -100,10 +95,9 @@ export class RolesService {
   async updateRolePermissionsByName(
     roleId: number,
     dto: UpdateRolePermissionsByNameDto,
-    customerId: number,
   ) {
     const role = await this.prisma.role.findUnique({
-      where: { id: roleId, customerId: customerId },
+      where: { id: roleId },
     });
 
     if (!role) {

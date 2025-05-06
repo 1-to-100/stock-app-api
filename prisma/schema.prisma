@@ -38,7 +38,6 @@ model Customer {
   Owner             User           @relation("CustomerOwner", fields: [ownerId], references: [id])
   CustomerSuccess   User?          @relation("CustomerSuccess", fields: [customerSuccessId], references: [id])
   Users             User[]         @relation("CustomerUsers")
-  Roles             Role[]
 
   @@index([status])
   @@index([subscriptionId])
@@ -69,14 +68,12 @@ enum Action {
 model Role {
   id          Int              @id @default(autoincrement())
   name        String?
-  customerId  Int?             @map("customer_id")
   description String?          @map("description")
   imageUlrl   String?          @map("image_url")
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime?        @updatedAt @map("updated_at")
   users       User[]
   permissions RolePermission[]
-  customer    Customer?        @relation(fields: [customerId], references: [id])
 
   @@map("roles")
 }

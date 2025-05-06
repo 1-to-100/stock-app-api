@@ -1,5 +1,4 @@
 import {
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -9,13 +8,6 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateRoleDto {
-  @IsInt()
-  @IsOptional()
-  @ApiProperty({
-    description: 'Customer ID. Only required if superadmin creates a role',
-  })
-  customerId: number;
-
   @IsString()
   @IsNotEmpty()
   @MinLength(3)

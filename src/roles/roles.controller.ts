@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Body,
   Controller,
   Get,
@@ -15,9 +14,6 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { UpdateRolePermissionsByNameDto } from './dto/update-role-permissions-by-name.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { OutputRoleDto } from './dto/output-role.dto';
-import { CustomerId } from '../common/decorators/customer-id.decorator';
-import { User } from '../common/decorators/user.decorator';
-import { OutputUserDto } from '../users/dto/output-user.dto';
 import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
 import { PermissionGuard } from '../auth/guards/permission/permission.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
@@ -32,59 +28,20 @@ export class RolesController {
 
   @Post()
   @Permissions('RoleManagement:createRoles')
-  create(
-    @User() user: OutputUserDto,
-    @CustomerId() customerId: string | null,
-    @Body() createRoleDto: CreateRoleDto,
-  ) {
-    if (user.isSuperadmin) {
-      if (!customerId) {
-        throw new ConflictException(
-          'To create role, you have to pass customerId',
-        );
-      } else {
-        createRoleDto.customerId = parseInt(customerId, 10);
-      }
-    } else {
-      if (user.customerId === null) {
-        throw new ConflictException(
-          'User must have a customerId to create a role',
-        );
-      }
-      createRoleDto.customerId = user.customerId;
-    }
+  create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
   }
 
   @Get()
   @Permissions('RoleManagement:viewRoles')
-  findAll(
-    @CustomerId() customerId: string | null,
-    @User() user: OutputUserDto,
-  ) {
-    let customerIdNum: number = 0;
-    if (!user.isSuperadmin) {
-      customerIdNum = user.customerId ?? 0;
-    } else if (customerId) {
-      customerIdNum = parseInt(customerId, 10);
-    }
-    return this.rolesService.findAll({ where: { customerId: customerIdNum } });
+  findAll() {
+    return this.rolesService.findAll({});
   }
 
   @Get(':id')
   @Permissions('RoleManagement:viewRoles')
-  async findOne(
-    @Param('id') id: string,
-    @User() user: OutputUserDto,
-    @CustomerId() customerId: string | null,
-  ): Promise<OutputRoleDto> {
-    let customerIdNum: number = 0;
-    if (!user.isSuperadmin) {
-      customerIdNum = user.customerId ?? 0;
-    } else if (customerId) {
-      customerIdNum = parseInt(customerId, 10);
-    }
-    const role = await this.rolesService.findOne(+id, customerIdNum);
+  async findOne(@Param('id') id: string): Promise<OutputRoleDto> {
+    const role = await this.rolesService.findOne(+id);
     const outputRole = {
       id: role.id,
       name: role.name,
@@ -116,24 +73,7 @@ export class RolesController {
 
   @Patch(':id')
   @Permissions('RoleManagement:editRoles')
-  update(
-    @Param('id') id: string,
-    @Body() updateRoleDto: UpdateRoleDto,
-    @User() user: OutputUserDto,
-    @CustomerId() customerId: string | null,
-  ) {
-    let customerIdNum: number = 0;
-    if (!user.isSuperadmin) {
-      customerIdNum = user.customerId ?? 0;
-    } else if (customerId) {
-      customerIdNum = parseInt(customerId, 10);
-    }
-    if (customerIdNum == 0) {
-      throw new ConflictException(
-        'customerId cannot be determined to update a role',
-      );
-    }
-    updateRoleDto.customerId = customerIdNum;
+  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.rolesService.update(+id, updateRoleDto);
   }
 
@@ -148,19 +88,7 @@ export class RolesController {
   updatePermissionsByName(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateRolePermissionsByNameDto,
-    @User() user: OutputUserDto,
-    @CustomerId() customerId: string | null,
   ) {
-    let customerIdNum: number = 0;
-    if (!user.isSuperadmin) {
-      customerIdNum = user.customerId ?? 0;
-    } else if (customerId) {
-      customerIdNum = parseInt(customerId, 10);
-    }
-    return this.rolesService.updateRolePermissionsByName(
-      id,
-      dto,
-      customerIdNum,
-    );
+    return this.rolesService.updateRolePermissionsByName(id, dto);
   }
 }

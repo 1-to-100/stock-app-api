@@ -40,15 +40,8 @@ export class TaxonomiesController {
     description: 'Roles',
     type: OutputTaxonomyDto,
   })
-  findAllRoles(@User() user: OutputUserDto) {
-    let customerId: number | null = 0;
-    if (!user.isSuperadmin) {
-      customerId = user.customerId ?? 0;
-    } else {
-      customerId = null;
-    }
-    console.log(customerId);
-    return this.rolesService.getForTaxonomy(customerId);
+  findAllRoles() {
+    return this.rolesService.getForTaxonomy();
   }
 
   @Get('/managers')
