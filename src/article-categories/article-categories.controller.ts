@@ -1,8 +1,20 @@
-import { Controller, Post, Body, Logger, UseGuards, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Logger,
+  UseGuards,
+  Get,
+  Patch,
+  Param,
+  ParseIntPipe,
+  Delete,
+} from '@nestjs/common';
 import { ArticleCategoriesService } from './article-categories.service';
 import { CreateArticleCategoryDto } from './dto/create-article-category.dto';
+import { UpdateArticleCategoryDto } from './dto/update-article-category.dto';
 import { OutputArticleCategoryDto } from './dto/output-article-category.dto';
-import { ApiConflictResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiConflictResponse, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { PermissionGuard } from '../auth/guards/permission/permission.guard';
@@ -83,5 +95,54 @@ export class ArticleCategoriesController {
       fields.customerId = customerId;
     }
     return await this.articlesCategoriesService.create(fields);
+  }
+
+  @Patch(':id')
+  @ApiOkResponse({
+    description: 'The updated category record',
+    type: OutputArticleCategoryDto,
+  })
+  @ApiConflictResponse({
+    description: 'Error updating category with provided data',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @Permissions('Documents:createCategories')
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: OutputUserDto,
+    @Body() updateArticleCategoryDto: UpdateArticleCategoryDto,
+    @CustomerId() customerId: number,
+  ) {
+    if (!user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
+    }
+    if (!customerId) {
+      throw new Error('User is not authorized to access this resource');
+    }
+    return await this.articlesCategoriesService.update(
+      id,
+      updateArticleCategoryDto,
+      customerId,
+    );
+  }
+
+  @Delete(':id')
+  @ApiOkResponse({
+    description: 'The category has been successfully deleted',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @Permissions('Documents:createCategories')
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: OutputUserDto,
+    @CustomerId() customerId: number,
+  ) {
+    if (!user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
+    }
+    if (!customerId) {
+      throw new Error('User is not authorized to access this resource');
+    }
+    return await this.articlesCategoriesService.remove(id, customerId);
   }
 }
