@@ -36,7 +36,7 @@ export class ArticleCategoriesController {
     description: 'The categories list',
     type: OutputArticleCategoryDto,
   })
-  @Permissions('Documents:createCategories')
+  @Permissions('Documents:viewCategories')
   async findAll(@User() user: OutputUserDto, @CustomerId() customerId: number) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId!;
@@ -51,7 +51,7 @@ export class ArticleCategoriesController {
   @ApiOkResponse({
     description: 'The subcategories list',
   })
-  @Permissions('Documents:createCategories')
+  @Permissions('Documents:viewCategories')
   async findAllSubcategories(
     @User() user: OutputUserDto,
     @CustomerId() customerId: number,
@@ -75,7 +75,7 @@ export class ArticleCategoriesController {
   @ApiConflictResponse({
     description: 'Error creating category with provided data',
   })
-  @Permissions('UserManagement:createUser')
+  @Permissions('Documents:createCategories')
   async create(
     @User() user: OutputUserDto,
     @Body() createArticleCategoryDto: CreateArticleCategoryDto,
@@ -106,7 +106,7 @@ export class ArticleCategoriesController {
     description: 'Error updating category with provided data',
   })
   @ApiParam({ name: 'id', type: Number })
-  @Permissions('Documents:createCategories')
+  @Permissions('Documents:editCategories')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @User() user: OutputUserDto,
@@ -131,7 +131,7 @@ export class ArticleCategoriesController {
     description: 'The category has been successfully deleted',
   })
   @ApiParam({ name: 'id', type: Number })
-  @Permissions('Documents:createCategories')
+  @Permissions('Documents:deleteCategories')
   async remove(
     @Param('id', ParseIntPipe) id: number,
     @User() user: OutputUserDto,
