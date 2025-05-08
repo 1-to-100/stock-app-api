@@ -1,7 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { SystemModulesService } from './system-modules.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Query } from '@nestjs/common';
 
 @Controller('system-modules')
 export class SystemModulesController {
@@ -16,7 +15,24 @@ export class SystemModulesController {
   }
 
   @Get('seed')
-  async seed(@Query('removeCustomers') removeCustomers?: boolean) {
+  async seed(
+    @Query('removeCustomers') removeCustomers?: boolean,
+    @Query('resetRoles') resetRoles?: boolean,
+  ) {
+    if (resetRoles) {
+      await this.prisma.user.updateMany({
+        where: {},
+        data: { roleId: null },
+      });
+      console.log(`✅ roles removed from users`);
+      await this.prisma.rolePermission.deleteMany();
+      console.log(`✅ permissions unassigned from roles`);
+      await this.prisma.permission.deleteMany();
+      console.log(`✅ old permissions deleted`);
+      await this.prisma.role.deleteMany();
+      console.log(`✅ old roles deleted`);
+    }
+
     const modules = this.systemModulesService.getAllModules();
 
     const flatPermissions = modules.flatMap((mod) =>
@@ -69,5 +85,6 @@ export class SystemModulesController {
       }
       console.log(`✅ Видалено ${customers.length} customers`);
     }
+    return { message: 'ok' };
   }
 }

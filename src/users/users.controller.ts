@@ -155,6 +155,18 @@ export class UsersController {
     return await this.usersService.findOne(user.id);
   }
 
+  @Patch('/me')
+  @ApiOkResponse({
+    description: 'User',
+    type: OutputUserDto,
+  })
+  async updateSelf(
+    @User() user: OutputUserDto,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.update(+user.id, updateUserDto);
+  }
+
   @Get(':id')
   @ApiOkResponse({
     description: 'User',
