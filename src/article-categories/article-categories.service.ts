@@ -36,4 +36,20 @@ export class ArticleCategoriesService {
     this.logger.log(`Find all categories for customer ${customerId}`);
     return categories as OutputArticleCategoryDto[];
   }
+
+  async findAllSubcategories(customerId: number) {
+    const categories = await this.prisma.articleCategory.findMany({
+      where: {
+        customerId,
+        subcategory: {
+          not: null,
+        },
+      },
+      select: { subcategory: true },
+      distinct: ['subcategory'],
+      orderBy: { subcategory: 'asc' },
+    });
+    this.logger.log(`Find all categories for customer ${customerId}`);
+    return categories.map((category) => category.subcategory as string);
+  }
 }

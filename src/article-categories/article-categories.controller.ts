@@ -24,19 +24,35 @@ export class ArticleCategoriesController {
     description: 'The categories list',
     type: OutputArticleCategoryDto,
   })
-  @ApiConflictResponse({
-    description: 'Error creating category with provided data',
+  @Permissions('Documents:createCategories')
+  async findAll(@User() user: OutputUserDto, @CustomerId() customerId: number) {
+    if (!user.isSuperadmin && user.customerId) {
+      customerId = user.customerId!;
+    }
+    if (!customerId) {
+      throw new Error('User is not authorized to access this resource');
+    }
+    return await this.articlesCategoriesService.findAll(customerId);
+  }
+
+  @Get('/subcategories')
+  @ApiOkResponse({
+    description: 'The subcategories list',
   })
-  @Permissions('UserManagement:createUser')
-  async findAll(
+  @Permissions('Documents:createCategories')
+  async findAllSubcategories(
     @User() user: OutputUserDto,
-    @Body() createArticleCategoryDto: CreateArticleCategoryDto,
     @CustomerId() customerId: number,
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId!;
     }
-    return await this.articlesCategoriesService.findAll(customerId);
+    if (!customerId) {
+      throw new Error('User is not authorized to access this resource');
+    }
+    return await this.articlesCategoriesService.findAllSubcategories(
+      customerId,
+    );
   }
 
   @Post()

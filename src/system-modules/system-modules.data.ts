@@ -163,24 +163,44 @@ export const SYSTEM_MODULES: SystemModule[] = [
     enabled: true,
     permissions: [
       {
-        name: permissionWithPrefix('viewRoles', DOCUMENTS_MODULE),
-        label: 'View Roles',
+        name: permissionWithPrefix('viewCategories', DOCUMENTS_MODULE),
+        label: 'View Categories',
         order: 1,
       },
       {
-        name: permissionWithPrefix('createRoles', DOCUMENTS_MODULE),
-        label: 'Create Roles',
+        name: permissionWithPrefix('createCategories', DOCUMENTS_MODULE),
+        label: 'Create Categories',
         order: 2,
       },
       {
-        name: permissionWithPrefix('editRoles', DOCUMENTS_MODULE),
-        label: 'Edit Roles',
+        name: permissionWithPrefix('editCategories', DOCUMENTS_MODULE),
+        label: 'Edit Categories',
         order: 3,
       },
       {
-        name: permissionWithPrefix('deleteRoles', DOCUMENTS_MODULE),
-        label: 'Delete Role',
+        name: permissionWithPrefix('deleteCategories', DOCUMENTS_MODULE),
+        label: 'Delete Categories',
         order: 4,
+      },
+      {
+        name: permissionWithPrefix('viewArticles', DOCUMENTS_MODULE),
+        label: 'View Articles',
+        order: 5,
+      },
+      {
+        name: permissionWithPrefix('createArticles', DOCUMENTS_MODULE),
+        label: 'Create Articles',
+        order: 6,
+      },
+      {
+        name: permissionWithPrefix('editArticles', DOCUMENTS_MODULE),
+        label: 'Edir Articles',
+        order: 7,
+      },
+      {
+        name: permissionWithPrefix('deleteArticles', DOCUMENTS_MODULE),
+        label: 'Delete Articles',
+        order: 8,
       },
     ],
   },
