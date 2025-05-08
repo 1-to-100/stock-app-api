@@ -14,6 +14,7 @@ import { CustomersModule } from './customers/customers.module';
 import { TaxonomiesModule } from './taxonomies/taxonomies.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { RegisterModule } from './register/register.module';
+import { ArticleCategoriesModule } from './article-categories/article-categories.module';
 
 @Module({
   imports: [
@@ -36,6 +37,8 @@ import { RegisterModule } from './register/register.module';
     TaxonomiesModule,
     SubscriptionsModule,
     RegisterModule,
+    // ArticlesModule,
+    ArticleCategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
