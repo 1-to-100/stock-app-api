@@ -32,9 +32,16 @@ export class ArticleCategoriesService {
   async findAll(customerId: number): Promise<OutputArticleCategoryDto[]> {
     const categories = await this.prisma.articleCategory.findMany({
       where: { customerId },
+      include: {
+        _count: {
+          select: {
+            Articles: true,
+          },
+        },
+      },
     });
     this.logger.log(`Find all categories for customer ${customerId}`);
-    return categories as OutputArticleCategoryDto[];
+    return categories;
   }
 
   async findAllSubcategories(customerId: number) {
