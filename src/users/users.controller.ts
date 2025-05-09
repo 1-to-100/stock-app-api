@@ -136,6 +136,7 @@ export class UsersController {
     @User() user: OutputUserDto,
     @Query() listUserInputDto: ListUsersInputDto,
   ) {
+    this.logger.debug(listUserInputDto);
     if (!user.isSuperadmin && !user.customerId) {
       throw new ForbiddenException('You have no access to list users.');
     }

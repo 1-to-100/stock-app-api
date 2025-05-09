@@ -1,4 +1,4 @@
-import { StatusType, StatusList } from 'src/common/constants/status';
+import { StatusType } from 'src/common/constants/status';
 
 export const eachNumberTransformer = ({
   value,
@@ -21,13 +21,8 @@ export const eachStatusTransformer = ({
   value: unknown;
 }): StatusType[] => {
   if (Array.isArray(value)) {
-    return value.filter(
-      (v) => typeof v === 'string' && StatusList.includes(v as StatusType),
-    ) as StatusType[];
-  } else if (
-    typeof value === 'string' &&
-    StatusList.includes(value as StatusType)
-  ) {
+    return value.filter((v) => typeof v === 'string') as StatusType[];
+  } else if (typeof value === 'string') {
     return [value as StatusType];
   }
   return [];

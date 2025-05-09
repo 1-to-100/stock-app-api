@@ -33,7 +33,7 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<OutputUserDto> {
     if (await this.emailExists({ email: createUserDto.email })) {
-      throw new ConflictException('User already exists');
+      throw new ConflictException('User with this email already exists');
     }
 
     try {
@@ -48,7 +48,7 @@ export class UsersService {
 
   async invite(inviteUserDto: InviteUserDto): Promise<OutputUserDto> {
     if (await this.emailExists({ email: inviteUserDto.email })) {
-      throw new ConflictException('User already exists');
+      throw new ConflictException('User with this email already exists');
     }
     const user = await this.prisma.user.create({ data: inviteUserDto });
     await this.sendInviteEmail(user);
@@ -72,7 +72,8 @@ export class UsersService {
   ): Promise<PaginatedOutputDto<OutputUserDto>> {
     const { roleId, customerId, status, search, perPage, page } =
       listUsersInput;
-
+    this.logger.debug(status);
+    this.logger.debug(listUsersInput);
     const where: Prisma.UserFindManyArgs['where'] = {
       ...(roleId && { roleId: { in: roleId } }),
       ...(customerId && { customerId: { in: customerId } }),
@@ -257,7 +258,7 @@ export class UsersService {
         lastName,
         avatar: supabaseUser.picture,
         uid: supabaseUser.uid,
-        customerId: existingCustomer?.id || null,
+        customerId: existingCustomer?.id,
       },
     });
 
