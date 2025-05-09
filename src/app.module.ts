@@ -15,6 +15,7 @@ import { TaxonomiesModule } from './taxonomies/taxonomies.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { RegisterModule } from './register/register.module';
 import { ArticleCategoriesModule } from './article-categories/article-categories.module';
+import { ArticlesModule } from './articles/articles.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ArticleCategoriesModule } from './article-categories/article-categories
     RegisterModule,
     // ArticlesModule,
     ArticleCategoriesModule,
+    ArticlesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
