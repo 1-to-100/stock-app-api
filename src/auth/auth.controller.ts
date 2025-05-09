@@ -5,10 +5,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { FirebaseAuthGuard } from './guards/firebase-auth/firebase-auth.guard';
+import { SupabaseDecodedToken } from './guards/supabase-auth/supabase-auth.guard';
 import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
 import { UsersService } from '../users/users.service';
 import { FirebaseUser } from '../common/decorators/firebase-user.decorator';
+import { DynamicAuthGuard } from './guards/dynamic-auth/dynamic-auth.guard';
+import { SupabaseUser } from '../common/decorators/supabase-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -17,7 +19,7 @@ export class AuthController {
     private readonly userService: UsersService,
   ) {}
 
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(DynamicAuthGuard)
   @Post('sync')
   async syncUser(@FirebaseUser() user: FirebaseDecodedToken) {
     if (!user) throw new UnauthorizedException();
@@ -28,6 +30,19 @@ export class AuthController {
       user: dbUser,
     };
   }
+
+  @UseGuards(DynamicAuthGuard)
+  @Post('sync/supabase')
+  async syncSupabaseUser(@SupabaseUser() user: SupabaseDecodedToken) {
+    if (!user) throw new UnauthorizedException();
+    const dbUser = await this.userService.createSupabaseUser(user);
+
+    return {
+      message: 'ok',
+      user: dbUser,
+    };
+  }
+
   //
   // @UseGuards(FirebaseAuthGuard)
   // @Post('set-role')

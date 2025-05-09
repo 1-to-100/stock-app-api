@@ -6,12 +6,12 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { OutputTaxonomyDto } from './dto/output-taxonomy.dto';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { StatusList } from '../common/constants/status';
-import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
 import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
+import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
 
 @Controller('taxonomies')
-@UseGuards(FirebaseAuthGuard)
+@UseGuards(DynamicAuthGuard)
 export class TaxonomiesController {
   constructor(
     private readonly customersService: CustomersService,

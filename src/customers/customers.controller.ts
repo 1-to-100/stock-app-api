@@ -14,12 +14,12 @@ import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { ListCustomersInputDto } from './dto/list-customers-input.dto';
-import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
 import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
+import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
 
 @Controller('customers')
-@UseGuards(FirebaseAuthGuard)
+@UseGuards(DynamicAuthGuard)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 

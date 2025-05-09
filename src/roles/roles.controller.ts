@@ -14,12 +14,12 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { UpdateRolePermissionsByNameDto } from './dto/update-role-permissions-by-name.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { OutputRoleDto } from './dto/output-role.dto';
-import { FirebaseAuthGuard } from '../auth/guards/firebase-auth/firebase-auth.guard';
 import { PermissionGuard } from '../auth/guards/permission/permission.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
+import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
 
 @Controller('roles')
-@UseGuards(FirebaseAuthGuard, PermissionGuard)
+@UseGuards(DynamicAuthGuard, PermissionGuard)
 export class RolesController {
   constructor(
     private readonly rolesService: RolesService,

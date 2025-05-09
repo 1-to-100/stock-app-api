@@ -20,6 +20,7 @@ import {
   getDomainFromEmail,
   isPublicEmailDomain,
 } from '../common/helpers/string-helpers';
+import { SupabaseDecodedToken } from '../auth/guards/supabase-auth/supabase-auth.guard';
 
 @Injectable()
 export class UsersService {
@@ -222,6 +223,58 @@ export class UsersService {
       await this.prisma.user.update({
         where: { id: newUser.id },
         data: { customerId: existingCustomer.id },
+      });
+    }
+
+    await this.sendInviteEmail(newUser);
+    return newUser;
+  }
+
+  async createSupabaseUser(
+    supabaseUser: SupabaseDecodedToken,
+    subscriptionId: number | null = null,
+  ) {
+    const existingUser = await this.findByUid(supabaseUser.uid);
+    if (existingUser) return existingUser;
+
+    const [firstName, ...lastNameParts] = supabaseUser.name?.split(' ') || [];
+    const lastName = lastNameParts ? lastNameParts.join(' ') : '';
+    const email = supabaseUser.email!;
+    const domain = getDomainFromEmail(email);
+
+    if (!domain) throw new ConflictException('Invalid email domain');
+    if (isPublicEmailDomain(domain))
+      throw new ConflictException('Public email domains are not allowed');
+
+    const existingCustomer = await this.prisma.customer.findFirst({
+      where: { domain },
+    });
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        email,
+        firstName,
+        lastName,
+        avatar: supabaseUser.picture,
+        uid: supabaseUser.uid,
+        customerId: existingCustomer?.id || null,
+      },
+    });
+
+    if (!existingCustomer) {
+      const newCustomer = await this.prisma.customer.create({
+        data: {
+          name: domain,
+          email,
+          domain,
+          ownerId: newUser.id,
+          subscriptionId,
+        },
+      });
+
+      await this.prisma.user.update({
+        where: { id: newUser.id },
+        data: { customerId: newCustomer.id },
       });
     }
 
