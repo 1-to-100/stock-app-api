@@ -9,7 +9,10 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
-  @IsEmail()
+  @IsEmail(
+    { blacklisted_chars: '\\/%^$#!~*()[]{}<>?|' },
+    { message: 'Invalid email format' },
+  )
   @ApiProperty({ description: 'Email address' })
   email: string;
 

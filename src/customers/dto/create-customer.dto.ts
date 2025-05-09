@@ -2,10 +2,9 @@ import {
   IsEmail,
   IsInt,
   IsNotEmpty,
-  IsOptional,
   IsString,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCustomerDto {
   @IsString()
@@ -13,23 +12,19 @@ export class CreateCustomerDto {
   @ApiProperty({ description: 'Customer name' })
   name: string;
 
-  @IsEmail()
+  @IsEmail({ blacklisted_chars: '\\/%^$#!~*()[]{}<>?|' })
   @ApiProperty({ description: 'Email address' })
   email: string;
-  //
-  // @ApiProperty({ description: 'Domain name' })
-  // domain: string;
 
   @IsInt()
-  @ApiPropertyOptional({ description: 'Subscription ID' })
+  @ApiProperty({ description: 'Subscription ID' })
   subscriptionId: number;
 
-  @IsOptional()
   @IsInt()
-  @ApiPropertyOptional({ description: 'Manager ID' })
+  @ApiProperty({ description: 'Manager ID' })
   managerId: number | null = null;
 
   @IsInt()
-  @ApiPropertyOptional({ description: 'Owner User ID' })
+  @ApiProperty({ description: 'Owner User ID' })
   ownerId: number;
 }
