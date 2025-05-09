@@ -27,7 +27,6 @@ export class DynamicAuthGuard implements CanActivate {
 
     const tokenProvider = getProviderFromToken(token);
 
-    // Example logic to differentiate tokens
     if (tokenProvider == 'firebase') {
       return this.firebaseAuthGuard.canActivate(context);
     } else if (tokenProvider == 'supabase') {
