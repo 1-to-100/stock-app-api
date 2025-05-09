@@ -145,4 +145,25 @@ export class ArticleCategoriesController {
     }
     return await this.articlesCategoriesService.remove(id, customerId);
   }
+
+  @Get(':id')
+  @ApiOkResponse({
+    description: 'The category record',
+    type: OutputArticleCategoryDto,
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @Permissions('Documents:viewCategories')
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: OutputUserDto,
+    @CustomerId() customerId: number,
+  ) {
+    if (!user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
+    }
+    if (!customerId) {
+      throw new Error('User is not authorized to access this resource');
+    }
+    return await this.articlesCategoriesService.findOne(id, customerId);
+  }
 }

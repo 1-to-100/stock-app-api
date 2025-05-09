@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { OutputArticleCategoryDto } from './dto/output-article-category.dto';
@@ -94,6 +99,29 @@ export class ArticleCategoriesService {
     } catch (error) {
       this.logger.error(`Error deleting category: ${error}`);
       throw new ConflictException('Category cannot be deleted.');
+    }
+  }
+
+  async findOne(
+    id: number,
+    customerId: number,
+  ): Promise<OutputArticleCategoryDto> {
+    try {
+      this.logger.log(`Find category ${id} for customer ${customerId}`);
+      const category = await this.prisma.articleCategory.findFirstOrThrow({
+        where: { id, customerId },
+        include: {
+          _count: {
+            select: {
+              Articles: true,
+            },
+          },
+        },
+      });
+      return category as OutputArticleCategoryDto;
+    } catch (error) {
+      this.logger.error(`Error finding category: ${error}`);
+      throw new NotFoundException('Category not found');
     }
   }
 }
