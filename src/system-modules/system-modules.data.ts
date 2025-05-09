@@ -42,45 +42,9 @@ export const SYSTEM_MODULES: SystemModule[] = [
         order: 3,
       },
       {
-        name: permissionWithPrefix('resendInvitation', USER_MANAGEMENT_MODULE),
-        label: 'Resend Invitation',
-        order: 4,
-      },
-      {
-        name: permissionWithPrefix(
-          'setInvitationRules',
-          USER_MANAGEMENT_MODULE,
-        ),
-        label: 'Set Invitation Rules',
-        order: 5,
-      },
-      {
-        name: permissionWithPrefix(
-          'createRequestForUserInvite',
-          USER_MANAGEMENT_MODULE,
-        ),
-        label: 'Create Request for User Invite',
-        order: 6,
-      },
-      {
         name: permissionWithPrefix('editUser', USER_MANAGEMENT_MODULE),
         label: 'Edit User',
-        order: 7,
-      },
-      {
-        name: permissionWithPrefix('getUser', USER_MANAGEMENT_MODULE),
-        label: 'Get User',
-        order: 8,
-      },
-      {
-        name: permissionWithPrefix('deactivate', USER_MANAGEMENT_MODULE),
-        label: 'Deactivate User',
-        order: 9,
-      },
-      {
-        name: permissionWithPrefix('impersonate', USER_MANAGEMENT_MODULE),
-        label: 'Impersonate',
-        order: 10,
+        order: 4,
       },
     ],
   },
@@ -91,34 +55,21 @@ export const SYSTEM_MODULES: SystemModule[] = [
     permissions: [
       {
         name: permissionWithPrefix(
-          'viewCustomerDashboard',
-          CUSTOMER_MANAGEMENT_MODULE,
-        ),
-        label: 'View Customer Dashboard',
-        order: 1,
-      },
-      {
-        name: permissionWithPrefix(
           'createCustomer',
           CUSTOMER_MANAGEMENT_MODULE,
         ),
         label: 'Create Customer',
-        order: 2,
+        order: 1,
       },
       {
         name: permissionWithPrefix('editCustomer', CUSTOMER_MANAGEMENT_MODULE),
         label: 'Edit Customer',
-        order: 3,
-      },
-      {
-        name: permissionWithPrefix('getCustomer', CUSTOMER_MANAGEMENT_MODULE),
-        label: 'Get Customer',
-        order: 4,
+        order: 2,
       },
       {
         name: permissionWithPrefix('listCustomers', CUSTOMER_MANAGEMENT_MODULE),
         label: 'List Customers',
-        order: 5,
+        order: 3,
       },
       {
         name: permissionWithPrefix(
@@ -126,7 +77,7 @@ export const SYSTEM_MODULES: SystemModule[] = [
           CUSTOMER_MANAGEMENT_MODULE,
         ),
         label: 'Delete Customer',
-        order: 6,
+        order: 4,
       },
     ],
   },
@@ -194,7 +145,7 @@ export const SYSTEM_MODULES: SystemModule[] = [
       },
       {
         name: permissionWithPrefix('editArticles', DOCUMENTS_MODULE),
-        label: 'Edir Articles',
+        label: 'Edit Articles',
         order: 7,
       },
       {
