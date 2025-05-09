@@ -9,8 +9,6 @@ import {
   Query,
   UseGuards,
   ForbiddenException,
-  // Delete,
-  // Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -165,6 +163,7 @@ export class UsersController {
     @User() user: OutputUserDto,
     @Body() updateUserDto: UpdateUserDto,
   ) {
+    updateUserDto.customerId = user.customerId!; // do not allow to change customer
     return this.usersService.update(+user.id, updateUserDto);
   }
 
@@ -188,12 +187,18 @@ export class UsersController {
     type: OutputUserDto,
   })
   @Permissions('UserManagement:editUser')
-  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+    @User() user: OutputUserDto,
+  ) {
+    if (!user.isSuperadmin && !user.customerId) {
+      throw new ForbiddenException('You have no access to update users.');
+    }
+    if (!user.isSuperadmin && user.customerId) {
+      // user cannot set another customer when updating users, assign the same he belongs to
+      updateUserDto.customerId = user.customerId;
+    }
     return this.usersService.update(+id, updateUserDto);
   }
-  //
-  // @Delete(':id')
-  // remove(@Param('id') id: number) {
-  //   return this.usersService.remove(+id);
-  // }
 }

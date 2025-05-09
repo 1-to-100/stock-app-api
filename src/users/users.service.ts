@@ -129,9 +129,16 @@ export class UsersService {
       updateUserDto.email = undefined;
     }
     try {
-      // it should be separate assignment, otherwise the catch is not working
+      const existingUser = await this.prisma.user.findFirst({
+        where: { id, customerId: updateUserDto.customerId },
+      });
+
+      if (!existingUser) {
+        throw new NotFoundException('No user with given ID exists');
+      }
+
       const user = await this.prisma.user.update({
-        where: { id },
+        where: { id, customerId: updateUserDto.customerId },
         data: updateUserDto,
       });
       return user;
