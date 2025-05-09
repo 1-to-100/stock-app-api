@@ -3,9 +3,9 @@ import {
   IsEmail,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
-  MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -13,17 +13,18 @@ export class CreateUserDto {
     { blacklisted_chars: '\\/%^$#!~*()[]{}<>?|' },
     { message: 'Invalid email format' },
   )
+  @IsNotEmpty()
   @ApiProperty({ description: 'Email address' })
   email: string;
 
   @ApiProperty({ description: 'First Name', example: 'John' })
   @IsString()
-  @MinLength(1)
+  @IsNotEmpty()
   firstName: string;
 
   @ApiProperty({ description: 'Last Name', example: 'Doe' })
   @IsString()
-  @MinLength(1)
+  @IsNotEmpty()
   lastName: string;
 
   @ApiProperty({ description: 'ID of the Customer this user belongs to' })

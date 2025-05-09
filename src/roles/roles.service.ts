@@ -33,7 +33,11 @@ export class RolesService {
     where?: Prisma.RoleWhereInput;
     orderBy?: Prisma.RoleOrderByWithRelationInput;
   }) {
-    const { skip, take, cursor, where, orderBy } = params;
+    const { skip, take, cursor, where } = params;
+    let { orderBy } = params;
+    orderBy ??= {
+      name: 'asc',
+    };
     return this.prisma.role.findMany({
       include: {
         permissions: {
@@ -58,6 +62,9 @@ export class RolesService {
       select: {
         id: true,
         name: true,
+      },
+      orderBy: {
+        name: 'asc',
       },
     });
   }
