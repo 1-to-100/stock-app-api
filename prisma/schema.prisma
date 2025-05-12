@@ -186,6 +186,7 @@ model Article {
   status            String?         @default("draft")
   content           String?         @db.Text
   videoUrl          String?         @map("video_url")
+  viewsNumber       Int?            @default(0) @map("views_number")
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @default(now()) @map("updated_at")
   Category          ArticleCategory @relation(fields: [articleCategoryId], references: [id])

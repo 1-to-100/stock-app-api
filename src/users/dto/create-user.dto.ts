@@ -4,7 +4,8 @@ import {
   IsIn,
   IsInt,
   IsNotEmpty,
-  IsOptional, IsPhoneNumber,
+  IsOptional,
+  IsPhoneNumber,
   IsString,
 } from 'class-validator';
 

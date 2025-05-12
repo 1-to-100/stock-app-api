@@ -22,12 +22,12 @@ export class ListArticlesOutputDto extends PaginatedInputDto {
   @IsInt()
   @IsNotEmpty()
   @ApiProperty({ description: 'Category ID' })
-  categoryId: number;
+  articleCategoryId: number;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ description: 'Subcategory' })
-  subcategory: string;
+  subcategory: string | null;
 
   @IsInt()
   @IsNotEmpty()
@@ -37,17 +37,17 @@ export class ListArticlesOutputDto extends PaginatedInputDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ description: 'Status' })
-  status: string;
+  status: string | null;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ description: 'Content' })
-  content: string;
+  content: string | null;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ description: 'Video URL' })
-  videoUrl: string;
+  videoUrl: string | null;
 
   @IsDate()
   @IsNotEmpty()
@@ -59,15 +59,27 @@ export class ListArticlesOutputDto extends PaginatedInputDto {
   @ApiProperty({ description: 'Created At' })
   updatedAt: Date;
 
+  @IsInt()
+  @ApiPropertyOptional({ description: 'Number of views' })
+  viewsNumber: number | null = 0;
+
   @IsOptional()
   @ApiPropertyOptional({ description: 'Category Fields' })
   Category: {
     id: number;
     name: string;
-    icon: string;
-    about: string;
+    icon: string | null;
+    about: string | null;
     subcategory: string | null;
     createdAt: Date;
     updatedAt: Date;
+  };
+
+  @IsOptional()
+  @ApiPropertyOptional({ description: 'Author of the article' })
+  Creator: {
+    id: number;
+    firstName: string | null;
+    lastName: string | null;
   };
 }

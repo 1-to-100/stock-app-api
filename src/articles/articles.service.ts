@@ -63,6 +63,7 @@ export class ArticlesService {
         where,
         include: {
           Category: true,
+          Creator: true,
         },
         orderBy: { id: 'desc' },
       },
@@ -70,35 +71,50 @@ export class ArticlesService {
     );
 
     const data = paginateResult.data.map((article) => {
-      return {
-        id: article.id,
-        title: article.title,
-        categoryId: article.categoryId,
-        subcategory: article.subcategory,
-        status: article.status,
-        customerId: article.customerId,
-        content: article.content,
-        videoUrl: article.videoUrl,
-        createdAt: article.createdAt,
-        updatedAt: article.updatedAt,
-        Category: article.Category
-          ? {
-              id: article.Category?.id,
-              name: article.Category?.name,
-              subcategory: article.Category?.subcategory,
-              icon: article.Category?.icon,
-              about: article.Category?.about,
-              createdAt: article.Category?.createdAt,
-              updatedAt: article.Category?.updatedAt,
-            }
-          : null,
-      };
+      return this.transform(article);
     }) as ListArticlesOutputDto[];
 
     return { data, meta: paginateResult.meta };
   }
 
-  async findOne(id: number, customerId: number) {
+  transform(article: ListArticlesOutputDto) {
+    return {
+      id: article.id,
+      title: article.title,
+      articleCategoryId: article.articleCategoryId,
+      subcategory: article.subcategory,
+      status: article.status,
+      customerId: article.customerId,
+      content: article.content,
+      videoUrl: article.videoUrl,
+      createdAt: article.createdAt,
+      updatedAt: article.updatedAt,
+      viewsNumber: article.viewsNumber,
+      Category: article.Category
+        ? {
+            id: article.Category?.id,
+            name: article.Category?.name,
+            subcategory: article.Category?.subcategory,
+            icon: article.Category?.icon,
+            about: article.Category?.about,
+            createdAt: article.Category?.createdAt,
+            updatedAt: article.Category?.updatedAt,
+          }
+        : null,
+      Creator: article.Creator
+        ? {
+            id: article.Creator?.id,
+            firstName: article.Creator?.firstName,
+            lastName: article.Creator?.lastName,
+          }
+        : null,
+    };
+  }
+
+  async findOne(
+    id: number,
+    customerId: number,
+  ): Promise<ListArticlesOutputDto> {
     const article = await this.prisma.article.findFirst({
       where: {
         id,
@@ -106,6 +122,7 @@ export class ArticlesService {
       },
       include: {
         Category: true,
+        Creator: true,
       },
     });
 
@@ -113,7 +130,7 @@ export class ArticlesService {
       throw new NotFoundException(`Article with ID ${id} not found`);
     }
 
-    return article;
+    return this.transform(article) as ListArticlesOutputDto;
   }
 
   async update(
