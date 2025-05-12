@@ -5,7 +5,7 @@ import { ManagersService } from '../managers/managers.service';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { OutputTaxonomyDto } from './dto/output-taxonomy.dto';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
-import { StatusList } from '../common/constants/status';
+import { UserStatusList } from '../common/constants/status';
 import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
@@ -68,6 +68,6 @@ export class TaxonomiesController {
     type: [String],
   })
   statuses() {
-    return StatusList;
+    return UserStatusList;
   }
 }

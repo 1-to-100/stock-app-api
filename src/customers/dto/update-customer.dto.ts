@@ -1,14 +1,14 @@
 import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { CreateCustomerDto } from './create-customer.dto';
 import { IsEnum, IsOptional } from 'class-validator';
-import { StatusList, StatusType } from '../../common/constants/status';
+import { UserStatusList, UserStatusType } from '../../common/constants/status';
 
 export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {
-  @IsEnum(StatusList)
+  @IsEnum(UserStatusList)
   @IsOptional()
   @ApiPropertyOptional({
     description: 'Status (optional). Default: inactive',
-    enum: StatusList,
+    enum: UserStatusList,
   })
-  status?: StatusType;
+  status?: UserStatusType;
 }

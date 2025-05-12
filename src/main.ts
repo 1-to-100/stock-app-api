@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
 import { ApiDbLoggerMiddleware } from './common/middlewares/api-db-logger.middleware';
 import { PrismaService } from './prisma/prisma.service';
-import { NextFunction, Request, Response } from 'express';
+import { json, NextFunction, Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -19,6 +19,7 @@ async function bootstrap() {
   app.use((req: Request, res: Response, next: NextFunction) =>
     apiDbLoggerMiddleware.use(req, res, next),
   );
+  app.use(json({ limit: '50mb' }));
 
   app.enableCors({
     origin: [

@@ -1,9 +1,9 @@
-export const Status = {
+export const UserStatus = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
   SUSPENDED: 'suspended',
 } as const;
 
-export type StatusType = (typeof Status)[keyof typeof Status];
+export type UserStatusType = (typeof UserStatus)[keyof typeof UserStatus];
 
-export const StatusList = Object.values(Status) as StatusType[];
+export const UserStatusList = Object.values(UserStatus) as UserStatusType[];

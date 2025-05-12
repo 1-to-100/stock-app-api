@@ -1,6 +1,6 @@
 import { PaginatedInputDto } from '../../common/dto/paginated-input.dto';
 import { IsArray, IsEnum, IsInt, IsOptional } from 'class-validator';
-import { StatusList } from '../../common/constants/status';
+import { UserStatusList } from '../../common/constants/status';
 import { Transform, Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
@@ -34,11 +34,11 @@ export class ListCustomersInputDto extends PaginatedInputDto {
   managerId?: number[];
 
   @IsArray()
-  @IsEnum(StatusList, { each: true })
+  @IsEnum(UserStatusList, { each: true })
   @IsOptional()
   @ApiPropertyOptional({
     description: 'Statuses',
-    enum: StatusList,
+    enum: UserStatusList,
     isArray: true,
   })
   @Transform(eachStatusTransformer)
