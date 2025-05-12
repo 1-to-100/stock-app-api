@@ -9,6 +9,7 @@ import {
   UseGuards,
   ParseIntPipe,
   Logger,
+  Query,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -21,6 +22,7 @@ import { CustomerId } from '../common/decorators/customer-id.decorator';
 import { ApiOkResponse, ApiConflictResponse, ApiParam } from '@nestjs/swagger';
 import { ArticleDto } from './dto/article.dto';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
+import { ListArticlesInputDto } from './dto/list-articles-input.dto';
 
 @Controller('documents/articles')
 @UseGuards(DynamicAuthGuard, PermissionGuard)
@@ -57,14 +59,18 @@ export class ArticlesController {
   @Get()
   @ApiOkResponse({ description: 'The articles list' })
   @Permissions('Documents:viewArticles')
-  async findAll(@User() user: OutputUserDto, @CustomerId() customerId: number) {
+  async findAll(
+    @User() user: OutputUserDto,
+    @CustomerId() customerId: number,
+    @Query() listArticlesInputDto: ListArticlesInputDto,
+  ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
     }
     if (!customerId) {
       throw new Error('User is not authorized to access this resource');
     }
-    return await this.articlesService.findAll(customerId);
+    return await this.articlesService.findAll(customerId, listArticlesInputDto);
   }
 
   @Get(':id')

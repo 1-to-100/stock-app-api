@@ -5,7 +5,7 @@ import { Type, Transform } from 'class-transformer';
 import { UserStatusList, UserStatusType } from '../../common/constants/status';
 import {
   eachNumberTransformer,
-  eachStatusTransformer,
+  eachUserStatusTransformer,
 } from '../../common/helpers/class-transform-helpers';
 
 export class ListUsersInputDto extends PaginatedInputDto {
@@ -28,7 +28,7 @@ export class ListUsersInputDto extends PaginatedInputDto {
   @IsOptional()
   // @IsArray()
   @Type(() => String) // First transform to string array
-  @Transform(eachStatusTransformer) // Finally transform to StatusType[]
+  @Transform(eachUserStatusTransformer) // Finally transform to StatusType[]
   @IsEnum(UserStatusList, { each: true }) // Then validate each value against StatusList
   @ApiPropertyOptional({
     description: 'Statuses',

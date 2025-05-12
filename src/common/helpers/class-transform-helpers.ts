@@ -1,4 +1,4 @@
-import { UserStatusType } from 'src/common/constants/status';
+import { ArticleStatusType, UserStatusType } from 'src/common/constants/status';
 
 export const eachNumberTransformer = ({
   value,
@@ -15,7 +15,7 @@ export const eachNumberTransformer = ({
   return [];
 };
 
-export const eachStatusTransformer = ({
+export const eachUserStatusTransformer = ({
   value,
 }: {
   value: unknown;
@@ -24,6 +24,19 @@ export const eachStatusTransformer = ({
     return value.filter((v) => typeof v === 'string') as UserStatusType[];
   } else if (typeof value === 'string') {
     return [value as UserStatusType];
+  }
+  return [];
+};
+
+export const eachArticleStatusTransformer = ({
+  value,
+}: {
+  value: unknown;
+}): ArticleStatusType[] => {
+  if (Array.isArray(value)) {
+    return value.filter((v) => typeof v === 'string') as ArticleStatusType[];
+  } else if (typeof value === 'string') {
+    return [value as ArticleStatusType];
   }
   return [];
 };

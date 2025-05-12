@@ -5,7 +5,7 @@ import { Transform, Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   eachNumberTransformer,
-  eachStatusTransformer,
+  eachUserStatusTransformer,
 } from '../../common/helpers/class-transform-helpers';
 
 export class ListCustomersInputDto extends PaginatedInputDto {
@@ -41,6 +41,6 @@ export class ListCustomersInputDto extends PaginatedInputDto {
     enum: UserStatusList,
     isArray: true,
   })
-  @Transform(eachStatusTransformer)
+  @Transform(eachUserStatusTransformer)
   status?: string[];
 }

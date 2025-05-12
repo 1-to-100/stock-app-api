@@ -7,3 +7,15 @@ export const UserStatus = {
 export type UserStatusType = (typeof UserStatus)[keyof typeof UserStatus];
 
 export const UserStatusList = Object.values(UserStatus) as UserStatusType[];
+
+export const ArticleStatus = {
+  DRAFT: 'draft',
+  PUBLISHED: 'published',
+} as const;
+
+export type ArticleStatusType =
+  (typeof ArticleStatus)[keyof typeof ArticleStatus];
+
+export const ArticleStatusList = Object.values(
+  ArticleStatus,
+) as ArticleStatusType[];
