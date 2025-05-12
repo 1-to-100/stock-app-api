@@ -1,13 +1,20 @@
-import { IsEmail, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCustomerDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ description: 'Customer name' })
+  @MaxLength(255)
   name: string;
 
-  @IsEmail({ blacklisted_chars: '\\/%^$#!~*()[]{}<>?|' })
+  @IsEmail()
   @ApiProperty({ description: 'Email address' })
   email: string;
 
