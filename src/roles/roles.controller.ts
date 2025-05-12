@@ -17,9 +17,11 @@ import { OutputRoleDto } from './dto/output-role.dto';
 import { PermissionGuard } from '../auth/guards/permission/permission.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
+import { RequireSuperuserGuard } from '../auth/guards/require-superuser/require-superuser.guard';
+import { RequiredSuperUser } from '../common/decorators/superuser.decorator';
 
 @Controller('roles')
-@UseGuards(DynamicAuthGuard, PermissionGuard)
+@UseGuards(DynamicAuthGuard, RequireSuperuserGuard, PermissionGuard)
 export class RolesController {
   constructor(
     private readonly rolesService: RolesService,
@@ -27,18 +29,21 @@ export class RolesController {
   ) {}
 
   @Post()
+  @RequiredSuperUser('superAdmin')
   @Permissions('RoleManagement:createRoles')
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
   }
 
   @Get()
+  @RequiredSuperUser('superAdmin')
   @Permissions('RoleManagement:viewRoles')
   findAll() {
     return this.rolesService.findAll({});
   }
 
   @Get(':id')
+  @RequiredSuperUser('superAdmin')
   @Permissions('RoleManagement:viewRoles')
   async findOne(@Param('id') id: string): Promise<OutputRoleDto> {
     const role = await this.rolesService.findOne(+id);
@@ -72,6 +77,7 @@ export class RolesController {
   }
 
   @Patch(':id')
+  @RequiredSuperUser('superAdmin')
   @Permissions('RoleManagement:editRoles')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.rolesService.update(+id, updateRoleDto);
@@ -84,6 +90,7 @@ export class RolesController {
   // }
 
   @Post(':id/permissions')
+  @RequiredSuperUser('superAdmin')
   @Permissions('RoleManagement:editRoles')
   updatePermissionsByName(
     @Param('id', ParseIntPipe) id: number,
