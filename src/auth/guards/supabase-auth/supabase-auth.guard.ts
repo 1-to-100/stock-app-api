@@ -20,6 +20,8 @@ export type SupabaseDecodedToken = {
 type supabaseJwtPayload =
   | (jwt.JwtPayload & {
       user_metadata: {
+        firstName?: string;
+        lastName?: string;
         full_name?: string;
         picture?: string;
       };
@@ -56,11 +58,15 @@ export class SupabaseAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid token');
     }
 
+    const { firstName, lastName, full_name, picture } =
+      decodedPayload.user_metadata || {};
+    const fullName = full_name || `${firstName || ''} ${lastName || ''}`.trim();
+
     request.user = {
       uid: decodedPayload.sub!,
       email: decodedPayload.email as string,
-      name: decodedPayload.user_metadata?.full_name,
-      picture: decodedPayload.user_metadata?.picture,
+      name: fullName,
+      picture,
     };
 
     request.currentUser = await this.usersService.findByUid(request.user.uid);
