@@ -15,6 +15,9 @@ export class OutputUserDto {
   @ApiProperty({ description: 'Last Name' })
   lastName: string | null = null;
 
+  @ApiPropertyOptional({ description: 'Phone Number' })
+  phoneNumber?: string | null = null;
+
   @ApiProperty({ description: 'ID of the Customer this user belongs to' })
   @IsOptional()
   customerId: number | null = null;

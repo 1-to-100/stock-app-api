@@ -129,6 +129,7 @@ model User {
   firstName         String?    @map("first_name")
   lastName          String?    @map("last_name")
   avatar            String?
+  phoneNumber       String?    @map("phone_number")
   customerId        Int?       @map("customer_id")
   roleId            Int?       @map("role_id")
   managerId         Int?       @map("manager_id")

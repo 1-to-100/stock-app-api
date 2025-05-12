@@ -4,7 +4,7 @@ import {
   IsIn,
   IsInt,
   IsNotEmpty,
-  IsOptional,
+  IsOptional, IsPhoneNumber,
   IsString,
 } from 'class-validator';
 
@@ -26,6 +26,11 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   lastName: string;
+
+  @ApiPropertyOptional({ description: 'Phone Number' })
+  @IsPhoneNumber('US')
+  @IsOptional()
+  phoneNumber?: string;
 
   @ApiProperty({ description: 'ID of the Customer this user belongs to' })
   @IsOptional()
