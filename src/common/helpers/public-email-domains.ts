@@ -1,5 +1,5 @@
 export const PUBLIC_EMAIL_DOMAINS = new Set([
-  'gmail.com',
+  // 'gmail.com', // тимчасово
   'yahoo.com',
   'yahoo.co.uk',
   'yahoo.fr',
