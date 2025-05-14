@@ -259,11 +259,11 @@ export class UsersService {
     });
 
     if (existingUserEmail?.uid == null) {
-      await this.prisma.user.update({
+      const existingUserEmailUpdated = await this.prisma.user.update({
         where: { id: existingUserEmail!.id },
         data: { uid: supabaseUser.uid },
       });
-      return existingUserEmail;
+      return existingUserEmailUpdated;
     }
 
     const existingCustomer = await this.prisma.customer.findFirst({
