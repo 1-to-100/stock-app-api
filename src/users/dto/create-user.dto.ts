@@ -50,9 +50,9 @@ export class CreateUserDto {
 
   @ApiPropertyOptional({
     description: 'Status (optional). Default: inactive',
-    enum: ['inactive', 'active', 'disabled'],
+    enum: ['inactive', 'active', 'suspended'],
   })
   @IsOptional()
-  @IsIn(['inactive', 'active', 'disabled'])
+  @IsIn(['inactive', 'active', 'suspended'])
   status?: string;
 }
