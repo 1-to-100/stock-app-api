@@ -254,6 +254,18 @@ export class UsersService {
     if (isPublicEmailDomain(domain))
       throw new ConflictException('Public email domains are not allowed');
 
+    const existingUserEmail = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUserEmail?.uid == null) {
+      await this.prisma.user.update({
+        where: { id: existingUserEmail!.id },
+        data: { uid: supabaseUser.uid },
+      });
+      return existingUserEmail;
+    }
+
     const existingCustomer = await this.prisma.customer.findFirst({
       where: { domain },
     });
