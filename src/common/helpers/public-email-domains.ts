@@ -7,9 +7,9 @@ export const PUBLIC_EMAIL_DOMAINS = new Set([
   'hotmail.com',
   'hotmail.co.uk',
   'hotmail.fr',
-  'outlook.com',
-  'outlook.co.uk',
-  'outlook.fr',
+  // 'outlook.com', // тимчасово
+  // 'outlook.co.uk', // тимчасово
+  // 'outlook.fr', // тимчасово
   'live.com',
   'msn.com',
   'icloud.com',
