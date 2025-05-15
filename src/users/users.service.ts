@@ -21,6 +21,8 @@ import {
   isPublicEmailDomain,
 } from '../common/helpers/string-helpers';
 import { SupabaseDecodedToken } from '../auth/guards/supabase-auth/supabase-auth.guard';
+import { CreateSystemUserDto } from './dto/create-system-user.dto';
+import { UserSystemRoles } from '../common/constants/user-system-roles';
 
 @Injectable()
 export class UsersService {
@@ -39,6 +41,45 @@ export class UsersService {
     try {
       this.logger.log(`Create user with email ${createUserDto.email}`);
       const user = await this.prisma.user.create({ data: createUserDto });
+      return user;
+    } catch (error) {
+      this.logger.error(`Error creating user: ${error}`);
+      throw new ConflictException('User cannot be created.');
+    }
+  }
+
+  async createSystemUser(
+    createSystemUserDto: CreateSystemUserDto,
+  ): Promise<OutputUserDto> {
+    if (await this.emailExists({ email: createSystemUserDto.email })) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    try {
+      const { systemRole, ...makeUser } = createSystemUserDto;
+      const isSuperadmin = systemRole === UserSystemRoles.SYSTEM_ADMIN;
+      const isCustomerSuccess = systemRole === UserSystemRoles.CUSTOMER_SUCCESS;
+
+      if (!(isSuperadmin || isCustomerSuccess)) {
+        throw new ConflictException('Invalid system role');
+      }
+
+      if (isCustomerSuccess && !createSystemUserDto.customerId) {
+        throw new ConflictException(
+          'Customer ID is required for Customer Success role',
+        );
+      } else if (isCustomerSuccess && createSystemUserDto.customerId) {
+        const customer = await this.prisma.customer.findUnique({
+          where: { id: createSystemUserDto.customerId },
+        });
+        if (!customer) {
+          throw new ConflictException('Customer not found');
+        }
+      }
+
+      const user = await this.prisma.user.create({
+        data: { ...makeUser, isSuperadmin, isCustomerSuccess },
+      });
       return user;
     } catch (error) {
       this.logger.error(`Error creating user: ${error}`);
@@ -95,6 +136,37 @@ export class UsersService {
     );
   }
 
+  async findAllSystemUsers(
+    listUsersInput: ListUsersInputDto,
+  ): Promise<PaginatedOutputDto<OutputUserDto>> {
+    const { roleId, customerId, status, search, perPage, page } =
+      listUsersInput;
+    this.logger.debug(status);
+    this.logger.debug(listUsersInput);
+    const where: Prisma.UserFindManyArgs['where'] = {
+      ...(roleId && { roleId: { in: roleId } }),
+      ...(customerId && { customerId: { in: customerId } }),
+      ...(status && { status: { in: status } }),
+      ...(search && {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
+      ...{
+        OR: [{ isSuperadmin: true }, { isCustomerSuccess: true }],
+      },
+    };
+
+    const paginate = createPaginator({ perPage });
+    return paginate<OutputUserDto, Prisma.UserFindManyArgs>(
+      this.prisma.user,
+      { where, orderBy: { id: 'desc' } },
+      { page },
+    );
+  }
+
   async findOne(
     id: number,
     customerId: number | null = null,
@@ -105,6 +177,29 @@ export class UsersService {
     } else {
       where = { id };
     }
+
+    const user = await this.prisma.user.findFirst({
+      where: where,
+      include: {
+        role: true,
+        customer: true,
+        manager: true,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('No user with given ID exists');
+    }
+
+    return user as OutputUserDto;
+  }
+
+  async findOneSystemUser(id: number): Promise<OutputUserDto> {
+    const where: Prisma.UserFindManyArgs['where'] = {
+      id,
+      ...{
+        OR: [{ isSuperadmin: true }, { isCustomerSuccess: true }],
+      },
+    };
 
     const user = await this.prisma.user.findFirst({
       where: where,

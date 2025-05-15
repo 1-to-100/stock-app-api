@@ -9,6 +9,7 @@ import { UserStatusList } from '../common/constants/status';
 import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
+import { UserSystemRolesList } from '../common/constants/user-system-roles';
 
 @Controller('taxonomies')
 @UseGuards(DynamicAuthGuard)
@@ -69,5 +70,14 @@ export class TaxonomiesController {
   })
   statuses() {
     return UserStatusList;
+  }
+
+  @Get('/user-system-roles')
+  @ApiOkResponse({
+    description: 'User System Roles',
+    type: [String],
+  })
+  userSystemRoles() {
+    return UserSystemRolesList;
   }
 }
