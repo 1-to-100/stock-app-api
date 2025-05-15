@@ -22,6 +22,7 @@ import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { CreateSystemUserDto } from './dto/create-system-user.dto';
 import { UpdateSystemUserDto } from './dto/update-system-user.dto';
+import { CustomerId } from '../common/decorators/customer-id.decorator';
 
 @Controller('system-users')
 @UseGuards(DynamicAuthGuard, PermissionGuard)
@@ -40,10 +41,15 @@ export class SystemUsersController {
   findAll(
     @User() user: OutputUserDto,
     @Query() listUserInputDto: ListUsersInputDto,
+    @CustomerId() customerId?: string,
   ) {
     this.logger.debug(listUserInputDto);
     if (!user.isSuperadmin) {
       throw new ForbiddenException('You have no access to list users.');
+    }
+
+    if (customerId) {
+      listUserInputDto.customerId = [+customerId];
     }
 
     return this.usersService.findAllSystemUsers(listUserInputDto);

@@ -17,6 +17,7 @@ import { ListCustomersInputDto } from './dto/list-customers-input.dto';
 import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
+import { CustomerId } from '../common/decorators/customer-id.decorator';
 
 @Controller('customers')
 @UseGuards(DynamicAuthGuard)
@@ -38,6 +39,7 @@ export class CustomersController {
   findAll(
     @Query() listCustomersInputDto: ListCustomersInputDto,
     @User() user: OutputUserDto,
+    @CustomerId() customerId?: string,
   ) {
     if (!(user.isSuperadmin || user.isCustomerSuccess)) {
       throw new ForbiddenException('You have no access to customers.');
@@ -47,6 +49,10 @@ export class CustomersController {
       listCustomersInputDto.id = [user.customerId];
     } else if (user.isCustomerSuccess && !user.customerId) {
       throw new ForbiddenException('You have no access to customers.');
+    }
+
+    if (customerId) {
+      listCustomersInputDto.id = [+customerId];
     }
 
     return this.customersService.findAll(listCustomersInputDto);

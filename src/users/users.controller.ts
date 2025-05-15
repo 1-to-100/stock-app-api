@@ -25,6 +25,7 @@ import { Permissions } from '../common/decorators/permissions.decorator';
 import { PermissionGuard } from '../auth/guards/permission/permission.guard';
 import { User } from '../common/decorators/user.decorator';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
+import { CustomerId } from '../common/decorators/customer-id.decorator';
 
 @Controller('users')
 @UseGuards(DynamicAuthGuard, PermissionGuard)
@@ -157,6 +158,7 @@ export class UsersController {
   findAll(
     @User() user: OutputUserDto,
     @Query() listUserInputDto: ListUsersInputDto,
+    @CustomerId() customerId?: string,
   ) {
     this.logger.debug(listUserInputDto);
     if (!user.isSuperadmin && !user.customerId) {
@@ -172,6 +174,10 @@ export class UsersController {
       throw new ForbiddenException('You have no access to create users.');
     } else if (user.isCustomerSuccess && user.customerId) {
       listUserInputDto.customerId = [user.customerId];
+    }
+
+    if (customerId) {
+      listUserInputDto.customerId = [+customerId];
     }
 
     return this.usersService.findAll(listUserInputDto);
