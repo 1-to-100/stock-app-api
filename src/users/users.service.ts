@@ -23,6 +23,7 @@ import {
 import { SupabaseDecodedToken } from '../auth/guards/supabase-auth/supabase-auth.guard';
 import { CreateSystemUserDto } from './dto/create-system-user.dto';
 import { UserSystemRoles } from '../common/constants/user-system-roles';
+import { UpdateSystemUserDto } from './dto/update-system-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -84,6 +85,57 @@ export class UsersService {
     } catch (error) {
       this.logger.error(`Error creating user: ${error}`);
       throw new ConflictException('User cannot be created.');
+    }
+  }
+
+  async updateSystemUser(
+    id: number,
+    updateSystemUserDto: UpdateSystemUserDto,
+  ): Promise<OutputUserDto> {
+    if (updateSystemUserDto.email) {
+      updateSystemUserDto.email = undefined;
+    }
+    try {
+      const existingUser = await this.findOneSystemUser(id);
+      if (!existingUser) {
+        throw new NotFoundException('No user with given ID exists');
+      }
+
+      const { systemRole, ...updateUser } = updateSystemUserDto;
+      const isSuperadmin = systemRole === UserSystemRoles.SYSTEM_ADMIN;
+      const isCustomerSuccess = systemRole === UserSystemRoles.CUSTOMER_SUCCESS;
+
+      if (systemRole) {
+        if (!(isSuperadmin || isCustomerSuccess)) {
+          throw new ConflictException('Invalid system role');
+        }
+
+        if (isCustomerSuccess && !updateSystemUserDto.customerId) {
+          throw new ConflictException(
+            'Customer ID is required for Customer Success role',
+          );
+        } else if (isCustomerSuccess && updateSystemUserDto.customerId) {
+          const customer = await this.prisma.customer.findUnique({
+            where: { id: updateSystemUserDto.customerId },
+          });
+          if (!customer) {
+            throw new ConflictException('Customer not found');
+          }
+        }
+      }
+
+      const user = await this.prisma.user.update({
+        where: { id },
+        data: {
+          ...updateUser,
+          ...(systemRole ? { isSuperadmin, isCustomerSuccess } : {}),
+        },
+      });
+
+      return user;
+    } catch (error) {
+      this.logger.error(`Error updating user: ${error}`);
+      throw new ConflictException('Error updating user');
     }
   }
 

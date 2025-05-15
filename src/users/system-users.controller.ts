@@ -8,6 +8,7 @@ import {
   ForbiddenException,
   Post,
   Body,
+  Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiPaginatedResponse } from '../common/decorators/api-paginated-response.decorator';
@@ -20,6 +21,7 @@ import { User } from '../common/decorators/user.decorator';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { CreateSystemUserDto } from './dto/create-system-user.dto';
+import { UpdateSystemUserDto } from './dto/update-system-user.dto';
 
 @Controller('system-users')
 @UseGuards(DynamicAuthGuard, PermissionGuard)
@@ -77,5 +79,22 @@ export class SystemUsersController {
     }
 
     return await this.usersService.createSystemUser(createSystemUserDto);
+  }
+
+  @Patch(':id')
+  @ApiOkResponse({
+    description: 'User',
+    type: OutputUserDto,
+  })
+  update(
+    @Param('id') id: number,
+    @Body() updateSystemUserDto: UpdateSystemUserDto,
+    @User() user: OutputUserDto,
+  ) {
+    if (!user.isSuperadmin) {
+      throw new ForbiddenException('You have no access to create users.');
+    }
+
+    return this.usersService.updateSystemUser(+id, updateSystemUserDto);
   }
 }
