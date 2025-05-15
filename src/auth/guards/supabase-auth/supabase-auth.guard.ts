@@ -20,9 +20,11 @@ export type SupabaseDecodedToken = {
 type supabaseJwtPayload =
   | (jwt.JwtPayload & {
       user_metadata: {
-        firstName?: string;
-        lastName?: string;
         full_name?: string;
+        firstName?: string; // google
+        lastName?: string; // google
+        given_name?: string; // linkedin
+        family_name?: string; // linkedin
         picture?: string;
       };
     })
@@ -58,9 +60,16 @@ export class SupabaseAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid token');
     }
 
-    const { firstName, lastName, full_name, picture } =
+    const { firstName, lastName, full_name, given_name, family_name, picture } =
       decodedPayload.user_metadata || {};
-    const fullName = full_name || `${firstName || ''} ${lastName || ''}`.trim();
+
+    const fullName = full_name
+      ? full_name
+      : firstName && lastName
+        ? `${firstName} ${lastName}`
+        : given_name && family_name
+          ? `${given_name} ${family_name}`
+          : '';
 
     request.user = {
       uid: decodedPayload.sub!,

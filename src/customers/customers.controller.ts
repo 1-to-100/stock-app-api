@@ -39,17 +39,19 @@ export class CustomersController {
     @Query() listCustomersInputDto: ListCustomersInputDto,
     @User() user: OutputUserDto,
   ) {
-    if (!user.isSuperadmin) {
+    if (!(user.isSuperadmin || user.isCustomerSuccess)) {
       throw new ForbiddenException('You have no access to customers.');
     }
+
     return this.customersService.findAll(listCustomersInputDto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @User() user: OutputUserDto) {
-    if (!user.isSuperadmin) {
+    if (!(user.isSuperadmin || user.isCustomerSuccess)) {
       throw new ForbiddenException('You have no access to customers.');
     }
+
     return this.customersService.findOne(+id);
   }
 
