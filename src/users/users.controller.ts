@@ -52,6 +52,14 @@ export class UsersController {
       // user cannot set another customer when creating users, assign the same he belongs to
       createUserDto.customerId = user.customerId;
     }
+
+    // поки так, спішим до демо
+    if (user.isCustomerSuccess && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    } else if (user.isCustomerSuccess && user.customerId) {
+      createUserDto.customerId = user.customerId;
+    }
+
     return await this.usersService.create(createUserDto);
   }
 
@@ -72,6 +80,14 @@ export class UsersController {
       // user cannot set another customer when creating users, assign the same he belongs to
       inviteUserDto.customerId = user.customerId;
     }
+
+    // поки так, спішим до демо
+    if (user.isCustomerSuccess && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    } else if (user.isCustomerSuccess && user.customerId) {
+      inviteUserDto.customerId = user.customerId;
+    }
+
     return await this.usersService.invite(inviteUserDto);
   }
 
@@ -103,6 +119,14 @@ export class UsersController {
       // user cannot set another customer when creating users, assign the same he belongs to
       inviteUsersDto.customerId = user.customerId;
     }
+
+    // поки так, спішим до демо
+    if (user.isCustomerSuccess && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    } else if (user.isCustomerSuccess && user.customerId) {
+      inviteUsersDto.customerId = user.customerId;
+    }
+
     const invitePromises = inviteUsersDto.emails.map(async (email) => {
       if (await this.usersService.emailExists({ email })) {
         this.logger.log(`Invite email already exists: ${email}`);
@@ -142,6 +166,14 @@ export class UsersController {
       // user cannot set another customer when creating users, assign the same he belongs to
       listUserInputDto.customerId = [user.customerId];
     }
+
+    // поки так, спішим до демо
+    if (user.isCustomerSuccess && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    } else if (user.isCustomerSuccess && user.customerId) {
+      listUserInputDto.customerId = [user.customerId];
+    }
+
     return this.usersService.findAll(listUserInputDto);
   }
 
@@ -178,6 +210,14 @@ export class UsersController {
     if (!user.isSuperadmin) {
       customerId = user.customerId;
     }
+
+    // поки так, спішим до демо
+    if (user.isCustomerSuccess && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    } else if (user.isCustomerSuccess && user.customerId) {
+      customerId = user.customerId;
+    }
+
     return this.usersService.findOne(+id, customerId);
   }
 
@@ -199,6 +239,14 @@ export class UsersController {
       // user cannot set another customer when updating users, assign the same he belongs to
       updateUserDto.customerId = user.customerId;
     }
+
+    // поки так, спішим до демо
+    if (user.isCustomerSuccess && !user.customerId) {
+      throw new ForbiddenException('You have no access to create users.');
+    } else if (user.isCustomerSuccess && user.customerId) {
+      updateUserDto.customerId = user.customerId;
+    }
+
     return this.usersService.update(+id, updateUserDto);
   }
 }

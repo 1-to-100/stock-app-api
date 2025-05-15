@@ -58,7 +58,7 @@ export class UsersService {
 
     try {
       const { systemRole, ...makeUser } = createSystemUserDto;
-      const isSuperadmin = systemRole === UserSystemRoles.SYSTEM_ADMIN;
+      const isSuperadmin = systemRole === UserSystemRoles.SUPER_ADMIN;
       const isCustomerSuccess = systemRole === UserSystemRoles.CUSTOMER_SUCCESS;
 
       if (!(isSuperadmin || isCustomerSuccess)) {
@@ -102,7 +102,7 @@ export class UsersService {
       }
 
       const { systemRole, ...updateUser } = updateSystemUserDto;
-      const isSuperadmin = systemRole === UserSystemRoles.SYSTEM_ADMIN;
+      const isSuperadmin = systemRole === UserSystemRoles.SUPER_ADMIN;
       const isCustomerSuccess = systemRole === UserSystemRoles.CUSTOMER_SUCCESS;
 
       if (systemRole) {
