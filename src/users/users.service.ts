@@ -178,6 +178,9 @@ export class UsersService {
           { email: { contains: search, mode: 'insensitive' } },
         ],
       }),
+      ...{
+        AND: [{ isSuperadmin: false }, { isCustomerSuccess: false }],
+      },
     };
 
     const paginate = createPaginator({ perPage });
