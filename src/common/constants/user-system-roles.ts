@@ -1,5 +1,5 @@
 export const UserSystemRoles = {
-  SUPER_ADMIN: 'super_admin',
+  SYSTEM_ADMIN: 'system_admin',
   CUSTOMER_SUCCESS: 'customer_success',
 } as const;
 
