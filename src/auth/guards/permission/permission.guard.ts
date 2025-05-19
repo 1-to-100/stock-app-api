@@ -45,6 +45,22 @@ export class PermissionGuard implements CanActivate {
     if (user.isSuperadmin) {
       return true;
     }
+
+    // треба придумати кращий метод для ролі CustomerSuccess, ніж харкодити деякі доступа
+    if (
+      user.isCustomerSuccess &&
+      allowedPermissions.some((permission) =>
+        [
+          'UserManagement:viewUsers',
+          'UserManagement:createUser',
+          'UserManagement:inviteUser',
+          'UserManagement:editUser',
+        ].includes(permission),
+      )
+    ) {
+      return true;
+    }
+
     const customer = await this.prisma.customer.findFirst({
       where: {
         id: user.customerId!,

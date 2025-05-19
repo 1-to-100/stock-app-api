@@ -54,13 +54,6 @@ export class UsersController {
       createUserDto.customerId = user.customerId;
     }
 
-    // поки так, спішим до демо
-    if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException('You have no access to create users.');
-    } else if (user.isCustomerSuccess && user.customerId) {
-      createUserDto.customerId = user.customerId;
-    }
-
     return await this.usersService.create(createUserDto);
   }
 
@@ -79,13 +72,6 @@ export class UsersController {
     }
     if (!user.isSuperadmin && user.customerId) {
       // user cannot set another customer when creating users, assign the same he belongs to
-      inviteUserDto.customerId = user.customerId;
-    }
-
-    // поки так, спішим до демо
-    if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException('You have no access to create users.');
-    } else if (user.isCustomerSuccess && user.customerId) {
       inviteUserDto.customerId = user.customerId;
     }
 
@@ -118,13 +104,6 @@ export class UsersController {
     }
     if (!user.isSuperadmin && user.customerId) {
       // user cannot set another customer when creating users, assign the same he belongs to
-      inviteUsersDto.customerId = user.customerId;
-    }
-
-    // поки так, спішим до демо
-    if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException('You have no access to create users.');
-    } else if (user.isCustomerSuccess && user.customerId) {
       inviteUsersDto.customerId = user.customerId;
     }
 
@@ -169,13 +148,6 @@ export class UsersController {
       listUserInputDto.customerId = [user.customerId];
     }
 
-    // поки так, спішим до демо
-    if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException('You have no access to create users.');
-    } else if (user.isCustomerSuccess && user.customerId) {
-      listUserInputDto.customerId = [user.customerId];
-    }
-
     if (customerId) {
       listUserInputDto.customerId = [+customerId];
     }
@@ -217,13 +189,6 @@ export class UsersController {
       customerId = user.customerId;
     }
 
-    // поки так, спішим до демо
-    if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException('You have no access to create users.');
-    } else if (user.isCustomerSuccess && user.customerId) {
-      customerId = user.customerId;
-    }
-
     return this.usersService.findOne(+id, customerId);
   }
 
@@ -243,13 +208,6 @@ export class UsersController {
     }
     if (!user.isSuperadmin && user.customerId) {
       // user cannot set another customer when updating users, assign the same he belongs to
-      updateUserDto.customerId = user.customerId;
-    }
-
-    // поки так, спішим до демо
-    if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException('You have no access to create users.');
-    } else if (user.isCustomerSuccess && user.customerId) {
       updateUserDto.customerId = user.customerId;
     }
 
