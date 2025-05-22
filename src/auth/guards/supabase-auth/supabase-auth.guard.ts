@@ -68,7 +68,7 @@ export class SupabaseAuthGuard implements CanActivate {
       given_name,
       family_name,
       picture,
-      // updateStatus,
+      updateStatus,
     } = decodedPayload.user_metadata || {};
 
     const fullName = full_name
@@ -84,7 +84,7 @@ export class SupabaseAuthGuard implements CanActivate {
       email: decodedPayload.email as string,
       name: fullName,
       picture,
-      // ...(updateStatus ? { status: 'active' } : {}),
+      ...(updateStatus ? { status: 'active' } : {}),
     };
 
     request.currentUser = await this.usersService.findByUid(request.user.uid);

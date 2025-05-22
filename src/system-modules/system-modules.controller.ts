@@ -102,21 +102,26 @@ export class SystemModulesController {
     //
     // console.log('getUser', newUser);
 
-    const { data: newUser } = await supabaseClientAdmin.inviteUserByEmail(
-      'oleksandr.zhuryk+invite16@huboxt.com',
-      {
-        data: {
-          name: 'Alex Test Od 16',
-        },
-        redirectTo: FrontendPaths.setNewPassword,
-      },
-    );
+    // await supabaseClientAdmin.updateUserById(
+    //   'aee6b0de-c09d-4756-907e-01ff587e03a1',
+    //   { user_metadata: { updateStatus: false } },
+    // );
+
+    // const { data: newUser } = await supabaseClientAdmin.inviteUserByEmail(
+    //   'oleksandr.zhuryk+invite16@huboxt.com',
+    //   {
+    //     data: {
+    //       name: 'Alex Test Od 16',
+    //     },
+    //     redirectTo: FrontendPaths.setNewPassword,
+    //   },
+    // );
 
     return {
       message: 'ok',
-      email,
-      newUser,
-      redirectTo: FrontendPaths.setNewPassword,
+      // email,
+      // newUser,
+      // redirectTo: FrontendPaths.setNewPassword,
     };
   }
 }

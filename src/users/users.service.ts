@@ -474,6 +474,14 @@ export class UsersService {
       });
     }
 
+    try {
+      await supabaseClientAdmin.updateUserById(supabaseUser.uid, {
+        user_metadata: { updateStatus: false },
+      });
+    } catch (error) {
+      this.logger.error(`Error updating user on supdabse: ${error}`);
+    }
+
     await this.sendInviteEmail(newUser);
     return newUser;
   }
