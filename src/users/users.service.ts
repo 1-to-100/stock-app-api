@@ -24,6 +24,8 @@ import { SupabaseDecodedToken } from '../auth/guards/supabase-auth/supabase-auth
 import { CreateSystemUserDto } from './dto/create-system-user.dto';
 import { UserSystemRoles } from '../common/constants/user-system-roles';
 import { UpdateSystemUserDto } from './dto/update-system-user.dto';
+import { supabaseClientAdmin } from '../common/helpers/supabase-client';
+import { FrontendPaths } from '../common/helpers/frontend-paths';
 
 @Injectable()
 export class UsersService {
@@ -42,6 +44,16 @@ export class UsersService {
     try {
       this.logger.log(`Create user with email ${createUserDto.email}`);
       const user = await this.prisma.user.create({ data: createUserDto });
+
+      if (user) {
+        await supabaseClientAdmin.inviteUserByEmail(user.email, {
+          data: {
+            name: `${user.firstName} ${user.lastName}`,
+          },
+          redirectTo: FrontendPaths.setNewPassword,
+        });
+      }
+
       return user;
     } catch (error) {
       this.logger.error(`Error creating user: ${error}`);
@@ -81,6 +93,16 @@ export class UsersService {
       const user = await this.prisma.user.create({
         data: { ...makeUser, isSuperadmin, isCustomerSuccess },
       });
+
+      if (user) {
+        await supabaseClientAdmin.inviteUserByEmail(user.email, {
+          data: {
+            name: `${user.firstName} ${user.lastName}`,
+          },
+          redirectTo: FrontendPaths.setNewPassword,
+        });
+      }
+
       return user;
     } catch (error) {
       this.logger.error(`Error creating user: ${error}`);
