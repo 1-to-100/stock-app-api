@@ -406,23 +406,7 @@ export class UsersService {
     subscriptionId: number | null = null,
   ) {
     const existingUser = await this.findByUid(supabaseUser.uid);
-    if (
-      existingUser &&
-      existingUser.status == UserStatus.INACTIVE &&
-      supabaseUser?.status == UserStatus.ACTIVE
-    ) {
-      const [updatedStatusUser] = await Promise.allSettled([
-        this.prisma.user.update({
-          where: { id: existingUser.id },
-          data: { status: supabaseUser.status },
-        }),
-        supabaseClientAdmin.updateUserById(supabaseUser.uid, {
-          user_metadata: { updateStatus: false },
-        }),
-      ]);
-
-      return updatedStatusUser;
-    } else if (existingUser) {
+    if (existingUser) {
       return existingUser;
     }
 
@@ -451,16 +435,25 @@ export class UsersService {
       where: { domain },
     });
 
-    const newUser = await this.prisma.user.create({
-      data: {
-        email,
-        firstName,
-        lastName,
-        avatar: supabaseUser.picture,
-        uid: supabaseUser.uid,
-        customerId: existingCustomer?.id,
-      },
-    });
+    const [newUser] = await Promise.all([
+      this.prisma.user.create({
+        data: {
+          email,
+          firstName,
+          lastName,
+          status:
+            supabaseUser.status == UserStatus.ACTIVE
+              ? supabaseUser.status
+              : UserStatus.INACTIVE,
+          avatar: supabaseUser.picture,
+          uid: supabaseUser.uid,
+          customerId: existingCustomer?.id,
+        },
+      }),
+      supabaseClientAdmin.updateUserById(supabaseUser.uid, {
+        user_metadata: { updateStatus: false },
+      }),
+    ]);
 
     if (!existingCustomer) {
       const newCustomer = await this.prisma.customer.create({
