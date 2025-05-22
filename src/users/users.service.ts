@@ -47,14 +47,7 @@ export class UsersService {
       const user = await this.prisma.user.create({ data: createUserDto });
 
       if (user) {
-        await supabaseClientAdmin.inviteUserByEmail(user.email, {
-          data: {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            updateStatus: true,
-          },
-          redirectTo: FrontendPaths.setNewPassword,
-        });
+        await this.sendInviteEmail(user);
       }
 
       return user;
@@ -98,14 +91,7 @@ export class UsersService {
       });
 
       if (user) {
-        await supabaseClientAdmin.inviteUserByEmail(user.email, {
-          data: {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            updateStatus: true,
-          },
-          redirectTo: FrontendPaths.setNewPassword,
-        });
+        await this.sendInviteEmail(user);
       }
 
       return user;
@@ -498,14 +484,15 @@ export class UsersService {
   }
 
   async sendInviteEmail(user: OutputUserDto) {
-    await this.prisma.userOneTimeCodes.create({
+    await supabaseClientAdmin.inviteUserByEmail(user.email, {
       data: {
-        userId: user.id,
-        code: this.getRandomString(6),
-        isUsed: false,
+        ...(user?.firstName && { firstName: user.firstName }),
+        ...(user?.lastName && { lastName: user.lastName }),
+        updateStatus: true,
       },
+      redirectTo: FrontendPaths.setNewPassword,
     });
-    // send email
+
     return true;
   }
 
