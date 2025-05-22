@@ -48,7 +48,9 @@ export class UsersService {
       if (user) {
         await supabaseClientAdmin.inviteUserByEmail(user.email, {
           data: {
-            name: `${user.firstName} ${user.lastName}`,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            updateStatus: true,
           },
           redirectTo: FrontendPaths.setNewPassword,
         });
@@ -97,7 +99,9 @@ export class UsersService {
       if (user) {
         await supabaseClientAdmin.inviteUserByEmail(user.email, {
           data: {
-            name: `${user.firstName} ${user.lastName}`,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            updateStatus: true,
           },
           redirectTo: FrontendPaths.setNewPassword,
         });

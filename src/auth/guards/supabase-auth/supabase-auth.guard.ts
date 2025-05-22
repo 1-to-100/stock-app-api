@@ -26,6 +26,7 @@ type supabaseJwtPayload =
         given_name?: string; // linkedin
         family_name?: string; // linkedin
         picture?: string;
+        updateStatus?: boolean;
       };
     })
   | null;
@@ -60,8 +61,15 @@ export class SupabaseAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid token');
     }
 
-    const { firstName, lastName, full_name, given_name, family_name, picture } =
-      decodedPayload.user_metadata || {};
+    const {
+      firstName,
+      lastName,
+      full_name,
+      given_name,
+      family_name,
+      picture,
+      // updateStatus,
+    } = decodedPayload.user_metadata || {};
 
     const fullName = full_name
       ? full_name
@@ -76,6 +84,7 @@ export class SupabaseAuthGuard implements CanActivate {
       email: decodedPayload.email as string,
       name: fullName,
       picture,
+      // ...(updateStatus ? { status: 'active' } : {}),
     };
 
     request.currentUser = await this.usersService.findByUid(request.user.uid);

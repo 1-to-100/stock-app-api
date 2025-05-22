@@ -1,6 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { SystemModulesService } from './system-modules.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { supabaseClientAdmin } from '../common/helpers/supabase-client';
+import { FrontendPaths } from '../common/helpers/frontend-paths';
 
 @Controller('system-modules')
 export class SystemModulesController {
@@ -86,5 +88,35 @@ export class SystemModulesController {
       console.log(`✅ Видалено ${customers.length} customers`);
     }
     return { message: 'ok' };
+  }
+
+  @Get('test')
+  async test(@Query('email') email?: string) {
+    if (!email) {
+      return { message: 'error' };
+    }
+
+    // const newUser = await supabaseClientAdmin.getUserById(
+    //   'faac8bef-8216-4f97-9699-0c57eedc0d62',
+    // );
+    //
+    // console.log('getUser', newUser);
+
+    const { data: newUser } = await supabaseClientAdmin.inviteUserByEmail(
+      'oleksandr.zhuryk+invite16@huboxt.com',
+      {
+        data: {
+          name: 'Alex Test Od 16',
+        },
+        redirectTo: FrontendPaths.setNewPassword,
+      },
+    );
+
+    return {
+      message: 'ok',
+      email,
+      newUser,
+      redirectTo: FrontendPaths.setNewPassword,
+    };
   }
 }
