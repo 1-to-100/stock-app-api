@@ -425,7 +425,7 @@ export class UsersService {
       existingUser.status == UserStatus.INACTIVE &&
       supabaseUser?.status == UserStatus.ACTIVE
     ) {
-      const [updatedStatusUser] = await Promise.all([
+      const [updatedStatusUser] = await Promise.allSettled([
         this.prisma.user.update({
           where: { id: existingUser.id },
           data: { status: supabaseUser.status },
