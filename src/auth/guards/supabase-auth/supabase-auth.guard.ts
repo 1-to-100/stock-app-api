@@ -15,6 +15,7 @@ export type SupabaseDecodedToken = {
   picture?: string;
   role?: string;
   permissions?: string[];
+  status?: string;
 };
 
 type supabaseJwtPayload =

@@ -26,6 +26,7 @@ import { UserSystemRoles } from '../common/constants/user-system-roles';
 import { UpdateSystemUserDto } from './dto/update-system-user.dto';
 import { supabaseClientAdmin } from '../common/helpers/supabase-client';
 import { FrontendPaths } from '../common/helpers/frontend-paths';
+import { UserStatus } from '../common/constants/status';
 
 @Injectable()
 export class UsersService {
@@ -419,7 +420,25 @@ export class UsersService {
     subscriptionId: number | null = null,
   ) {
     const existingUser = await this.findByUid(supabaseUser.uid);
-    if (existingUser) return existingUser;
+    if (
+      existingUser &&
+      existingUser.status == UserStatus.INACTIVE &&
+      supabaseUser?.status == UserStatus.ACTIVE
+    ) {
+      const [updatedStatusUser] = await Promise.all([
+        this.prisma.user.update({
+          where: { id: existingUser.id },
+          data: { status: supabaseUser.status },
+        }),
+        supabaseClientAdmin.updateUserById(supabaseUser.uid, {
+          user_metadata: { updateStatus: false },
+        }),
+      ]);
+
+      return updatedStatusUser;
+    } else if (existingUser) {
+      return existingUser;
+    }
 
     const [firstName, ...lastNameParts] = supabaseUser.name?.split(' ') || [];
     const lastName = lastNameParts ? lastNameParts.join(' ') : '';
@@ -472,14 +491,6 @@ export class UsersService {
         where: { id: newUser.id },
         data: { customerId: newCustomer.id },
       });
-    }
-
-    try {
-      await supabaseClientAdmin.updateUserById(supabaseUser.uid, {
-        user_metadata: { updateStatus: false },
-      });
-    } catch (error) {
-      this.logger.error(`Error updating user on supdabse: ${error}`);
     }
 
     await this.sendInviteEmail(newUser);
