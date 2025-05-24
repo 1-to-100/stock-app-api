@@ -423,7 +423,11 @@ export class UsersService {
       where: { email },
     });
 
-    if (existingUserEmail && existingUserEmail.uid == null) {
+    if (
+      existingUserEmail &&
+      existingUserEmail.uid == null &&
+      supabaseUser.uid
+    ) {
       const existingUserEmailUpdated = await this.prisma.user.update({
         where: { id: existingUserEmail.id },
         data: {
@@ -446,6 +450,7 @@ export class UsersService {
           lastName,
           avatar: supabaseUser.picture,
           uid: supabaseUser.uid,
+          status: supabaseUser.uid ? UserStatus.ACTIVE : UserStatus.INACTIVE,
           customerId: existingCustomer?.id,
         },
       }),
