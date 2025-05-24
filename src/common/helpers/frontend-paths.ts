@@ -6,5 +6,7 @@ if (!home || !/^https?:\/\//.test(home)) {
 
 export const FrontendPaths = {
   home,
+  dashboardOverview: new URL('/dashboard/user-management', home).href,
   setNewPassword: new URL('/auth/supabase/set-new-password', home).href,
+  callbackPkce: new URL('/auth/supabase/callback/pkce', home).href,
 };

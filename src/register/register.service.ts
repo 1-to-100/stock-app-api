@@ -7,6 +7,8 @@ import {
 } from '../common/helpers/string-helpers';
 import { UsersService } from '../users/users.service';
 import { OutputUserDto } from 'src/users/dto/output-user.dto';
+import { supabaseClientAuth } from '../common/helpers/supabase-client';
+import { FrontendPaths } from '../common/helpers/frontend-paths';
 
 @Injectable()
 export class RegisterService {
@@ -62,6 +64,23 @@ export class RegisterService {
       });
     }
 
+    // Sign up in Supabase
+    await this.signUpInSupabase(registerDto);
+
     return newUser;
+  }
+
+  async signUpInSupabase(registerDto: RegisterDto) {
+    return supabaseClientAuth.signUp({
+      email: registerDto.email,
+      password: registerDto.password,
+      options: {
+        emailRedirectTo: FrontendPaths.callbackPkce,
+        data: {
+          firstName: registerDto.firstName,
+          lastName: registerDto.lastName,
+        },
+      },
+    });
   }
 }

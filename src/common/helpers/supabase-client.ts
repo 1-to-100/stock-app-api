@@ -13,4 +13,5 @@ const supabase = createClient(supabase_url, service_role_key, {
 
 // TODO: Переробити в окремі сервіси
 export const supabaseClientAdmin = supabase.auth.admin;
+export const supabaseClientAuth = supabase.auth;
 export const supabaseClientStorage = supabase.storage;
