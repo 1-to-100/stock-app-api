@@ -428,10 +428,7 @@ export class UsersService {
         where: { id: existingUserEmail.id },
         data: {
           uid: supabaseUser.uid,
-          status:
-            supabaseUser.status == UserStatus.ACTIVE
-              ? supabaseUser.status
-              : UserStatus.INACTIVE,
+          status: UserStatus.ACTIVE,
         },
       });
       return existingUserEmailUpdated;
@@ -447,17 +444,10 @@ export class UsersService {
           email,
           firstName,
           lastName,
-          status:
-            supabaseUser.status == UserStatus.ACTIVE
-              ? supabaseUser.status
-              : UserStatus.INACTIVE,
           avatar: supabaseUser.picture,
           uid: supabaseUser.uid,
           customerId: existingCustomer?.id,
         },
-      }),
-      supabaseClientAdmin.updateUserById(supabaseUser.uid, {
-        user_metadata: { updateStatus: false },
       }),
     ]);
 
@@ -487,7 +477,6 @@ export class UsersService {
       data: {
         ...(user?.firstName && { firstName: user.firstName }),
         ...(user?.lastName && { lastName: user.lastName }),
-        updateStatus: true,
       },
       redirectTo: FrontendPaths.setNewPassword,
     });
