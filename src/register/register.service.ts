@@ -62,7 +62,6 @@ export class RegisterService {
       });
     }
 
-    await this.usersService.sendInviteEmail(newUser);
     return newUser;
   }
 }
