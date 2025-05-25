@@ -62,16 +62,18 @@ export class RegisterService {
 
   // TODO: Винести в окремий сервіс
   private async signUpInSupabase(registerDto: RegisterDto) {
-    return supabaseClientAuth.signUp({
+    const { data, error } = await supabaseClientAuth.signUp({
       email: registerDto.email,
       password: registerDto.password,
       options: {
-        emailRedirectTo: FrontendPaths.callbackPkce,
+        emailRedirectTo: FrontendPaths.callbackImplicit,
         data: {
           firstName: registerDto.firstName,
           lastName: registerDto.lastName,
         },
       },
     });
+
+    console.log('signUpInSupabase', data, error);
   }
 }
