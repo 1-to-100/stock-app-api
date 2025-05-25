@@ -37,7 +37,10 @@ export class UsersService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<OutputUserDto> {
+  async create(
+    createUserDto: CreateUserDto,
+    skipInvite: boolean = false,
+  ): Promise<OutputUserDto> {
     if (await this.emailExists({ email: createUserDto.email })) {
       throw new ConflictException('User with this email already exists');
     }
@@ -46,7 +49,7 @@ export class UsersService {
       this.logger.log(`Create user with email ${createUserDto.email}`);
       const user = await this.prisma.user.create({ data: createUserDto });
 
-      if (user) {
+      if (!skipInvite && user) {
         await this.sendInviteEmail(user);
       }
 

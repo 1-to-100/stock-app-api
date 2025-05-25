@@ -6,7 +6,6 @@ import {
   isPublicEmailDomain,
 } from '../common/helpers/string-helpers';
 import { UsersService } from '../users/users.service';
-import { OutputUserDto } from 'src/users/dto/output-user.dto';
 import { supabaseClientAuth } from '../common/helpers/supabase-client';
 import { FrontendPaths } from '../common/helpers/frontend-paths';
 
@@ -30,37 +29,28 @@ export class RegisterService {
       throw new ConflictException('Email address is not a company address');
     }
 
-    let existingCustomer = await this.prisma.customer.findFirst({
+    const existingCustomer = await this.prisma.customer.findFirst({
       where: { domain },
     });
 
-    let newUser: OutputUserDto;
-    if (existingCustomer) {
-      newUser = await this.usersService.create({
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        customerId: existingCustomer.id,
-      });
-    } else {
-      newUser = await this.usersService.create({
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-      });
+    const newUser = await this.usersService.create(
+      {
+        email,
+        firstName,
+        lastName,
+        customerId: existingCustomer?.id,
+      },
+      true,
+    );
 
-      existingCustomer = await this.prisma.customer.create({
-        data: {
-          name: domain,
-          email: email,
-          domain: domain,
-          ownerId: newUser.id,
-        },
+    if (!existingCustomer) {
+      const newCustomer = await this.prisma.customer.create({
+        data: { name: domain, email, domain, ownerId: newUser.id },
       });
 
       await this.prisma.user.update({
         where: { id: newUser.id },
-        data: { customerId: existingCustomer.id },
+        data: { customerId: newCustomer.id },
       });
     }
 
@@ -70,7 +60,8 @@ export class RegisterService {
     return newUser;
   }
 
-  async signUpInSupabase(registerDto: RegisterDto) {
+  // TODO: Винести в окремий сервіс
+  private async signUpInSupabase(registerDto: RegisterDto) {
     return supabaseClientAuth.signUp({
       email: registerDto.email,
       password: registerDto.password,
