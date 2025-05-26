@@ -95,6 +95,24 @@ export class NotificationsController {
     );
   }
 
+  @Get('/unread-count')
+  @ApiOkResponse({
+    description: 'Count of unread notifications',
+    schema: {
+      type: 'object',
+      properties: {
+        count: {
+          type: 'number',
+          example: 5,
+        },
+      },
+    },
+  })
+  async unreadCount(@User() user: OutputUserDto) {
+    const count = await this.notificationsService.unreadCount(+user.id);
+    return { count };
+  }
+
   @Get(':id')
   @ApiOkResponse({
     description: 'The notification record',
