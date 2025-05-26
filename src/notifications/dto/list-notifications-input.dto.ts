@@ -1,11 +1,5 @@
 import { PaginatedInputDto } from '../../common/dto/paginated-input.dto';
-import {
-  IsBoolean,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   NotificationType,
@@ -13,20 +7,6 @@ import {
 } from '../constants/notification-type';
 
 export class ListNotificationsInputDto extends PaginatedInputDto {
-  @IsInt()
-  @IsOptional()
-  @ApiPropertyOptional({
-    description: 'User ID associated with the notification',
-  })
-  userId?: number;
-
-  @IsInt()
-  @IsOptional()
-  @ApiPropertyOptional({
-    description: 'Customer ID associated with the notification',
-  })
-  customerId?: number;
-
   @IsOptional()
   @IsEnum(NotificationTypeList)
   @ApiProperty({
