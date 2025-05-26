@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { ApiOkResponse, ApiParam } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
 import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
@@ -140,6 +140,21 @@ export class NotificationsController {
   }
 
   @Patch()
+  @ApiBody({
+    description: 'Array of notification IDs to mark as read',
+    schema: {
+      type: 'object',
+      properties: {
+        ids: {
+          type: 'array',
+          items: {
+            type: 'number',
+          },
+          example: [1, 2, 3],
+        },
+      },
+    },
+  })
   @ApiOkResponse({
     description: 'Multiple notifications marked as read',
     schema: {
