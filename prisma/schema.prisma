@@ -40,6 +40,7 @@ model Customer {
   CustomerSuccess   User?          @relation("CustomerSuccess", fields: [customerSuccessId], references: [id])
   Users             User[]         @relation("CustomerUsers")
   Articles          Article[]
+  Notification      Notification[]
 
   @@index([status])
   @@index([subscriptionId])
@@ -123,28 +124,29 @@ model UserOneTimeCodes {
 }
 
 model User {
-  id                Int        @id @default(autoincrement())
-  uid               String?    @unique
-  email             String     @unique
-  emailVerified     Boolean?   @default(false) @map("email_verified")
-  firstName         String?    @map("first_name")
-  lastName          String?    @map("last_name")
+  id                Int            @id @default(autoincrement())
+  uid               String?        @unique
+  email             String         @unique
+  emailVerified     Boolean?       @default(false) @map("email_verified")
+  firstName         String?        @map("first_name")
+  lastName          String?        @map("last_name")
   avatar            String?
-  phoneNumber       String?    @map("phone_number")
-  customerId        Int?       @map("customer_id")
-  roleId            Int?       @map("role_id")
-  managerId         Int?       @map("manager_id")
-  status            String     @default("inactive")
-  isSuperadmin      Boolean?   @default(false) @map("is_superadmin")
-  isCustomerSuccess Boolean?   @default(false) @map("is_customer_success")
-  createdAt         DateTime   @default(now()) @map("created_at")
-  updatedAt         DateTime?  @updatedAt @map("updated_at")
-  customer          Customer?  @relation("CustomerUsers", fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  successCustomers  Customer[] @relation("CustomerSuccess")
-  role              Role?      @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  manager           Manager?   @relation(fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ownedCustomer     Customer?  @relation("CustomerOwner")
+  phoneNumber       String?        @map("phone_number")
+  customerId        Int?           @map("customer_id")
+  roleId            Int?           @map("role_id")
+  managerId         Int?           @map("manager_id")
+  status            String         @default("inactive")
+  isSuperadmin      Boolean?       @default(false) @map("is_superadmin")
+  isCustomerSuccess Boolean?       @default(false) @map("is_customer_success")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime?      @updatedAt @map("updated_at")
+  customer          Customer?      @relation("CustomerUsers", fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  successCustomers  Customer[]     @relation("CustomerSuccess")
+  role              Role?          @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  manager           Manager?       @relation(fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ownedCustomer     Customer?      @relation("CustomerOwner")
   articles          Article[]
+  Notification      Notification[]
 
   @@map("users")
 }
@@ -195,4 +197,32 @@ model Article {
   Customer          Customer        @relation(fields: [customerId], references: [id])
 
   @@map("articles")
+}
+
+model Notification {
+  id         Int              @id @default(autoincrement())
+  userId     Int?             @map("user_id")
+  customerId Int?             @map("customer_id")
+  type       NotificationType
+  message    String
+  metadata   Json?            @db.Json
+  channel    String?          @db.VarChar(256)
+  isRead     Boolean          @default(false) @map("is_read")
+  createdAt  DateTime         @default(now()) @map("created_at")
+  readAt     DateTime?        @map("read_at")
+  User       User?            @relation(fields: [userId], references: [id])
+  Customer   Customer?        @relation(fields: [customerId], references: [id])
+
+  @@index([userId])
+  @@index([customerId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([isRead])
+  @@index([channel])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  EMAIL
+  IN_APP
 }

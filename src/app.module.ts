@@ -16,6 +16,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { RegisterModule } from './register/register.module';
 import { ArticleCategoriesModule } from './article-categories/article-categories.module';
 import { ArticlesModule } from './articles/articles.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ArticlesModule } from './articles/articles.module';
     // ArticlesModule,
     ArticleCategoriesModule,
     ArticlesModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
