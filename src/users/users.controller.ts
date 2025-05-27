@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -105,6 +106,20 @@ export class UsersController {
     if (!user.isSuperadmin && user.customerId) {
       // user cannot set another customer when creating users, assign the same he belongs to
       inviteUsersDto.customerId = user.customerId;
+    }
+
+    // found duplicate emails
+    const seenEmails = new Set<string>();
+    const duplicateEmails = inviteUsersDto.emails.filter((email) => {
+      if (seenEmails.has(email)) return true;
+      seenEmails.add(email);
+      return false;
+    });
+
+    if (duplicateEmails.length > 0) {
+      throw new BadRequestException(
+        `Duplicate emails found: ${duplicateEmails.join(', ')}`,
+      );
     }
 
     const invitePromises = inviteUsersDto.emails.map(async (email) => {
