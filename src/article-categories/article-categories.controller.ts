@@ -9,6 +9,7 @@ import {
   Param,
   ParseIntPipe,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { ArticleCategoriesService } from './article-categories.service';
 import { CreateArticleCategoryDto } from './dto/create-article-category.dto';
@@ -39,10 +40,17 @@ export class ArticleCategoriesController {
   @Permissions('Documents:viewCategories')
   async findAll(@User() user: OutputUserDto, @CustomerId() customerId: number) {
     if (!user.isSuperadmin && user.customerId) {
-      customerId = user.customerId!;
+      customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
+
+    console.log('customerId', user);
+
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesCategoriesService.findAll(customerId);
   }
@@ -57,10 +65,15 @@ export class ArticleCategoriesController {
     @CustomerId() customerId: number,
   ) {
     if (!user.isSuperadmin && user.customerId) {
-      customerId = user.customerId!;
+      customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
+
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesCategoriesService.findAllSubcategories(
       customerId,
@@ -91,6 +104,8 @@ export class ArticleCategoriesController {
     };
     if (!user.isSuperadmin && user.customerId) {
       fields.customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      fields.customerId = user.customerId;
     } else {
       fields.customerId = customerId;
     }
@@ -115,9 +130,14 @@ export class ArticleCategoriesController {
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
+
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesCategoriesService.update(
       id,
@@ -139,9 +159,14 @@ export class ArticleCategoriesController {
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
+
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesCategoriesService.remove(id, customerId);
   }
@@ -160,9 +185,14 @@ export class ArticleCategoriesController {
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
+
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesCategoriesService.findOne(id, customerId);
   }

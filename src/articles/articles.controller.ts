@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Logger,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -44,9 +45,14 @@ export class ArticlesController {
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
+
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     const fields: ArticleDto = {
       ...createArticleDto,
@@ -66,9 +72,13 @@ export class ArticlesController {
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesService.findAll(customerId, listArticlesInputDto);
   }
@@ -84,9 +94,13 @@ export class ArticlesController {
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesService.findOne(id, customerId);
   }
@@ -106,9 +120,13 @@ export class ArticlesController {
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesService.update(id, updateArticleDto, customerId);
   }
@@ -124,9 +142,13 @@ export class ArticlesController {
   ) {
     if (!user.isSuperadmin && user.customerId) {
       customerId = user.customerId;
+    } else if (!customerId && user.isSuperadmin && user.customerId) {
+      customerId = user.customerId;
     }
     if (!customerId) {
-      throw new Error('User is not authorized to access this resource');
+      throw new BadRequestException(
+        'User is not authorized to access this resource',
+      );
     }
     return await this.articlesService.remove(id, customerId);
   }
