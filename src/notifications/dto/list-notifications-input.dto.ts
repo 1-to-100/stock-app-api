@@ -14,18 +14,23 @@ export class ListNotificationsInputDto extends OmitType(PaginatedInputDto, [
   @ApiProperty({
     description: 'Type of the notification',
     enum: NotificationType,
+    required: false,
   })
-  type: NotificationType;
+  type?: NotificationType;
 
   @IsOptional()
   @IsBoolean()
-  @ApiProperty({ description: 'Read status of the notification' })
-  isRead: boolean;
+  @ApiProperty({
+    description: 'Read status of the notification',
+    required: false,
+  })
+  isRead?: boolean;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
     description: 'Notification channel',
+    required: false,
   })
   channel?: string;
 }
