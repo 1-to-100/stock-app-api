@@ -15,3 +15,24 @@ const supabase = createClient(supabase_url, service_role_key, {
 export const supabaseClientAdmin = supabase.auth.admin;
 export const supabaseClientAuth = supabase.auth;
 export const supabaseClientStorage = supabase.storage;
+export const supabaseClientChannel = (channelName: string) => {
+  return supabase.channel(channelName);
+};
+
+export const sendSupabaseNotification = async (
+  channelName: string,
+  event: string,
+  payload?: unknown,
+) => {
+  if (!channelName || !event) {
+    throw new Error('Channel and event are required');
+  }
+  if (!supabaseClientChannel) {
+    throw new Error('Supabase channel client is not initialized');
+  }
+
+  const channel = supabaseClientChannel(channelName);
+  channel.subscribe();
+  await channel.send({ type: 'broadcast', event, payload });
+  await channel.unsubscribe();
+};

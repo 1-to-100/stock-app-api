@@ -11,6 +11,7 @@ import { NotificationDto } from './dto/notification.dto';
 import { ListNotificationsInputDto } from './dto/list-notifications-input.dto';
 import { createPaginator } from 'prisma-pagination';
 import { Prisma } from '@prisma/client';
+import { sendSupabaseNotification } from '../common/helpers/supabase-client';
 
 @Injectable()
 export class NotificationsService {
@@ -18,38 +19,40 @@ export class NotificationsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createNotification: CreateNotificationDto) {
-    try {
-      this.logger.log('Creating notification');
+    this.logger.log('Creating notification');
 
-      if (!createNotification.userId && createNotification.customerId) {
-        const users = await this.prisma.user.findMany({
-          where: { customerId: createNotification.customerId },
-        });
+    const { userId, customerId } = createNotification;
 
-        if (!users.length) {
-          throw new ConflictException('No users found for the customer');
-        }
+    if (!userId && customerId) {
+      const users = await this.prisma.user.findMany({ where: { customerId } });
 
-        // create notifications for each user
-        const notifications = users.map((user) => ({
-          ...createNotification,
-          userId: user.id,
-        }));
-
-        await this.prisma.notification.createMany({
-          data: notifications,
-        });
-
-        return notifications.at(-1);
+      if (!users.length) {
+        throw new ConflictException('No users found for the customer');
       }
 
-      return this.prisma.notification.create({
+      const notifications = users.map((user) => ({
+        ...createNotification,
+        userId: user.id,
+      }));
+
+      await this.prisma.notification.createMany({ data: notifications });
+
+      await Promise.all(
+        users.map((user) => this.sendUnreadCountNotification(user.id)),
+      );
+
+      return notifications.at(-1);
+    } else if (userId) {
+      const notification = await this.prisma.notification.create({
         data: createNotification,
       });
-    } catch (error) {
-      this.logger.error(`Error creating notification: ${error}`);
-      throw new ConflictException('Notification cannot be created.');
+      await this.sendUnreadCountNotification(userId);
+      return notification;
     }
+
+    throw new ConflictException(
+      'Notification must be associated with a user or customer',
+    );
   }
 
   async findOne(userId: number, id: number) {
@@ -88,7 +91,9 @@ export class NotificationsService {
   }
 
   async markAsRead(userId: number, id: number) {
-    this.logger.log(`Marking notification with id ${id} as read`);
+    this.logger.log(
+      `Marking user (${userId}) notification with id ${id} as read`,
+    );
     const notification = await this.prisma.notification.update({
       where: { id, userId },
       data: { isRead: true, readAt: new Date() },
@@ -98,23 +103,28 @@ export class NotificationsService {
       throw new NotFoundException('Notification not found');
     }
 
+    await this.sendUnreadCountNotification(userId);
+
     return notification;
   }
 
   async markAllAsRead(userId: number) {
     this.logger.log('Marking all notifications as read');
-    return this.prisma.notification.updateMany({
+    await this.prisma.notification.updateMany({
       where: { isRead: false, userId },
       data: { isRead: true, readAt: new Date() },
     });
+
+    await this.sendUnreadCountNotification(userId);
   }
 
   async marksAsReadMultiple(userId: number, ids: number[]) {
     this.logger.log(`Marking notifications with ids ${ids.join(', ')} as read`);
-    return this.prisma.notification.updateMany({
+    await this.prisma.notification.updateMany({
       where: { id: { in: ids }, isRead: false, userId },
       data: { isRead: true, readAt: new Date() },
     });
+    await this.sendUnreadCountNotification(userId);
   }
 
   async unreadCount(userId: number): Promise<number> {
@@ -122,5 +132,14 @@ export class NotificationsService {
     return this.prisma.notification.count({
       where: { isRead: false, userId },
     });
+  }
+
+  async sendUnreadCountNotification(userId: number) {
+    const count = await this.unreadCount(userId);
+    await sendSupabaseNotification(
+      `unread-notifications:${userId}`,
+      'unread_count',
+      { count },
+    );
   }
 }

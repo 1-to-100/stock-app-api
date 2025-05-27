@@ -10,6 +10,7 @@ import {
   ForbiddenException,
   BadRequestException,
   Query,
+  Logger,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -26,6 +27,8 @@ import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 @Controller('notifications')
 @UseGuards(DynamicAuthGuard)
 export class NotificationsController {
+  private readonly logger = new Logger(NotificationsController.name);
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly notificationsService: NotificationsService,
@@ -34,7 +37,8 @@ export class NotificationsController {
   // Only superadmins can create notifications
   @Post()
   @ApiOkResponse({
-    description: 'Notification created successfully',
+    description:
+      'Notification created successfully. Only system admin can create notifications.',
     type: NotificationDto,
   })
   async createNotification(
@@ -75,7 +79,12 @@ export class NotificationsController {
       }
     }
 
-    return this.notificationsService.create(createNotificationDto);
+    try {
+      return this.notificationsService.create(createNotificationDto);
+    } catch (error) {
+      this.logger.error('Failed to create notification', error);
+      throw new BadRequestException('Failed to create notification');
+    }
   }
 
   @Get()
@@ -140,7 +149,12 @@ export class NotificationsController {
     },
   })
   async markAllAsRead(@User() user: OutputUserDto) {
-    await this.notificationsService.markAllAsRead(+user.id);
+    try {
+      await this.notificationsService.markAllAsRead(+user.id);
+    } catch (error) {
+      this.logger.error('Failed to mark notifications as read', error);
+      throw new BadRequestException('Failed to mark all notifications as read');
+    }
     return { message: 'All notifications marked as read' };
   }
 
@@ -154,7 +168,12 @@ export class NotificationsController {
     @User() user: OutputUserDto,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.notificationsService.markAsRead(+user.id, +id);
+    try {
+      await this.notificationsService.markAsRead(+user.id, +id);
+    } catch (error) {
+      this.logger.error('Failed to mark notifications as read', error);
+      throw new BadRequestException('Failed to mark notification as read');
+    }
   }
 
   @Patch()
@@ -194,7 +213,14 @@ export class NotificationsController {
         'Invalid input: ids must be a non-empty array',
       );
     }
-    await this.notificationsService.marksAsReadMultiple(+user.id, ids);
+
+    try {
+      await this.notificationsService.marksAsReadMultiple(+user.id, ids);
+    } catch (error) {
+      this.logger.error('Failed to mark notifications as read', error);
+      throw new BadRequestException('Failed to mark notifications as read');
+    }
+
     return { message: 'Notifications marked as read' };
   }
 }
