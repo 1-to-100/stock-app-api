@@ -204,6 +204,7 @@ model Notification {
   userId     Int?             @map("user_id")
   customerId Int?             @map("customer_id")
   type       NotificationType
+  title      String?
   message    String
   metadata   Json?            @db.Json
   channel    String?          @db.VarChar(256)

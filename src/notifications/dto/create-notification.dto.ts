@@ -25,21 +25,31 @@ export class CreateNotificationDto {
     description: 'Type of the notification',
     enum: NotificationType,
     isArray: true,
+    required: true,
   })
   type: NotificationType;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: 'Title of the notification', required: false })
+  title?: string;
 
   @IsString()
   @ApiProperty({ description: 'Message content of the notification' })
   message: string;
 
   @IsOptional()
-  @ApiPropertyOptional({ description: 'Metadata in JSON format' })
+  @ApiPropertyOptional({
+    description: 'Metadata in JSON format',
+    required: false,
+  })
   metadata?: Record<string, any>;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
     description: 'Notification channel',
+    required: false,
   })
   channel?: string;
 }
