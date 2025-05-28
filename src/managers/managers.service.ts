@@ -7,7 +7,7 @@ import {
 import { CreateManagerDto } from './dto/create-manager.dto';
 import { UpdateManagerDto } from './dto/update-manager.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { OutputTaxonomyDto } from '../taxonomies/dto/output-taxonomy.dto';
+import { OutputManagerDto } from './dto/output-manager.dto';
 
 @Injectable()
 export class ManagersService {
@@ -30,17 +30,28 @@ export class ManagersService {
     return this.prisma.manager.findMany();
   }
 
-  getForTaxonomy(): Promise<OutputTaxonomyDto[]> {
-    return this.prisma.manager.findMany({
+  async getForTaxonomy(): Promise<OutputManagerDto[]> {
+    const usersManagers = await this.prisma.user.findMany({
+      where: { isCustomerSuccess: true },
       select: {
         id: true,
-        name: true,
+        email: true,
+        firstName: true,
+        lastName: true,
       },
     });
+
+    return usersManagers.map((manager) => ({
+      id: manager.id,
+      name: `${manager.firstName ?? ''} ${manager.lastName ?? ''}`.trim(),
+      email: manager.email,
+    })) as OutputManagerDto[];
   }
 
   async findOne(id: number) {
-    const manager = await this.prisma.manager.findFirst({ where: { id } });
+    const manager = await this.prisma.user.findFirst({
+      where: { id, isCustomerSuccess: true },
+    });
     if (!manager) {
       throw new NotFoundException('No manager with given ID exists');
     }

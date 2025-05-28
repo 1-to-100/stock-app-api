@@ -28,6 +28,12 @@ type SubscriptionDataType = {
     name: string;
     Users: { email: string }[];
   };
+  CustomerSuccess: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string | null;
+  } | null;
   createdAt?: Date;
   updatedAt?: Date;
   Subscription?: {
@@ -97,13 +103,25 @@ export class CustomersService {
   async findAll(
     listCustomersInput: ListCustomersInputDto,
   ): Promise<PaginatedOutputDto<ListCustomersOutputDto>> {
-    const { id, search, status, subscriptionId, managerId, perPage, page } =
-      listCustomersInput;
+    const {
+      id,
+      search,
+      status,
+      subscriptionId,
+      managerId,
+      perPage,
+      page,
+      customerSuccessId,
+    } = listCustomersInput;
 
     const where: Prisma.CustomerFindManyArgs['where'] = {
       ...(id && { id: { in: id } }),
       ...(subscriptionId && { subscriptionId: { in: subscriptionId } }),
       ...(managerId && { managerId: { in: managerId } }),
+      ...(managerId && { managerId: { in: managerId } }),
+      ...(customerSuccessId && {
+        customerSuccessId: { in: customerSuccessId },
+      }),
       ...(status && {
         status: {
           in: status.map((s) => s as CustomerStatus),
@@ -133,8 +151,17 @@ export class CustomersService {
               Users: { select: { email: true }, take: 1 },
             },
           },
+          CustomerSuccess: {
+            select: { id: true, firstName: true, lastName: true, email: true },
+          },
           Subscription: { select: { id: true, name: true } },
-          _count: { select: { Users: true } },
+          _count: {
+            select: {
+              Users: {
+                where: { isSuperadmin: false, isCustomerSuccess: false },
+              },
+            },
+          },
         },
         orderBy: { id: 'desc' },
       },
@@ -147,6 +174,13 @@ export class CustomersService {
         name: customer.name,
         email: customer.email,
         status: customer.status,
+        customerSuccess: customer.CustomerSuccess
+          ? {
+              id: customer.CustomerSuccess.id,
+              name: `${customer.CustomerSuccess.firstName ?? ''} ${customer.CustomerSuccess.lastName ?? ''}`.trim(),
+              email: customer.CustomerSuccess.email,
+            }
+          : null,
         manager: customer.Manager
           ? {
               id: customer.Manager?.id,
@@ -190,6 +224,9 @@ export class CustomersService {
             Users: { select: { email: true }, take: 1 },
           },
         },
+        CustomerSuccess: {
+          select: { id: true, firstName: true, lastName: true },
+        },
         Subscription: { select: { id: true, name: true } },
         Owner: { select: { id: true, firstName: true, lastName: true } },
         _count: { select: { Users: true } },
@@ -207,6 +244,13 @@ export class CustomersService {
       name: customer.name,
       email: customer.email,
       status: customer.status,
+      customerSuccess: customer.CustomerSuccess
+        ? {
+            id: customer.CustomerSuccess.id,
+            name: `${customer.CustomerSuccess.firstName ?? ''} ${customer.CustomerSuccess.lastName ?? ''}`.trim(),
+            email: customer.CustomerSuccess.lastName,
+          }
+        : null,
       manager: customer.Manager
         ? {
             id: customer.Manager?.id,

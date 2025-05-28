@@ -27,6 +27,10 @@ export class CreateCustomerDto {
   managerId: number | null = null;
 
   @IsInt()
+  @ApiProperty({ description: 'Customer Success ID' })
+  customerSuccessId: number | null = null;
+
+  @IsInt()
   @ApiProperty({ description: 'Owner User ID' })
   ownerId: number;
 }

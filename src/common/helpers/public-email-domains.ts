@@ -1,5 +1,5 @@
 export const PUBLIC_EMAIL_DOMAINS = new Set([
-  // 'gmail.com', // тимчасово
+  'gmail.com',
   'yahoo.com',
   'yahoo.co.uk',
   'yahoo.fr',
@@ -7,9 +7,9 @@ export const PUBLIC_EMAIL_DOMAINS = new Set([
   'hotmail.com',
   'hotmail.co.uk',
   'hotmail.fr',
-  // 'outlook.com', // тимчасово
-  // 'outlook.co.uk', // тимчасово
-  // 'outlook.fr', // тимчасово
+  'outlook.com',
+  'outlook.co.uk',
+  'outlook.fr',
   'live.com',
   'msn.com',
   'icloud.com',

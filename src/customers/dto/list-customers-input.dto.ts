@@ -34,6 +34,14 @@ export class ListCustomersInputDto extends PaginatedInputDto {
   managerId?: number[];
 
   @IsArray()
+  @IsInt({ each: true })
+  @IsOptional()
+  @Type(() => Number)
+  @ApiPropertyOptional({ description: 'Manager IDs' })
+  @Transform(eachNumberTransformer)
+  customerSuccessId?: number[];
+
+  @IsArray()
   @IsEnum(UserStatusList, { each: true })
   @IsOptional()
   @ApiPropertyOptional({
