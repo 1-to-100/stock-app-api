@@ -12,11 +12,16 @@ import { Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
 import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 import { ListArticlesOutputDto } from './dto/list-articles-output.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/constants/notification-type';
 
 @Injectable()
 export class ArticlesService {
   private readonly logger = new Logger(ArticlesService.name);
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationsService,
+  ) {}
 
   async create(createArticleDto: ArticleDto) {
     try {
@@ -149,10 +154,26 @@ export class ArticlesService {
       throw new NotFoundException(`Article with ID ${id} not found`);
     }
 
-    return this.prisma.article.update({
+    const updatedArticle = await this.prisma.article.update({
       where: { id },
       data: updateArticleDto,
     });
+
+    // send notification to all users of this customer
+    if (
+      article.status != updateArticleDto.status &&
+      updateArticleDto.status === 'published'
+    ) {
+      await this.notificationService.create({
+        title: 'New Article Published',
+        message: `A new article "${updatedArticle.title}" has been published.`,
+        channel: 'article',
+        type: NotificationType.IN_APP,
+        customerId,
+      });
+    }
+
+    return updatedArticle;
   }
 
   async remove(id: number, customerId: number) {

@@ -12,6 +12,7 @@ import { ListNotificationsInputDto } from './dto/list-notifications-input.dto';
 import { createPaginator } from 'prisma-pagination';
 import { Prisma } from '@prisma/client';
 import { sendSupabaseNotification } from '../common/helpers/supabase-client';
+import { NotificationType } from './constants/notification-type';
 
 @Injectable()
 export class NotificationsService {
@@ -37,16 +38,36 @@ export class NotificationsService {
 
       await this.prisma.notification.createMany({ data: notifications });
 
-      await Promise.all(
-        users.map((user) => this.sendUnreadCountNotification(user.id)),
-      );
+      setTimeout(() => {
+        Promise.all(
+          users.map((user) => this.sendUnreadCountNotification(user.id)),
+        )
+          .then(() => {
+            return Promise.all(
+              notifications.map((notification) =>
+                this.sendInAppNotification(notification),
+              ),
+            );
+          })
+          .catch((error) => {
+            this.logger.error(
+              'Error in delayed notification processing',
+              error,
+            );
+          });
+      }, 200);
 
       return notifications.at(-1);
     } else if (userId) {
       const notification = await this.prisma.notification.create({
         data: createNotification,
       });
-      await this.sendUnreadCountNotification(userId);
+
+      await Promise.all([
+        this.sendUnreadCountNotification(userId),
+        this.sendInAppNotification({ ...createNotification, userId }),
+      ]);
+
       return notification;
     }
 
@@ -132,6 +153,22 @@ export class NotificationsService {
     return this.prisma.notification.count({
       where: { isRead: false, userId },
     });
+  }
+
+  async sendInAppNotification(notification: CreateNotificationDto) {
+    if (
+      !notification.userId ||
+      !notification.customerId ||
+      notification.type !== NotificationType.IN_APP
+    ) {
+      return;
+    }
+
+    return sendSupabaseNotification(
+      `main-notifications:${notification.userId}`,
+      'new',
+      notification,
+    );
   }
 
   async sendUnreadCountNotification(userId: number) {
