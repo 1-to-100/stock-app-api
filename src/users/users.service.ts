@@ -93,6 +93,14 @@ export class UsersService {
         data: { ...makeUser, isSuperadmin, isCustomerSuccess },
       });
 
+      // attach customer success to customer
+      if (isCustomerSuccess && createSystemUserDto.customerId) {
+        await this.prisma.customer.update({
+          where: { id: createSystemUserDto.customerId },
+          data: { customerSuccessId: user.id },
+        });
+      }
+
       if (user) {
         await this.sendInviteEmail(user);
       }
@@ -145,8 +153,22 @@ export class UsersService {
         data: {
           ...updateUser,
           ...(systemRole ? { isSuperadmin, isCustomerSuccess } : {}),
+          ...(isSuperadmin ? { customerId: null } : {}),
         },
       });
+
+      // attach customer success to customer
+      if (isSuperadmin) {
+        await this.prisma.customer.updateMany({
+          where: { customerSuccessId: id },
+          data: { customerSuccessId: null },
+        });
+      } else if (isCustomerSuccess && updateSystemUserDto.customerId) {
+        await this.prisma.customer.update({
+          where: { id: updateSystemUserDto.customerId },
+          data: { customerSuccessId: user.id },
+        });
+      }
 
       return user;
     } catch (error) {
