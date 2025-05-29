@@ -44,4 +44,8 @@ export class OutputUserDto {
   @ApiPropertyOptional({ description: 'Is Customer Success' })
   @IsOptional()
   isCustomerSuccess?: boolean | null;
+
+  @ApiPropertyOptional({ description: 'List of permissions' })
+  @IsOptional()
+  permissions?: string[];
 }

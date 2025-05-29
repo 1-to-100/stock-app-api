@@ -264,26 +264,47 @@ export class UsersService {
     id: number,
     customerId: number | null = null,
   ): Promise<OutputUserDto> {
-    let where = {};
-    if (customerId) {
-      where = { AND: [{ id }, { customerId }] };
-    } else {
-      where = { id };
-    }
+    const where = customerId ? { AND: [{ id }, { customerId }] } : { id };
 
     const user = await this.prisma.user.findFirst({
-      where: where,
+      where,
       include: {
+        // role: {
+        //   include: {
+        //     permissions: {
+        //       include: {
+        //         permission: true,
+        //       },
+        //     },
+        //   },
+        // },
         role: true,
         customer: true,
         manager: true,
       },
     });
+
     if (!user) {
       throw new NotFoundException('No user with given ID exists');
     }
 
-    return user as OutputUserDto;
+    let userPermissions: string[] = [];
+    if (user.role) {
+      const rolePermissions = await this.prisma.rolePermission.findMany({
+        where: { roleId: user.role.id },
+        include: {
+          permission: true,
+        },
+      });
+
+      userPermissions = rolePermissions
+        ? rolePermissions.map(
+            (permission) => permission.permission.name.split(':')[1],
+          )
+        : [];
+    }
+
+    return { ...user, permissions: userPermissions } as OutputUserDto;
   }
 
   async findOneSystemUser(id: number): Promise<OutputUserDto> {
