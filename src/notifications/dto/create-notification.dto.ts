@@ -24,7 +24,7 @@ export class CreateNotificationDto {
   @ApiProperty({
     description: 'Type of the notification',
     enum: NotificationType,
-    isArray: true,
+    isArray: false,
     required: true,
   })
   type: NotificationType;
