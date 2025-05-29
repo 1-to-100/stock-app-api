@@ -28,6 +28,7 @@ export class PermissionGuard implements CanActivate {
     );
 
     // if no permissions are required, allow access
+    console.log('allowedPermissions', allowedPermissions);
     if (!allowedPermissions || allowedPermissions.length === 0) {
       return true;
     }
@@ -38,7 +39,6 @@ export class PermissionGuard implements CanActivate {
     }>();
 
     const user = request.currentUser;
-    console.log(user);
     if (!user) {
       throw new ForbiddenException('Access denied: user not found');
     }
@@ -49,13 +49,14 @@ export class PermissionGuard implements CanActivate {
     // треба придумати кращий метод для ролі CustomerSuccess, ніж харкодити деякі доступа
     if (
       user.isCustomerSuccess &&
-      allowedPermissions.some((permission) =>
-        [
-          'UserManagement:viewUsers',
-          'UserManagement:createUser',
-          'UserManagement:inviteUser',
-          'UserManagement:editUser',
-        ].includes(permission),
+      allowedPermissions.some(
+        (permission) =>
+          [
+            'UserManagement:viewUsers',
+            'UserManagement:createUser',
+            'UserManagement:inviteUser',
+            'UserManagement:editUser',
+          ].includes(permission) || permission.startsWith('Documents:'),
       )
     ) {
       return true;
