@@ -15,6 +15,8 @@ const supabase = createClient(supabase_url, service_role_key, {
 export const supabaseClientAdmin = supabase.auth.admin;
 export const supabaseClientAuth = supabase.auth;
 export const supabaseClientStorage = supabase.storage;
+export const supabaseClientFunctions = supabase.functions;
+
 export const supabaseClientChannel = (channelName: string) => {
   return supabase.channel(channelName);
 };

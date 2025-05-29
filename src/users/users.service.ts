@@ -247,9 +247,7 @@ export class UsersService {
           { email: { contains: search, mode: 'insensitive' } },
         ],
       }),
-      ...{
-        OR: [{ isSuperadmin: true }, { isCustomerSuccess: true }],
-      },
+      ...{ AND: { OR: [{ isSuperadmin: true }, { isCustomerSuccess: true }] } },
     };
 
     const paginate = createPaginator({ perPage });
