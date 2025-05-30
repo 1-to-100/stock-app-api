@@ -51,7 +51,7 @@ export const SYSTEM_MODULES: SystemModule[] = [
   {
     name: CUSTOMER_MANAGEMENT_MODULE,
     label: 'Customer Management',
-    enabled: true,
+    enabled: false,
     permissions: [
       {
         name: permissionWithPrefix(
@@ -84,7 +84,7 @@ export const SYSTEM_MODULES: SystemModule[] = [
   {
     name: ROLE_MANAGEMENT_MODULE,
     label: 'Role Management',
-    enabled: true,
+    enabled: false,
     permissions: [
       {
         name: permissionWithPrefix('viewRoles', ROLE_MANAGEMENT_MODULE),

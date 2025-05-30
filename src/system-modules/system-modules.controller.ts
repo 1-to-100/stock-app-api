@@ -90,38 +90,23 @@ export class SystemModulesController {
 
   @Get('test')
   test() {
-    // await supabaseClientAuth.signUp({
-    //   email: 'oleksandr.zhuryk+invite17@huboxt.com',
-    //   password: '1QAZxsw2!',
-    //   options: {
-    //     emailRedirectTo: FrontendPaths.callbackPkce,
-    //     data: {
-    //       firstName: 'Alex',
-    //       lastName: 'Test',
-    //     },
+    // const user = await this.prisma.user.findFirst({
+    //   where: { email: 'oleksandr.zhuryk+resend2@1to100.com' },
+    // });
+    //
+    // if (!user) {
+    //   throw new Error('User not found');
+    // }
+    //
+    // const res = await supabaseClientAdmin.inviteUserByEmail(user.email, {
+    //   data: {
+    //     ...(user?.firstName && { firstName: user.firstName }),
+    //     ...(user?.lastName && { lastName: user.lastName }),
     //   },
+    //   redirectTo: FrontendPaths.setNewPassword,
     // });
 
-    // const newUser = await supabaseClientAdmin.getUserById(
-    //   'faac8bef-8216-4f97-9699-0c57eedc0d62',
-    // );
-    //
-    // console.log('getUser', newUser);
-
-    // await supabaseClientAdmin.updateUserById(
-    //   'aee6b0de-c09d-4756-907e-01ff587e03a1',
-    //   { user_metadata: { updateStatus: false } },
-    // );
-
-    // const { data: newUser } = await supabaseClientAdmin.inviteUserByEmail(
-    //   'oleksandr.zhuryk+invite16@huboxt.com',
-    //   {
-    //     data: {
-    //       name: 'Alex Test Od 16',
-    //     },
-    //     redirectTo: FrontendPaths.setNewPassword,
-    //   },
-    // );
+    // console.log('Invite result:', res);
 
     return {
       message: 'ok',

@@ -38,6 +38,7 @@ export class RolesService {
 
     return this.prisma.role.findMany({
       where,
+      orderBy: { id: 'desc' },
       include: {
         permissions: {
           include: {
