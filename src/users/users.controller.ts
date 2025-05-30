@@ -140,18 +140,23 @@ export class UsersController {
       );
     }
 
+    const existingEmails = await this.usersService.emailsExists(
+      inviteUsersDto.emails,
+    );
+
+    if (existingEmails.length > 0) {
+      throw new BadRequestException(
+        `The following emails already exist: ${existingEmails.join(', ')}`,
+      );
+    }
+
     const invitePromises = inviteUsersDto.emails.map(async (email) => {
-      if (await this.usersService.emailExists({ email })) {
-        this.logger.log(`Invite email already exists: ${email}`);
-        return null; // Return null or something to maintain array structure
-      } else {
-        const inviteUserDto = new InviteUserDto();
-        inviteUserDto.email = email;
-        inviteUserDto.customerId = inviteUsersDto.customerId;
-        inviteUserDto.roleId = inviteUsersDto.roleId;
-        inviteUserDto.managerId = inviteUsersDto.managerId;
-        return this.usersService.invite(inviteUserDto);
-      }
+      const inviteUserDto = new InviteUserDto();
+      inviteUserDto.email = email;
+      inviteUserDto.customerId = inviteUsersDto.customerId;
+      inviteUserDto.roleId = inviteUsersDto.roleId;
+      inviteUserDto.managerId = inviteUsersDto.managerId;
+      return this.usersService.invite(inviteUserDto);
     });
 
     const results = await Promise.all(invitePromises);

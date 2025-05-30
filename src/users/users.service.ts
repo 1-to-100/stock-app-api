@@ -181,6 +181,16 @@ export class UsersService {
     if (await this.emailExists({ email: inviteUserDto.email })) {
       throw new ConflictException('User with this email already exists');
     }
+
+    if (inviteUserDto.customerId) {
+      const customer = await this.prisma.customer.findUnique({
+        where: { id: inviteUserDto.customerId },
+      });
+      if (!customer) {
+        throw new ConflictException('Customer not found');
+      }
+    }
+
     const user = await this.prisma.user.create({ data: inviteUserDto });
     await this.sendInviteEmail(user);
     return user;
@@ -211,6 +221,19 @@ export class UsersService {
     return !!(await this.prisma.user.findFirst({
       where: { email: checkUserExistsDto.email },
     }));
+  }
+
+  async emailsExists(emails: string[]): Promise<string[]> {
+    const existingEmails = await this.prisma.user.findMany({
+      select: { email: true },
+      where: {
+        email: {
+          in: emails,
+        },
+      },
+    });
+
+    return existingEmails.map((user) => user.email);
   }
 
   async findAll(
@@ -278,7 +301,6 @@ export class UsersService {
     customerId: number | null = null,
   ): Promise<OutputUserDto> {
     const where = customerId ? { AND: [{ id }, { customerId }] } : { id };
-
     const user = await this.prisma.user.findFirst({
       where,
       include: {
