@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
@@ -19,6 +20,7 @@ import { Permissions } from '../common/decorators/permissions.decorator';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
 import { RequireSuperuserGuard } from '../auth/guards/require-superuser/require-superuser.guard';
 import { RequiredSuperUser } from '../common/decorators/superuser.decorator';
+import { ListRolesDto } from './dto/list-roles.dto';
 
 @Controller('roles')
 @UseGuards(DynamicAuthGuard, RequireSuperuserGuard, PermissionGuard)
@@ -38,8 +40,8 @@ export class RolesController {
   @Get()
   @RequiredSuperUser('superAdmin')
   @Permissions('RoleManagement:viewRoles')
-  findAll() {
-    return this.rolesService.findAll({});
+  findAll(@Query() listRolesDto: ListRolesDto) {
+    return this.rolesService.findAll(listRolesDto.search);
   }
 
   @Get(':id')

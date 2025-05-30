@@ -43,7 +43,9 @@ export class RegisterController {
       );
     }
     if (isPublicEmailDomain(domain)) {
-      throw new ConflictException('Email address is not a company address');
+      throw new ConflictException(
+        'Please use your work email instead of a personal one (@gmail, @yahoo, etc.) to connect with your company. Personal email domains cannot join existing companies.',
+      );
     }
   }
 }

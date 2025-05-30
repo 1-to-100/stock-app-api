@@ -26,19 +26,18 @@ export class RolesService {
     return this.prisma.role.create({ data: createRoleDto });
   }
 
-  findAll(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.RoleWhereUniqueInput;
-    where?: Prisma.RoleWhereInput;
-    orderBy?: Prisma.RoleOrderByWithRelationInput;
-  }) {
-    const { skip, take, cursor, where } = params;
-    let { orderBy } = params;
-    orderBy ??= {
-      name: 'asc',
-    };
+  findAll(search?: string) {
+    const where: Prisma.RoleWhereInput = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
     return this.prisma.role.findMany({
+      where,
       include: {
         permissions: {
           include: {
@@ -49,11 +48,6 @@ export class RolesService {
           select: { users: true },
         },
       },
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
     });
   }
 

@@ -88,7 +88,9 @@ export class CustomersService {
       );
     }
     if (isPublicEmailDomain(domain)) {
-      throw new ConflictException('Email address is not a company address');
+      throw new ConflictException(
+        'Please use your work email instead of a personal one (@gmail, @yahoo, etc.) to connect with your company. Personal email domains cannot join existing companies.',
+      );
     }
     const customer = await this.prisma.customer.create({
       data: { name, email, subscriptionId, domain, ownerId, managerId },
