@@ -27,6 +27,7 @@ import { PermissionGuard } from '../auth/guards/permission/permission.guard';
 import { User } from '../common/decorators/user.decorator';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
 import { CustomerId } from '../common/decorators/customer-id.decorator';
+import { ResendInviteUserDto } from './dto/resend-invite-user.dto';
 
 @Controller('users')
 @UseGuards(DynamicAuthGuard, PermissionGuard)
@@ -77,6 +78,23 @@ export class UsersController {
     }
 
     return await this.usersService.invite(inviteUserDto);
+  }
+
+  @Post('/resend-invite')
+  @ApiOkResponse({
+    description: 'The user record',
+    type: OutputUserDto,
+  })
+  @Permissions('UserManagement:inviteUser')
+  async resendInvite(
+    @User() user: OutputUserDto,
+    @Body() resendInviteUserDto: ResendInviteUserDto,
+  ) {
+    if (!user.isSuperadmin && !user.customerId) {
+      throw new ForbiddenException('You have no access to resend invites.');
+    }
+
+    return this.usersService.resendInviteEmail(resendInviteUserDto.email);
   }
 
   @Post('/check-email')

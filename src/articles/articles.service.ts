@@ -26,9 +26,21 @@ export class ArticlesService {
   async create(createArticleDto: ArticleDto) {
     try {
       this.logger.log(`Create article with title ${createArticleDto.title}`);
-      return this.prisma.article.create({
+      const article = await this.prisma.article.create({
         data: createArticleDto,
       });
+
+      if (article.status == 'published') {
+        await this.notificationService.create({
+          title: 'New Article Published',
+          message: `A new article "${article.title}" has been published.`,
+          channel: 'article',
+          type: NotificationType.IN_APP,
+          customerId: article.customerId,
+        });
+      }
+
+      return article;
     } catch (error) {
       this.logger.error(`Error creating article: ${error}`);
       throw new ConflictException('Article cannot be created.');

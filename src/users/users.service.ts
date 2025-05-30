@@ -186,6 +186,21 @@ export class UsersService {
     return user;
   }
 
+  async resendInviteEmail(email: string): Promise<OutputUserDto> {
+    const user = await this.prisma.user.findFirst({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User with this email does not exist');
+    } else if (user.status === UserStatus.ACTIVE) {
+      throw new ConflictException('User is already active');
+    }
+
+    await this.sendInviteEmail(user);
+    return user;
+  }
+
   async checkEmailExists(checkUserExistsDto: CheckUserExistsDto) {
     return {
       exists: await this.emailExists(checkUserExistsDto),
@@ -522,13 +537,20 @@ export class UsersService {
   }
 
   async sendInviteEmail(user: OutputUserDto) {
-    await supabaseClientAdmin.inviteUserByEmail(user.email, {
+    const { error } = await supabaseClientAdmin.inviteUserByEmail(user.email, {
       data: {
         ...(user?.firstName && { firstName: user.firstName }),
         ...(user?.lastName && { lastName: user.lastName }),
       },
       redirectTo: FrontendPaths.setNewPassword,
     });
+
+    if (error) {
+      this.logger.error(`Error sending invite email: ${error.message}`);
+      throw new ConflictException(
+        `Error sending invite email: ${error.message}`,
+      );
+    }
 
     return true;
   }
