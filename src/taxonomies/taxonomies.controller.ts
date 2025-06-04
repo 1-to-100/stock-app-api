@@ -10,6 +10,9 @@ import { User } from '../common/decorators/user.decorator';
 import { OutputUserDto } from '../users/dto/output-user.dto';
 import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
 import { UserSystemRolesList } from '../common/constants/user-system-roles';
+import { NotificationTypeList } from '../notifications/constants/notification-types';
+import { NotificationChannelList } from '../notifications/constants/notification-channel';
+import { OutputNotificationsTaxonomyDto } from './dto/output-notifications-taxonomy.dto';
 
 @Controller('taxonomies')
 @UseGuards(DynamicAuthGuard)
@@ -76,8 +79,21 @@ export class TaxonomiesController {
   @ApiOkResponse({
     description: 'User System Roles',
     type: [String],
+    example: { types: NotificationTypeList, channels: NotificationChannelList },
   })
   userSystemRoles() {
     return UserSystemRolesList;
+  }
+
+  @Get('/notifications')
+  @ApiOkResponse({
+    description: 'Notifications',
+    type: OutputNotificationsTaxonomyDto,
+  })
+  notifications() {
+    return {
+      types: NotificationTypeList,
+      channels: NotificationChannelList,
+    };
   }
 }
