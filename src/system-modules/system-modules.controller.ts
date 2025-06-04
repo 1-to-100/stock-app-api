@@ -87,32 +87,4 @@ export class SystemModulesController {
     }
     return { message: 'ok' };
   }
-
-  @Get('test')
-  test() {
-    // const user = await this.prisma.user.findFirst({
-    //   where: { email: 'oleksandr.zhuryk+resend2@1to100.com' },
-    // });
-    //
-    // if (!user) {
-    //   throw new Error('User not found');
-    // }
-    //
-    // const res = await supabaseClientAdmin.inviteUserByEmail(user.email, {
-    //   data: {
-    //     ...(user?.firstName && { firstName: user.firstName }),
-    //     ...(user?.lastName && { lastName: user.lastName }),
-    //   },
-    //   redirectTo: FrontendPaths.setNewPassword,
-    // });
-
-    // console.log('Invite result:', res);
-
-    return {
-      message: 'ok',
-      // email,
-      // newUser,
-      // redirectTo: FrontendPaths.setNewPassword,
-    };
-  }
 }

@@ -23,24 +23,25 @@ enum CustomerStatus {
 }
 
 model Customer {
-  id                Int            @id @default(autoincrement())
-  name              String         @unique
-  email             String         @unique
-  domain            String         @unique
-  ownerId           Int            @unique @map("owner_id")
-  status            CustomerStatus @default(inactive)
-  subscriptionId    Int?           @map("subscription_id")
-  managerId         Int?           @map("manager_id")
-  customerSuccessId Int?           @map("customer_success_id")
-  createdAt         DateTime       @default(now()) @map("created_at")
-  updatedAt         DateTime?      @updatedAt @map("updated_at")
-  Subscription      Subscription?  @relation(fields: [subscriptionId], references: [id])
-  Manager           Manager?       @relation(fields: [managerId], references: [id])
-  Owner             User           @relation("CustomerOwner", fields: [ownerId], references: [id])
-  CustomerSuccess   User?          @relation("CustomerSuccess", fields: [customerSuccessId], references: [id])
-  Users             User[]         @relation("CustomerUsers")
-  Articles          Article[]
-  Notification      Notification[]
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @unique
+  email                String                 @unique
+  domain               String                 @unique
+  ownerId              Int                    @unique @map("owner_id")
+  status               CustomerStatus         @default(inactive)
+  subscriptionId       Int?                   @map("subscription_id")
+  managerId            Int?                   @map("manager_id")
+  customerSuccessId    Int?                   @map("customer_success_id")
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime?              @updatedAt @map("updated_at")
+  Subscription         Subscription?          @relation(fields: [subscriptionId], references: [id])
+  Manager              Manager?               @relation(fields: [managerId], references: [id])
+  Owner                User                   @relation("CustomerOwner", fields: [ownerId], references: [id])
+  CustomerSuccess      User?                  @relation("CustomerSuccess", fields: [customerSuccessId], references: [id])
+  Users                User[]                 @relation("CustomerUsers")
+  Articles             Article[]
+  Notification         Notification[]
+  NotificationTemplate NotificationTemplate[]
 
   @@index([status])
   @@index([subscriptionId])
@@ -199,22 +200,31 @@ model Article {
   @@map("articles")
 }
 
+enum NotificationType {
+  EMAIL
+  IN_APP
+}
+
 model Notification {
-  id         Int              @id @default(autoincrement())
-  userId     Int?             @map("user_id")
-  customerId Int?             @map("customer_id")
+  id         Int                   @id @default(autoincrement())
+  userId     Int?                  @map("user_id")
+  customerId Int?                  @map("customer_id")
+  senderId   Int?                  @map("sender_id")
   type       NotificationType
   title      String?
-  message    String
-  metadata   Json?            @db.Json
-  channel    String?          @db.VarChar(256)
-  isRead     Boolean          @default(false) @map("is_read")
-  createdAt  DateTime         @default(now()) @map("created_at")
-  readAt     DateTime?        @map("read_at")
-  User       User?            @relation(fields: [userId], references: [id])
-  Customer   Customer?        @relation(fields: [customerId], references: [id])
+  message    String?
+  templateId Int?                  @map("template_id")
+  metadata   Json?                 @db.Json
+  channel    String?               @db.VarChar(256)
+  isRead     Boolean               @default(false) @map("is_read")
+  createdAt  DateTime              @default(now()) @map("created_at")
+  readAt     DateTime?             @map("read_at")
+  User       User?                 @relation(fields: [userId], references: [id])
+  Customer   Customer?             @relation(fields: [customerId], references: [id])
+  Template   NotificationTemplate? @relation(fields: [templateId], references: [id])
 
   @@index([userId])
+  @@index([senderId])
   @@index([customerId])
   @@index([type])
   @@index([createdAt])
@@ -223,7 +233,24 @@ model Notification {
   @@map("notifications")
 }
 
-enum NotificationType {
-  EMAIL
-  IN_APP
+model NotificationTemplate {
+  id           Int                @id @default(autoincrement())
+  title        String             @db.VarChar(100)
+  message      String?            @db.Text
+  comment      String?            @db.VarChar(100)
+  type         NotificationType[]
+  channel      String             @db.VarChar(256)
+  customerId   Int?               @map("customer_id")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime?          @updatedAt @map("updated_at")
+  deletedAt    DateTime?          @map("deleted_at")
+  Customer     Customer?          @relation(fields: [customerId], references: [id])
+  Notification Notification[]
+
+  @@index([title])
+  @@index([type])
+  @@index([channel])
+  @@index([customerId])
+  @@index([createdAt])
+  @@map("notification_templates")
 }

@@ -13,7 +13,7 @@ import { createPaginator } from 'prisma-pagination';
 import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
 import { ListArticlesOutputDto } from './dto/list-articles-output.dto';
 import { NotificationsService } from '../notifications/notifications.service';
-import { NotificationType } from '../notifications/constants/notification-type';
+import { NotificationTypes } from '../notifications/constants/notification-types';
 
 @Injectable()
 export class ArticlesService {
@@ -35,7 +35,7 @@ export class ArticlesService {
           title: 'New Article Published',
           message: `A new article "${article.title}" has been published.`,
           channel: 'article',
-          type: NotificationType.IN_APP,
+          type: NotificationTypes.IN_APP,
           customerId: article.customerId,
         });
       }
@@ -180,7 +180,7 @@ export class ArticlesService {
         title: 'New Article Published',
         message: `A new article "${updatedArticle.title}" has been published.`,
         channel: 'article',
-        type: NotificationType.IN_APP,
+        type: NotificationTypes.IN_APP,
         customerId,
       });
     }

@@ -12,7 +12,7 @@ import { ListNotificationsInputDto } from './dto/list-notifications-input.dto';
 import { createPaginator } from 'prisma-pagination';
 import { Prisma } from '@prisma/client';
 import { sendSupabaseNotification } from '../common/helpers/supabase-client';
-import { NotificationType } from './constants/notification-type';
+import { NotificationTypes } from './constants/notification-types';
 
 @Injectable()
 export class NotificationsService {
@@ -159,7 +159,7 @@ export class NotificationsService {
     if (
       !notification.userId ||
       !notification.customerId ||
-      notification.type !== NotificationType.IN_APP
+      notification.type !== NotificationTypes.IN_APP
     ) {
       return;
     }

@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import {
-  NotificationType,
+  NotificationTypes,
   NotificationTypeList,
-} from '../constants/notification-type';
+  NotificationType,
+} from '../constants/notification-types';
 
 export class CreateNotificationDto {
   @IsInt()
@@ -23,7 +24,7 @@ export class CreateNotificationDto {
   @IsEnum(NotificationTypeList, { each: true })
   @ApiProperty({
     description: 'Type of the notification',
-    enum: NotificationType,
+    enum: NotificationTypes,
     isArray: false,
     required: true,
   })
