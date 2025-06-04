@@ -80,6 +80,22 @@ export class NotificationsService {
     this.logger.log(`Finding notification with id ${id}`);
     const notification = await this.prisma.notification.findUnique({
       where: { id, userId },
+      include: {
+        User: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        Customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!notification) {
@@ -101,14 +117,35 @@ export class NotificationsService {
       userId,
     };
 
-    return paginate<NotificationDto, Prisma.NotificationFindManyArgs>(
+    const paginatedResult = await paginate<
+      NotificationDto,
+      Prisma.NotificationFindManyArgs
+    >(
       this.prisma.notification,
       {
         where,
+        include: {
+          User: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          Customer: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
         orderBy: { createdAt: 'desc' },
       },
       { page },
     );
+
+    return paginatedResult;
   }
 
   async markAsRead(userId: number, id: number) {
