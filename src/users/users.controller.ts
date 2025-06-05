@@ -28,12 +28,17 @@ import { CheckUserExistsDto } from '@/users/dto/check-user-exists.dto';
 import { InviteMultipleUsersDto } from '@/users/dto/invite-multiple-users.dto';
 import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
 import { UpdateUserDto } from '@/users/dto/update-user.dto';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { UserStatus } from '@/common/constants/status';
 
 @Controller('users')
 @UseGuards(DynamicAuthGuard, PermissionGuard)
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post()
   @ApiOkResponse({
@@ -71,7 +76,15 @@ export class UsersController {
   ) {
     if (!user.isSuperadmin && !user.customerId) {
       throw new ForbiddenException('You have no access to invite users.');
+    } else if (
+      !user.isSuperadmin &&
+      user.customerId !== inviteUserDto.customerId
+    ) {
+      throw new ForbiddenException(
+        'You cannot invite users for another customer.',
+      );
     }
+
     if (!user.isSuperadmin && user.customerId) {
       // user cannot set another customer when creating users, assign the same he belongs to
       inviteUserDto.customerId = user.customerId;
@@ -92,6 +105,28 @@ export class UsersController {
   ) {
     if (!user.isSuperadmin && !user.customerId) {
       throw new ForbiddenException('You have no access to resend invites.');
+    }
+
+    const foundUser = await this.prisma.user.findFirst({
+      where: { email: resendInviteUserDto.email },
+    });
+
+    if (!foundUser) {
+      throw new BadRequestException(
+        `User with email ${resendInviteUserDto.email} not found.`,
+      );
+    } else if (foundUser && foundUser.status === UserStatus.ACTIVE) {
+      throw new BadRequestException(
+        `User with email ${resendInviteUserDto.email} is already active.`,
+      );
+    } else if (
+      !user.isSuperadmin &&
+      foundUser &&
+      foundUser.customerId !== user.customerId
+    ) {
+      throw new ForbiddenException(
+        'You cannot resend invite for a user from another customer.',
+      );
     }
 
     return this.usersService.resendInviteEmail(resendInviteUserDto.email);
@@ -120,7 +155,15 @@ export class UsersController {
   ) {
     if (!user.isSuperadmin && !user.customerId) {
       throw new ForbiddenException('You have no access to create users.');
+    } else if (
+      !user.isSuperadmin &&
+      user.customerId !== inviteUsersDto.customerId
+    ) {
+      throw new ForbiddenException(
+        'You cannot invite users for another customer.',
+      );
     }
+
     if (!user.isSuperadmin && user.customerId) {
       // user cannot set another customer when creating users, assign the same he belongs to
       inviteUsersDto.customerId = user.customerId;
