@@ -10,19 +10,19 @@ import {
   Body,
   Patch,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { ApiPaginatedResponse } from '../common/decorators/api-paginated-response.decorator';
-import { OutputUserDto } from './dto/output-user.dto';
-import { ListUsersInputDto } from './dto/list-users-input.dto';
+import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 import { ApiConflictResponse, ApiOkResponse } from '@nestjs/swagger';
-import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
-import { PermissionGuard } from '../auth/guards/permission/permission.guard';
-import { User } from '../common/decorators/user.decorator';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
-import { Permissions } from '../common/decorators/permissions.decorator';
-import { CreateSystemUserDto } from './dto/create-system-user.dto';
-import { UpdateSystemUserDto } from './dto/update-system-user.dto';
-import { CustomerId } from '../common/decorators/customer-id.decorator';
+import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
+import { User } from '@/common/decorators/user.decorator';
+import { Permissions } from '@/common/decorators/permissions.decorator';
+import { CustomerId } from '@/common/decorators/customer-id.decorator';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { UsersService } from '@/users/users.service';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
+import { CreateSystemUserDto } from '@/users/dto/create-system-user.dto';
+import { UpdateSystemUserDto } from '@/users/dto/update-system-user.dto';
 
 @Controller('system-users')
 @UseGuards(DynamicAuthGuard, PermissionGuard)

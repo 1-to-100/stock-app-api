@@ -11,23 +11,23 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { InviteUserDto } from './dto/invite-user.dto';
-import { InviteMultipleUsersDto } from './dto/invite-multiple-users.dto';
-import { CheckUserExistsDto } from './dto/check-user-exists.dto';
-import { ApiPaginatedResponse } from '../common/decorators/api-paginated-response.decorator';
-import { OutputUserDto } from './dto/output-user.dto';
-import { ListUsersInputDto } from './dto/list-users-input.dto';
+import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 import { ApiConflictResponse, ApiOkResponse } from '@nestjs/swagger';
-import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
-import { Permissions } from '../common/decorators/permissions.decorator';
-import { PermissionGuard } from '../auth/guards/permission/permission.guard';
-import { User } from '../common/decorators/user.decorator';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
-import { CustomerId } from '../common/decorators/customer-id.decorator';
-import { ResendInviteUserDto } from './dto/resend-invite-user.dto';
+import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
+import { Permissions } from '@/common/decorators/permissions.decorator';
+import { User } from '@/common/decorators/user.decorator';
+import { CustomerId } from '@/common/decorators/customer-id.decorator';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { UsersService } from '@/users/users.service';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { InviteUserDto } from '@/users/dto/invite-user.dto';
+import { ResendInviteUserDto } from '@/users/dto/resend-invite-user.dto';
+import { CheckUserExistsDto } from '@/users/dto/check-user-exists.dto';
+import { InviteMultipleUsersDto } from '@/users/dto/invite-multiple-users.dto';
+import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
+import { UpdateUserDto } from '@/users/dto/update-user.dto';
 
 @Controller('users')
 @UseGuards(DynamicAuthGuard, PermissionGuard)

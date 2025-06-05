@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TaxonomiesController } from './taxonomies.controller';
-import { TaxonomiesService } from './taxonomies.service';
+import { TaxonomiesController } from '@/taxonomies/taxonomies.controller';
+import { TaxonomiesService } from '@/taxonomies/taxonomies.service';
 
 describe('TaxonomiesController', () => {
   let controller: TaxonomiesController;

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
-import { PrismaService } from '../prisma/prisma.service';
-import { AuthService } from '../auth/auth.service';
-import { RolesService } from '../roles/roles.service';
-import { SystemUsersController } from './system-users.controller';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { AuthService } from '@/auth/auth.service';
+import { RolesService } from '@/roles/roles.service';
+import { UsersController } from '@/users/users.controller';
+import { SystemUsersController } from '@/users/system-users.controller';
+import { UsersService } from '@/users/users.service';
 
 @Module({
   controllers: [UsersController, SystemUsersController],

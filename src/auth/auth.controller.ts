@@ -4,13 +4,13 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { SupabaseDecodedToken } from './guards/supabase-auth/supabase-auth.guard';
-import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
-import { UsersService } from '../users/users.service';
-import { FirebaseUser } from '../common/decorators/firebase-user.decorator';
-import { DynamicAuthGuard } from './guards/dynamic-auth/dynamic-auth.guard';
-import { SupabaseUser } from '../common/decorators/supabase-user.decorator';
+import { FirebaseDecodedToken } from '@/common/types/forebase-decoded-token.type';
+import { FirebaseUser } from '@/common/decorators/firebase-user.decorator';
+import { SupabaseUser } from '@/common/decorators/supabase-user.decorator';
+import { AuthService } from '@/auth/auth.service';
+import { UsersService } from '@/users/users.service';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { SupabaseDecodedToken } from '@/auth/guards/supabase-auth/supabase-auth.guard';
 
 @Controller('auth')
 export class AuthController {

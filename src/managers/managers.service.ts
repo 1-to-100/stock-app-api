@@ -4,10 +4,10 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateManagerDto } from './dto/create-manager.dto';
-import { UpdateManagerDto } from './dto/update-manager.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { OutputManagerDto } from './dto/output-manager.dto';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { CreateManagerDto } from '@/managers/dto/create-manager.dto';
+import { OutputManagerDto } from '@/managers/dto/output-manager.dto';
+import { UpdateManagerDto } from '@/managers/dto/update-manager.dto';
 
 @Injectable()
 export class ManagersService {

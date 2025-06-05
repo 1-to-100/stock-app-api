@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ArticlesService } from './articles.service';
-import { ArticlesController } from './articles.controller';
-import { PrismaService } from '../prisma/prisma.service';
-import { RolesService } from '../roles/roles.service';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { ArticlesController } from '@/articles/articles.controller';
+import { ArticlesService } from '@/articles/articles.service';
+import { RolesService } from '@/roles/roles.service';
 
 @Module({
   controllers: [ArticlesController],

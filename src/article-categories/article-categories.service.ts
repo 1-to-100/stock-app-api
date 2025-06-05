@@ -4,11 +4,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
-import { OutputArticleCategoryDto } from './dto/output-article-category.dto';
-import { ArticleCategoryDto } from './dto/article-category.dto';
-import { UpdateArticleCategoryDto } from './dto/update-article-category.dto';
+import { ArticleCategoryDto } from '@/article-categories/dto/article-category.dto';
+import { OutputArticleCategoryDto } from '@/article-categories/dto/output-article-category.dto';
+import { UpdateArticleCategoryDto } from '@/article-categories/dto/update-article-category.dto';
 
 @Injectable()
 export class ArticleCategoriesService {

@@ -5,10 +5,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from '../../auth.service';
 import { DecodedIdToken } from 'firebase-admin/lib/auth';
-import { OutputUserDto } from '../../../users/dto/output-user.dto';
-import { UsersService } from '../../../users/users.service';
+import { UsersService } from '@/users/users.service';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { AuthService } from '@/auth/auth.service';
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {

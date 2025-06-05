@@ -12,18 +12,18 @@ import {
   Query,
   BadRequestException,
 } from '@nestjs/common';
-import { ArticlesService } from './articles.service';
-import { CreateArticleDto } from './dto/create-article.dto';
-import { UpdateArticleDto } from './dto/update-article.dto';
-import { PermissionGuard } from '../auth/guards/permission/permission.guard';
-import { Permissions } from '../common/decorators/permissions.decorator';
-import { User } from '../common/decorators/user.decorator';
-import { OutputUserDto } from '../users/dto/output-user.dto';
-import { CustomerId } from '../common/decorators/customer-id.decorator';
+import { Permissions } from '@/common/decorators/permissions.decorator';
+import { User } from '@/common/decorators/user.decorator';
+import { CustomerId } from '@/common/decorators/customer-id.decorator';
 import { ApiOkResponse, ApiConflictResponse, ApiParam } from '@nestjs/swagger';
-import { ArticleDto } from './dto/article.dto';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
-import { ListArticlesInputDto } from './dto/list-articles-input.dto';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { ArticlesService } from '@/articles/articles.service';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { CreateArticleDto } from '@/articles/dto/create-article.dto';
+import { ListArticlesInputDto } from '@/articles/dto/list-articles-input.dto';
+import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
+import { ArticleDto } from '@/articles/dto/article.dto';
 
 @Controller('documents/articles')
 @UseGuards(DynamicAuthGuard, PermissionGuard)

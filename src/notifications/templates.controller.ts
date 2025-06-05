@@ -11,19 +11,19 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { User } from '../common/decorators/user.decorator';
-import { OutputUserDto } from '../users/dto/output-user.dto';
+import { User } from '@/common/decorators/user.decorator';
 import { ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
-import { CreateTemplateDto } from './dto/create-template.dto';
-import { TemplatesService } from './templates.service';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
-import { NotificationTemplateDto } from './dto/notification-template.dto';
-import { CustomerId } from '../common/decorators/customer-id.decorator';
-import { UpdateTemplateDto } from './dto/update-template.dto';
-import { ListTemplatesInputDto } from './dto/list-templates-input.dto';
-import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
-import { ApiPaginatedResponse } from '../common/decorators/api-paginated-response.decorator';
-import { SendTemplatesInputDto } from './dto/send-templates-input.dto';
+import { CustomerId } from '@/common/decorators/customer-id.decorator';
+import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
+import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { TemplatesService } from '@/notifications/templates.service';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { ListTemplatesInputDto } from '@/notifications/dto/list-templates-input.dto';
+import { CreateTemplateDto } from '@/notifications/dto/create-template.dto';
+import { UpdateTemplateDto } from '@/notifications/dto/update-template.dto';
+import { SendTemplatesInputDto } from '@/notifications/dto/send-templates-input.dto';
+import { NotificationTemplateDto } from '@/notifications/dto/notification-template.dto';
 
 @ApiTags('Notification Templates')
 @Controller('notification/templates')

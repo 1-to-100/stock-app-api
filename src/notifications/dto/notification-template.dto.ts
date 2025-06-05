@@ -1,6 +1,6 @@
 import { IsOptional, IsInt, IsDate } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CreateTemplateDto } from './create-template.dto';
+import { CreateTemplateDto } from '@/notifications/dto/create-template.dto';
 
 export class NotificationTemplateDto extends CreateTemplateDto {
   @IsInt()

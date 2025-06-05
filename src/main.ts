@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
-import { ApiDbLoggerMiddleware } from './common/middlewares/api-db-logger.middleware';
-import { PrismaService } from './prisma/prisma.service';
 import { json, NextFunction, Request, Response } from 'express';
+import { AppModule } from '@/app.module';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { ApiDbLoggerMiddleware } from '@/common/middlewares/api-db-logger.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

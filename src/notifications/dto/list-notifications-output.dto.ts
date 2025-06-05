@@ -1,3 +1,3 @@
-import { NotificationDto } from './notification.dto';
+import { NotificationDto } from '@/notifications/dto/notification.dto';
 
 export class ListNotificationsOutputDto extends NotificationDto {}

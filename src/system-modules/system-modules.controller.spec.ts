@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SystemModulesController } from './system-modules.controller';
+import { SystemModulesController } from '@/system-modules/system-modules.controller';
 
 describe('SystemModulesController', () => {
   let controller: SystemModulesController;

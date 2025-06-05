@@ -1,4 +1,4 @@
-import { PUBLIC_EMAIL_DOMAINS } from './public-email-domains';
+import { PUBLIC_EMAIL_DOMAINS } from '@/common/helpers/public-email-domains';
 
 export function getDomainFromEmail(email: string): string {
   if (!email) return '';

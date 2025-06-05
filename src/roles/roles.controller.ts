@@ -9,18 +9,18 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { RolesService } from './roles.service';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
-import { UpdateRolePermissionsByNameDto } from './dto/update-role-permissions-by-name.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { OutputRoleDto } from './dto/output-role.dto';
-import { PermissionGuard } from '../auth/guards/permission/permission.guard';
-import { Permissions } from '../common/decorators/permissions.decorator';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
-import { RequireSuperuserGuard } from '../auth/guards/require-superuser/require-superuser.guard';
-import { RequiredSuperUser } from '../common/decorators/superuser.decorator';
-import { ListRolesDto } from './dto/list-roles.dto';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { Permissions } from '@/common/decorators/permissions.decorator';
+import { RequiredSuperUser } from '@/common/decorators/superuser.decorator';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { RequireSuperuserGuard } from '@/auth/guards/require-superuser/require-superuser.guard';
+import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { RolesService } from '@/roles/roles.service';
+import { CreateRoleDto } from '@/roles/dto/create-role.dto';
+import { ListRolesDto } from '@/roles/dto/list-roles.dto';
+import { OutputRoleDto } from '@/roles/dto/output-role.dto';
+import { UpdateRoleDto } from '@/roles/dto/update-role.dto';
+import { UpdateRolePermissionsByNameDto } from '@/roles/dto/update-role-permissions-by-name.dto';
 
 @Controller('roles')
 @UseGuards(DynamicAuthGuard, RequireSuperuserGuard, PermissionGuard)

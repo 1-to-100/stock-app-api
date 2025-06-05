@@ -5,9 +5,9 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { SUPERUSER_KEY } from '../../../common/decorators/superuser.decorator';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { OutputUserDto } from '../../../users/dto/output-user.dto';
+import { SUPERUSER_KEY } from '@/common/decorators/superuser.decorator';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
 
 @Injectable()
 export class RequireSuperuserGuard implements CanActivate {

@@ -4,16 +4,16 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ArticleDto } from './dto/article.dto';
-import { UpdateArticleDto } from './dto/update-article.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { ListArticlesInputDto } from './dto/list-articles-input.dto';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
-import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
-import { ListArticlesOutputDto } from './dto/list-articles-output.dto';
-import { NotificationsService } from '../notifications/notifications.service';
-import { NotificationTypes } from '../notifications/constants/notification-types';
+import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
+import { NotificationsService } from '@/notifications/notifications.service';
+import { ArticleDto } from '@/articles/dto/article.dto';
+import { NotificationTypes } from '@/notifications/constants/notification-types';
+import { ListArticlesInputDto } from '@/articles/dto/list-articles-input.dto';
+import { ListArticlesOutputDto } from '@/articles/dto/list-articles-output.dto';
+import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
 
 @Injectable()
 export class ArticlesService {

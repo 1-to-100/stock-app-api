@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
-import { UserStatusList } from '../../common/constants/status';
+import { UserStatusList } from '@/common/constants/status';
 
 export class OutputUserDto {
   @ApiProperty({ description: 'Email address' })

@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import {
-  NotificationTypes,
-  NotificationTypeList,
   NotificationType,
-} from '../constants/notification-types';
+  NotificationTypeList,
+  NotificationTypes,
+} from '@/notifications/constants/notification-types';
 
 export class CreateNotificationDto {
   @IsInt()

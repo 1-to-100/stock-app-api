@@ -4,9 +4,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { getProviderFromToken } from '../../../common/helpers/token-helpers';
-import { SupabaseAuthGuard } from '../supabase-auth/supabase-auth.guard';
-import { FirebaseAuthGuard } from '../firebase-auth/firebase-auth.guard';
+import { getProviderFromToken } from '@/common/helpers/token-helpers';
+import { FirebaseAuthGuard } from '@/auth/guards/firebase-auth/firebase-auth.guard';
+import { SupabaseAuthGuard } from '@/auth/guards/supabase-auth/supabase-auth.guard';
 
 @Injectable()
 export class DynamicAuthGuard implements CanActivate {

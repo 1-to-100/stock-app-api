@@ -4,29 +4,29 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { FirebaseDecodedToken } from '../common/types/forebase-decoded-token.type';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { FirebaseDecodedToken } from '@/common/types/forebase-decoded-token.type';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
-import { InviteUserDto } from './dto/invite-user.dto';
-import { CheckUserExistsDto } from './dto/check-user-exists.dto';
-import { ListUsersInputDto } from './dto/list-users-input.dto';
-import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
-import { OutputUserDto } from './dto/output-user.dto';
+import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
 import { createPaginator } from 'prisma-pagination';
 import { CustomerStatus, Prisma } from '@prisma/client';
 import {
   getDomainFromEmail,
   isPublicEmailDomain,
-} from '../common/helpers/string-helpers';
-import { SupabaseDecodedToken } from '../auth/guards/supabase-auth/supabase-auth.guard';
-import { CreateSystemUserDto } from './dto/create-system-user.dto';
-import { UserSystemRoles } from '../common/constants/user-system-roles';
-import { UpdateSystemUserDto } from './dto/update-system-user.dto';
-import { supabaseClientAdmin } from '../common/helpers/supabase-client';
-import { FrontendPaths } from '../common/helpers/frontend-paths';
-import { UserStatus } from '../common/constants/status';
+} from '@/common/helpers/string-helpers';
+import { UserSystemRoles } from '@/common/constants/user-system-roles';
+import { supabaseClientAdmin } from '@/common/helpers/supabase-client';
+import { FrontendPaths } from '@/common/helpers/frontend-paths';
+import { UserStatus } from '@/common/constants/status';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { CreateSystemUserDto } from '@/users/dto/create-system-user.dto';
+import { UpdateSystemUserDto } from '@/users/dto/update-system-user.dto';
+import { InviteUserDto } from '@/users/dto/invite-user.dto';
+import { CheckUserExistsDto } from '@/users/dto/check-user-exists.dto';
+import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
+import { UpdateUserDto } from '@/users/dto/update-user.dto';
+import { SupabaseDecodedToken } from '@/auth/guards/supabase-auth/supabase-auth.guard';
 
 @Injectable()
 export class UsersService {

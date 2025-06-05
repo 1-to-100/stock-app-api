@@ -1,5 +1,5 @@
-import { NotificationChannel } from '../constants/notification-channel';
-import { NotificationType } from '../constants/notification-types';
+import { NotificationType } from '@/notifications/constants/notification-types';
+import { NotificationChannel } from '@/notifications/constants/notification-channel';
 
 export const eachNotificationTypeTransformer = ({
   value,

@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { NotificationsService } from './notifications.service';
-import { NotificationsController } from './notifications.controller';
-import { PrismaService } from '../prisma/prisma.service';
-import { TemplatesController } from './templates.controller';
-import { TemplatesService } from './templates.service';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { NotificationsService } from '@/notifications/notifications.service';
+import { TemplatesService } from '@/notifications/templates.service';
+import { NotificationsController } from '@/notifications/notifications.controller';
+import { TemplatesController } from '@/notifications/templates.controller';
 
 @Global()
 @Module({

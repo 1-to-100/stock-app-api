@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateTemplateDto } from './dto/create-template.dto';
-import { NotificationTemplateDto } from './dto/notification-template.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { UpdateTemplateDto } from './dto/update-template.dto';
-import { ListTemplatesInputDto } from './dto/list-templates-input.dto';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
-import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
-import { NotificationTypes } from './constants/notification-types';
-import { SendTemplatesInputDto } from './dto/send-templates-input.dto';
-import { NotificationsService } from './notifications.service';
+import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
+import { NotificationsService } from '@/notifications/notifications.service';
+import { ListTemplatesInputDto } from '@/notifications/dto/list-templates-input.dto';
+import { NotificationTemplateDto } from '@/notifications/dto/notification-template.dto';
+import { CreateTemplateDto } from '@/notifications/dto/create-template.dto';
+import { UpdateTemplateDto } from '@/notifications/dto/update-template.dto';
+import { SendTemplatesInputDto } from '@/notifications/dto/send-templates-input.dto';
+import { NotificationTypes } from '@/notifications/constants/notification-types';
 
 @Injectable()
 export class TemplatesService {

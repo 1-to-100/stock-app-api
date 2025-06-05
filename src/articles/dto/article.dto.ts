@@ -1,4 +1,4 @@
-import { CreateArticleDto } from './create-article.dto';
+import { CreateArticleDto } from '@/articles/dto/create-article.dto';
 
 export class ArticleDto extends CreateArticleDto {
   customerId: number;

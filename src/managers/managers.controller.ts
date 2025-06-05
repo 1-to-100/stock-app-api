@@ -7,9 +7,9 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { ManagersService } from './managers.service';
-import { CreateManagerDto } from './dto/create-manager.dto';
-import { UpdateManagerDto } from './dto/update-manager.dto';
+import { ManagersService } from '@/managers/managers.service';
+import { CreateManagerDto } from '@/managers/dto/create-manager.dto';
+import { UpdateManagerDto } from '@/managers/dto/update-manager.dto';
 
 @Controller('managers')
 export class ManagersController {

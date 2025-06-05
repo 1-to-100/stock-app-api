@@ -1,18 +1,18 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { CustomersService } from '../customers/customers.service';
-import { RolesService } from '../roles/roles.service';
-import { ManagersService } from '../managers/managers.service';
 import { ApiOkResponse } from '@nestjs/swagger';
-import { OutputTaxonomyDto } from './dto/output-taxonomy.dto';
-import { SubscriptionsService } from '../subscriptions/subscriptions.service';
-import { UserStatusList } from '../common/constants/status';
-import { User } from '../common/decorators/user.decorator';
-import { OutputUserDto } from '../users/dto/output-user.dto';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
-import { UserSystemRolesList } from '../common/constants/user-system-roles';
-import { NotificationTypeList } from '../notifications/constants/notification-types';
-import { NotificationChannelList } from '../notifications/constants/notification-channel';
-import { OutputNotificationsTaxonomyDto } from './dto/output-notifications-taxonomy.dto';
+import { UserStatusList } from '@/common/constants/status';
+import { User } from '@/common/decorators/user.decorator';
+import { UserSystemRolesList } from '@/common/constants/user-system-roles';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { CustomersService } from '@/customers/customers.service';
+import { RolesService } from '@/roles/roles.service';
+import { ManagersService } from '@/managers/managers.service';
+import { SubscriptionsService } from '@/subscriptions/subscriptions.service';
+import { OutputTaxonomyDto } from '@/taxonomies/dto/output-taxonomy.dto';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { NotificationTypeList } from '@/notifications/constants/notification-types';
+import { NotificationChannelList } from '@/notifications/constants/notification-channel';
+import { OutputNotificationsTaxonomyDto } from '@/taxonomies/dto/output-notifications-taxonomy.dto';
 
 @Controller('taxonomies')
 @UseGuards(DynamicAuthGuard)

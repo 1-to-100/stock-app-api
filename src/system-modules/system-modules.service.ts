@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SYSTEM_MODULES } from './system-modules.data';
+import { SYSTEM_MODULES } from '@/system-modules/system-modules.data';
 
 @Injectable()
 export class SystemModulesService {

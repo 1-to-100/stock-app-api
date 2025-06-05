@@ -7,12 +7,12 @@ import {
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { NotificationChannel } from '../constants/notification-channel';
 import {
-  NotificationTypeList,
   NotificationType,
+  NotificationTypeList,
   NotificationTypes,
-} from '../constants/notification-types';
+} from '@/notifications/constants/notification-types';
+import { NotificationChannel } from '@/notifications/constants/notification-channel';
 
 export class CreateTemplateDto {
   @MinLength(3)

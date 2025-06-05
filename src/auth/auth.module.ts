@@ -1,11 +1,11 @@
 import { Module, Global } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { UsersModule } from '../users/users.module';
-import { RoleTestController } from './controllers/role-test.controller';
-import { FirebaseAuthGuard } from './guards/firebase-auth/firebase-auth.guard';
-import { SupabaseAuthGuard } from './guards/supabase-auth/supabase-auth.guard';
-import { DynamicAuthGuard } from './guards/dynamic-auth/dynamic-auth.guard';
+import { UsersModule } from '@/users/users.module';
+import { AuthController } from '@/auth/auth.controller';
+import { RoleTestController } from '@/auth/controllers/role-test.controller';
+import { AuthService } from '@/auth/auth.service';
+import { FirebaseAuthGuard } from '@/auth/guards/firebase-auth/firebase-auth.guard';
+import { SupabaseAuthGuard } from '@/auth/guards/supabase-auth/supabase-auth.guard';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
 
 @Global()
 @Module({

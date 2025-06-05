@@ -10,14 +10,14 @@ import {
   UseGuards,
   ForbiddenException,
 } from '@nestjs/common';
-import { CustomersService } from './customers.service';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { ListCustomersInputDto } from './dto/list-customers-input.dto';
-import { User } from '../common/decorators/user.decorator';
-import { OutputUserDto } from '../users/dto/output-user.dto';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
-import { CustomerId } from '../common/decorators/customer-id.decorator';
+import { User } from '@/common/decorators/user.decorator';
+import { CustomerId } from '@/common/decorators/customer-id.decorator';
+import { CustomersService } from '@/customers/customers.service';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { CreateCustomerDto } from '@/customers/dto/create-customer.dto';
+import { ListCustomersInputDto } from '@/customers/dto/list-customers-input.dto';
+import { UpdateCustomerDto } from '@/customers/dto/update-customer.dto';
 
 @Controller('customers')
 @UseGuards(DynamicAuthGuard)

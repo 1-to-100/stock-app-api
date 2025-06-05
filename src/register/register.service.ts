@@ -1,13 +1,13 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { RegisterDto } from './dto/register.dto';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import {
   getDomainFromEmail,
   isPublicEmailDomain,
-} from '../common/helpers/string-helpers';
-import { UsersService } from '../users/users.service';
-import { supabaseClientAuth } from '../common/helpers/supabase-client';
-import { FrontendPaths } from '../common/helpers/frontend-paths';
+} from '@/common/helpers/string-helpers';
+import { supabaseClientAuth } from '@/common/helpers/supabase-client';
+import { FrontendPaths } from '@/common/helpers/frontend-paths';
+import { UsersService } from '@/users/users.service';
+import { RegisterDto } from '@/register/dto/register.dto';
 
 @Injectable()
 export class RegisterService {

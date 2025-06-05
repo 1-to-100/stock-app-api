@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { RoleGuard } from '../guards/role/role.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { DynamicAuthGuard } from '../guards/dynamic-auth/dynamic-auth.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { RoleGuard } from '@/auth/guards/role/role.guard';
 
 @Controller('role-test')
 @UseGuards(DynamicAuthGuard, RoleGuard)

@@ -1,7 +1,7 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { FirebaseDecodedToken } from '../types/forebase-decoded-token.type';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { OutputUserDto } from '../../users/dto/output-user.dto';
+import { FirebaseDecodedToken } from '@/common/types/forebase-decoded-token.type';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
 
 export const User = createParamDecorator(
   (

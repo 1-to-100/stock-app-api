@@ -1,6 +1,6 @@
-import { PaginatedInputDto } from '../../common/dto/paginated-input.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { PaginatedInputDto } from '@/common/dto/paginated-input.dto';
 
 export class ListCustomersOutputDto extends PaginatedInputDto {
   @IsString()

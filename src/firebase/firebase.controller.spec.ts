@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FirebaseController } from './firebase.controller';
+import { FirebaseController } from '@/firebase/firebase.controller';
 
 describe('FirebaseController', () => {
   let controller: FirebaseController;

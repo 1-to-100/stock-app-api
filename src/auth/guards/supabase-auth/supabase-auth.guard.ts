@@ -4,9 +4,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from '../../../users/users.service';
 import * as jwt from 'jsonwebtoken';
-import { OutputUserDto } from '../../../users/dto/output-user.dto';
+import { UsersService } from '@/users/users.service';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
 
 export type SupabaseDecodedToken = {
   uid: string; // sub

@@ -1,4 +1,3 @@
-import { PaginatedInputDto } from '../../common/dto/paginated-input.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDate,
@@ -7,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { PaginatedInputDto } from '@/common/dto/paginated-input.dto';
 
 export class ListArticlesOutputDto extends PaginatedInputDto {
   @IsInt()

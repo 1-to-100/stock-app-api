@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { SupabaseDecodedToken } from '../../auth/guards/supabase-auth/supabase-auth.guard';
+import { SupabaseDecodedToken } from '@/auth/guards/supabase-auth/supabase-auth.guard';
 
 export const SupabaseUser = createParamDecorator(
   (

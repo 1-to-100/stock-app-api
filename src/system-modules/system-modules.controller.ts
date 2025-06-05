@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { SystemModulesService } from './system-modules.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+import { SystemModulesService } from '@/system-modules/system-modules.service';
 
 @Controller('system-modules')
 export class SystemModulesController {
@@ -86,5 +86,10 @@ export class SystemModulesController {
       console.log(`✅ Видалено ${customers.length} customers`);
     }
     return { message: 'ok' };
+  }
+
+  @Get('test')
+  test() {
+    return { status: 'ok' };
   }
 }

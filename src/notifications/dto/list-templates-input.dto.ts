@@ -1,16 +1,16 @@
-import { PaginatedInputDto } from '../../common/dto/paginated-input.dto';
 import { IsArray, IsEnum, IsInt, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { PaginatedInputDto } from '@/common/dto/paginated-input.dto';
 import {
   NotificationType,
   NotificationTypes,
-} from '../constants/notification-types';
-import { NotificationChannel } from '../constants/notification-channel';
-import { Transform } from 'class-transformer';
+} from '@/notifications/constants/notification-types';
 import {
   eachNotificationChannelTransformer,
   eachNotificationTypeTransformer,
-} from '../helpers/class-transform-helpers';
+} from '@/notifications/helpers/class-transform-helpers';
+import { NotificationChannel } from '@/notifications/constants/notification-channel';
 
 export class ListTemplatesInputDto extends PaginatedInputDto {
   @IsOptional()

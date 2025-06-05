@@ -12,17 +12,17 @@ import {
   Query,
   Logger,
 } from '@nestjs/common';
-import { NotificationsService } from './notifications.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
 import { ApiBody, ApiOkResponse, ApiParam } from '@nestjs/swagger';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
-import { User } from '../common/decorators/user.decorator';
-import { OutputUserDto } from '../users/dto/output-user.dto';
-import { NotificationDto } from './dto/notification.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { ApiPaginatedResponse } from '../common/decorators/api-paginated-response.decorator';
-import { ListNotificationsInputDto } from './dto/list-notifications-input.dto';
-import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
+import { User } from '@/common/decorators/user.decorator';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
+import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { NotificationsService } from '@/notifications/notifications.service';
+import { NotificationDto } from '@/notifications/dto/notification.dto';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { CreateNotificationDto } from '@/notifications/dto/create-notification.dto';
+import { ListNotificationsInputDto } from '@/notifications/dto/list-notifications-input.dto';
 
 @Controller('notifications')
 @UseGuards(DynamicAuthGuard)

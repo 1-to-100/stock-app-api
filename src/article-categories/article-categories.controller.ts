@@ -11,18 +11,18 @@ import {
   Delete,
   BadRequestException,
 } from '@nestjs/common';
-import { ArticleCategoriesService } from './article-categories.service';
-import { CreateArticleCategoryDto } from './dto/create-article-category.dto';
-import { UpdateArticleCategoryDto } from './dto/update-article-category.dto';
-import { OutputArticleCategoryDto } from './dto/output-article-category.dto';
 import { ApiConflictResponse, ApiOkResponse, ApiParam } from '@nestjs/swagger';
-import { Permissions } from '../common/decorators/permissions.decorator';
-import { PermissionGuard } from '../auth/guards/permission/permission.guard';
-import { User } from '../common/decorators/user.decorator';
-import { OutputUserDto } from '../users/dto/output-user.dto';
-import { CustomerId } from '../common/decorators/customer-id.decorator';
-import { ArticleCategoryDto } from './dto/article-category.dto';
-import { DynamicAuthGuard } from '../auth/guards/dynamic-auth/dynamic-auth.guard';
+import { Permissions } from '@/common/decorators/permissions.decorator';
+import { User } from '@/common/decorators/user.decorator';
+import { CustomerId } from '@/common/decorators/customer-id.decorator';
+import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { ArticleCategoryDto } from '@/article-categories/dto/article-category.dto';
+import { ArticleCategoriesService } from '@/article-categories/article-categories.service';
+import { OutputArticleCategoryDto } from '@/article-categories/dto/output-article-category.dto';
+import { CreateArticleCategoryDto } from '@/article-categories/dto/create-article-category.dto';
+import { UpdateArticleCategoryDto } from '@/article-categories/dto/update-article-category.dto';
 
 @Controller('documents/categories')
 @UseGuards(DynamicAuthGuard, PermissionGuard)

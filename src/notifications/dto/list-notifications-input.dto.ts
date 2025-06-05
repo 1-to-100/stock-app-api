@@ -1,11 +1,11 @@
-import { PaginatedInputDto } from '../../common/dto/paginated-input.dto';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import {
-  NotificationTypes,
-  NotificationTypeList,
   NotificationType,
-} from '../constants/notification-types';
+  NotificationTypeList,
+  NotificationTypes,
+} from '@/notifications/constants/notification-types';
+import { PaginatedInputDto } from '@/common/dto/paginated-input.dto';
 
 export class ListNotificationsInputDto extends OmitType(PaginatedInputDto, [
   'search',

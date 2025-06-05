@@ -1,6 +1,6 @@
 import { IsOptional, IsInt, IsBoolean, IsDate } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CreateNotificationDto } from './create-notification.dto';
+import { CreateNotificationDto } from '@/notifications/dto/create-notification.dto';
 
 export class NotificationDto extends CreateNotificationDto {
   @IsInt()

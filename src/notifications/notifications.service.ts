@@ -4,15 +4,15 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { PaginatedOutputDto } from '../common/dto/paginated-output.dto';
-import { NotificationDto } from './dto/notification.dto';
-import { ListNotificationsInputDto } from './dto/list-notifications-input.dto';
+import { PrismaService } from '@/common/prisma/prisma.service';
+import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
 import { createPaginator } from 'prisma-pagination';
 import { Prisma } from '@prisma/client';
-import { sendSupabaseNotification } from '../common/helpers/supabase-client';
-import { NotificationTypes } from './constants/notification-types';
+import { sendSupabaseNotification } from '@/common/helpers/supabase-client';
+import { CreateNotificationDto } from '@/notifications/dto/create-notification.dto';
+import { ListNotificationsInputDto } from '@/notifications/dto/list-notifications-input.dto';
+import { NotificationDto } from '@/notifications/dto/notification.dto';
+import { NotificationTypes } from '@/notifications/constants/notification-types';
 
 @Injectable()
 export class NotificationsService {

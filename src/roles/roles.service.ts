@@ -4,12 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { UpdateRolePermissionsByNameDto } from './dto/update-role-permissions-by-name.dto';
-import { OutputTaxonomyDto } from '../taxonomies/dto/output-taxonomy.dto';
+import { CreateRoleDto } from '@/roles/dto/create-role.dto';
+import { OutputTaxonomyDto } from '@/taxonomies/dto/output-taxonomy.dto';
+import { UpdateRoleDto } from '@/roles/dto/update-role.dto';
+import { UpdateRolePermissionsByNameDto } from '@/roles/dto/update-role-permissions-by-name.dto';
 
 @Injectable()
 export class RolesService {
