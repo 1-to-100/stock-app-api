@@ -23,6 +23,7 @@ import { NotificationDto } from '@/notifications/dto/notification.dto';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { CreateNotificationDto } from '@/notifications/dto/create-notification.dto';
 import { ListNotificationsInputDto } from '@/notifications/dto/list-notifications-input.dto';
+import { ListAdminNotificationsInputDto } from '@/notifications/dto/list-admin-notifications-input.dto';
 
 @Controller('notifications')
 @UseGuards(DynamicAuthGuard)
@@ -80,7 +81,11 @@ export class NotificationsController {
     }
 
     try {
-      return this.notificationsService.create(createNotificationDto);
+      return this.notificationsService.create({
+        ...createNotificationDto,
+        senderId: user.id,
+        generatedBy: 'user (notifications api)',
+      });
     } catch (error) {
       this.logger.error('Failed to create notification', error);
       throw new BadRequestException('Failed to create notification');
@@ -90,7 +95,7 @@ export class NotificationsController {
   @Get()
   @ApiPaginatedResponse(NotificationDto)
   @ApiOkResponse({
-    description: 'The notifications list',
+    description: 'The notifications list for the user',
     type: PaginatedOutputDto,
     isArray: true,
   })
@@ -101,6 +106,45 @@ export class NotificationsController {
     return this.notificationsService.findAll(
       +user.id,
       listNotificationsInputDto,
+    );
+  }
+
+  @Get('/all')
+  @ApiPaginatedResponse(NotificationDto)
+  @ApiOkResponse({
+    description:
+      'The notifications list, including all notifications. Only accessible by System Admin and Customer Success',
+    type: PaginatedOutputDto,
+    isArray: true,
+  })
+  async findAllNotificationsForAdmin(
+    @User() user: OutputUserDto,
+    @Query() adminNotificationsInputDto: ListAdminNotificationsInputDto,
+  ) {
+    if (!user.isSuperadmin && !user.isCustomerSuccess) {
+      throw new ForbiddenException(
+        'User is not authorized to access all notifications',
+      );
+    } else if (user.isCustomerSuccess && !user.customerId) {
+      throw new ForbiddenException(
+        'Customer Success is not authorized to access all notifications without a customer ID',
+      );
+    } else if (
+      user.isCustomerSuccess &&
+      adminNotificationsInputDto.customerId &&
+      user.customerId != adminNotificationsInputDto.customerId
+    ) {
+      throw new ForbiddenException(
+        'Customer Success is not authorized to access notifications for this customer',
+      );
+    }
+
+    if (user.isCustomerSuccess && !adminNotificationsInputDto.customerId) {
+      adminNotificationsInputDto.customerId = user.customerId!;
+    }
+
+    return this.notificationsService.findAllForAdmin(
+      adminNotificationsInputDto,
     );
   }
 

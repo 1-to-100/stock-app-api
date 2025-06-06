@@ -13,13 +13,19 @@ import { CreateNotificationDto } from '@/notifications/dto/create-notification.d
 import { ListNotificationsInputDto } from '@/notifications/dto/list-notifications-input.dto';
 import { NotificationDto } from '@/notifications/dto/notification.dto';
 import { NotificationTypes } from '@/notifications/constants/notification-types';
+import { ListAdminNotificationsInputDto } from '@/notifications/dto/list-admin-notifications-input.dto';
 
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
   constructor(private prisma: PrismaService) {}
 
-  async create(createNotification: CreateNotificationDto) {
+  async create(
+    createNotification: CreateNotificationDto & {
+      senderId?: number;
+      generatedBy?: string;
+    },
+  ) {
     this.logger.log('Creating notification');
 
     const { userId, customerId } = createNotification;
@@ -55,7 +61,7 @@ export class NotificationsService {
               error,
             );
           });
-      }, 200);
+      }, 100);
 
       return notifications.at(-1);
     } else if (userId) {
@@ -113,8 +119,13 @@ export class NotificationsService {
     const { perPage, page } = listNotificationsInputDto;
     const paginate = createPaginator({ perPage });
 
+    const { type, isRead, channel } = listNotificationsInputDto;
+
     const where: Prisma.NotificationFindManyArgs['where'] = {
       userId,
+      ...(type ? { type } : {}),
+      ...(isRead !== undefined ? { isRead } : {}),
+      ...(channel ? { channel } : {}),
     };
 
     const paginatedResult = await paginate<
@@ -125,6 +136,73 @@ export class NotificationsService {
       {
         where,
         include: {
+          User: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          Customer: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+      { page },
+    );
+
+    return paginatedResult;
+  }
+
+  async findAllForAdmin(
+    inputDto: ListAdminNotificationsInputDto,
+  ): Promise<PaginatedOutputDto<NotificationDto>> {
+    this.logger.log('Finding all admins notifications');
+    const { perPage, page } = inputDto;
+    const paginate = createPaginator({ perPage });
+
+    const { userId, customerId, type, isRead, channel, senderId, search } =
+      inputDto;
+
+    const where: Prisma.NotificationFindManyArgs['where'] = {
+      ...(userId ? { userId } : {}),
+      ...(customerId ? { customerId } : {}),
+      ...(type ? { type } : {}),
+      ...(isRead !== undefined ? { isRead } : {}),
+      ...(channel ? { channel } : {}),
+      ...(senderId ? { senderId } : {}),
+      ...(search
+        ? {
+            OR: [
+              { title: { contains: search, mode: 'insensitive' } },
+              { message: { contains: search, mode: 'insensitive' } },
+              { generatedBy: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    };
+
+    const paginatedResult = await paginate<
+      NotificationDto,
+      Prisma.NotificationFindManyArgs
+    >(
+      this.prisma.notification,
+      {
+        where,
+        include: {
+          Sender: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
           User: {
             select: {
               id: true,

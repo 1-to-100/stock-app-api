@@ -1,4 +1,10 @@
-import { IsOptional, IsInt, IsBoolean, IsDate } from 'class-validator';
+import {
+  IsOptional,
+  IsInt,
+  IsBoolean,
+  IsDate,
+  IsString,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreateNotificationDto } from '@/notifications/dto/create-notification.dto';
 
@@ -20,6 +26,15 @@ export class NotificationDto extends CreateNotificationDto {
   @ApiPropertyOptional({ description: 'Date when the notification was read' })
   readAt?: Date;
 
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description:
+      'Identifier for the user or system that generated the notification',
+    required: false,
+  })
+  generatedBy?: string;
+
   @ApiPropertyOptional({
     description: 'User associated with the notification',
     type: 'object',
@@ -31,6 +46,23 @@ export class NotificationDto extends CreateNotificationDto {
     },
   })
   User?: {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+
+  @ApiPropertyOptional({
+    description: 'User who sent the notification',
+    type: 'object',
+    properties: {
+      id: { type: 'number', description: 'User ID' },
+      email: { type: 'string', description: 'User email' },
+      firstName: { type: 'string', description: 'User first name' },
+      lastName: { type: 'string', description: 'User last name' },
+    },
+  })
+  Sender?: {
     id: number;
     email: string;
     firstName: string;

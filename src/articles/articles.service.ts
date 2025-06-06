@@ -37,6 +37,7 @@ export class ArticlesService {
           channel: 'article',
           type: NotificationTypes.IN_APP,
           customerId: article.customerId,
+          generatedBy: 'system (article service)',
         });
       }
 
@@ -182,6 +183,7 @@ export class ArticlesService {
         channel: 'article',
         type: NotificationTypes.IN_APP,
         customerId,
+        generatedBy: 'system (article service)',
       });
     }
 
