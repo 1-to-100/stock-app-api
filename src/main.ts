@@ -26,6 +26,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://localhost:3001',
       'https://dev-app-381393991104.us-central1.run.app',
+      'https://baseplate.huboxt.com',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     // allowedHeaders: 'Content-Type, Accept, Authorization',
