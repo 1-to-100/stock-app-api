@@ -3,7 +3,7 @@ name: '[dev] Deploy Backend to Cloud Run'
 on:
   push:
     branches:
-      - 'dev'
+      - 'dev-skip'
 
 env:
   PROJECT_ID: 'stock-app-cms-9144fc8'
