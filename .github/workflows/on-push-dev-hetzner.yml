@@ -1,0 +1,49 @@
+name: '[dev] Deploy Backend to Hetzner Run'
+on: 
+  push:
+    branches: [ dev ]
+env: 
+  CI: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:   
+      
+      - uses: actions/checkout@v2
+
+
+      - name: Build Docker Image
+        run: |
+          echo "${{ secrets.ENV_DEV }}" | base64 --decode > .env
+          docker build -t stock-app-api:latest .
+
+      - name: Save Docker Image
+        run: |
+          docker save stock-app-api:latest | gzip > stock-app-api.tar.gz
+
+      - name: Save Docker Image
+        run: |
+          ls -lah
+
+      - name: rsync deployments
+        uses: burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete
+          path: stock-app-api.tar.gz
+          remote_path: /opt/stock-app-api
+          remote_host: ${{ secrets.DEPLOY_HOST_DEV }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}          
+
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST_DEV }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/stock-app-api
+            docker load < stock-app-api.tar.gz
+            docker-compose up -d 
+            docker system prune -af
