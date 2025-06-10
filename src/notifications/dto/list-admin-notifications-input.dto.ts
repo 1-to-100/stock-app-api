@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
   IsInt,
@@ -11,6 +12,11 @@ import {
   NotificationTypes,
 } from '@/notifications/constants/notification-types';
 import { PaginatedInputDto } from '@/common/dto/paginated-input.dto';
+import { Transform, Type } from 'class-transformer';
+import {
+  eachNumberTransformer,
+  eachStringTransformer,
+} from '@/common/helpers/class-transform-helpers';
 
 export class ListAdminNotificationsInputDto extends PaginatedInputDto {
   @IsOptional()
@@ -30,38 +36,53 @@ export class ListAdminNotificationsInputDto extends PaginatedInputDto {
   })
   isRead?: boolean;
 
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Notification channel',
+    description: 'Notification channels',
     required: false,
+    type: String,
+    isArray: true,
   })
-  channel?: string;
+  @Transform(eachStringTransformer)
+  channel?: string[];
 
-  @IsInt()
+  @IsArray()
+  @IsInt({ each: true })
   @IsOptional()
   @ApiPropertyOptional({
     description:
-      'Customer ID associated with the notification. Only for System Admin or Customer Success',
+      'Customer IDs associated with the notification. Only for System Admin or Customer Success',
     required: false,
+    isArray: true,
   })
-  customerId?: number;
+  @Transform(eachNumberTransformer)
+  customerId?: number[];
 
-  @IsInt()
+  @IsArray()
+  @IsInt({ each: true })
   @IsOptional()
+  @Type(() => Number)
   @ApiPropertyOptional({
     description:
-      'User ID associated with the notification. Only for System Admin or Customer Success',
+      'User IDs associated with the notification. Only for System Admin or Customer Success',
     required: false,
+    isArray: true,
   })
-  userId?: number;
+  @Transform(eachNumberTransformer)
+  userId?: number[];
 
-  @IsInt()
+  @IsArray()
+  @IsInt({ each: true })
   @IsOptional()
+  @Type(() => Number)
   @ApiPropertyOptional({
     description:
-      'User who generated the notification. Only for System Admin or Customer Success',
+      'User IDs who generated the notification. Only for System Admin or Customer Success',
     required: false,
+    isArray: true,
   })
-  senderId?: number;
+  @Transform(eachNumberTransformer)
+  senderId?: number[];
 }

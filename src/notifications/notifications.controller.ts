@@ -132,16 +132,27 @@ export class NotificationsController {
     } else if (
       user.isCustomerSuccess &&
       adminNotificationsInputDto.customerId &&
-      user.customerId != adminNotificationsInputDto.customerId
+      adminNotificationsInputDto.customerId.length == 1 &&
+      !adminNotificationsInputDto.customerId.includes(user.customerId!)
     ) {
       throw new ForbiddenException(
         'Customer Success is not authorized to access notifications for this customer',
       );
+    } else if (
+      user.isCustomerSuccess &&
+      adminNotificationsInputDto.customerId &&
+      adminNotificationsInputDto.customerId.length > 1
+    ) {
+      throw new ForbiddenException(
+        'Customer Success is not authorized to access notifications for multiple customers',
+      );
     }
 
     if (user.isCustomerSuccess && !adminNotificationsInputDto.customerId) {
-      adminNotificationsInputDto.customerId = user.customerId!;
+      adminNotificationsInputDto.customerId = [user.customerId!];
     }
+
+    console.log('xxx', adminNotificationsInputDto);
 
     return this.notificationsService.findAllForAdmin(
       adminNotificationsInputDto,

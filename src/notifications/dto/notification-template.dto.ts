@@ -10,9 +10,22 @@ export class NotificationTemplateDto extends CreateTemplateDto {
   @IsInt()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Customer ID associated with the notification',
+    description: 'Customer ID associated with the notification template',
   })
   customerId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Customer associated with the notification template',
+    type: 'object',
+    properties: {
+      id: { type: 'number', description: 'Customer ID' },
+      name: { type: 'string', description: 'Customer name' },
+    },
+  })
+  Customer?: {
+    id: number;
+    name: string;
+  };
 
   @IsDate()
   @ApiProperty({ description: 'Creation date of the notification template' })

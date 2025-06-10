@@ -15,6 +15,19 @@ export const eachNumberTransformer = ({
   return [];
 };
 
+export const eachStringTransformer = ({
+  value,
+}: {
+  value: unknown;
+}): string[] => {
+  if (Array.isArray(value)) {
+    return value.filter((v) => typeof v === 'string');
+  } else if (typeof value === 'string') {
+    return [value];
+  }
+  return [];
+};
+
 export const eachUserStatusTransformer = ({
   value,
 }: {

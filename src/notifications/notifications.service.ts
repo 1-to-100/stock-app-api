@@ -170,12 +170,12 @@ export class NotificationsService {
       inputDto;
 
     const where: Prisma.NotificationFindManyArgs['where'] = {
-      ...(userId ? { userId } : {}),
-      ...(customerId ? { customerId } : {}),
+      ...(userId ? { userId: { in: userId } } : {}),
+      ...(customerId ? { customerId: { in: customerId } } : {}),
       ...(type ? { type } : {}),
       ...(isRead !== undefined ? { isRead } : {}),
-      ...(channel ? { channel } : {}),
-      ...(senderId ? { senderId } : {}),
+      ...(channel ? { channel: { in: channel } } : {}),
+      ...(senderId ? { senderId: { in: senderId } } : {}),
       ...(search
         ? {
             OR: [

@@ -56,6 +56,14 @@ export class TemplatesService {
       this.prisma.notificationTemplate,
       {
         where,
+        include: {
+          Customer: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
         orderBy: { createdAt: 'desc' },
       },
       { page },
@@ -69,6 +77,7 @@ export class TemplatesService {
       comment: template.comment || undefined,
       channel: template.channel,
       customerId: template.customerId || undefined,
+      Customer: template.Customer,
       createdAt: template.createdAt,
     })) as NotificationTemplateDto[];
 
@@ -83,6 +92,14 @@ export class TemplatesService {
 
     const template = await this.prisma.notificationTemplate.findUnique({
       where: { id, customerId, deletedAt: null },
+      include: {
+        Customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!template) {
@@ -103,6 +120,14 @@ export class TemplatesService {
         ...createTemplateDto,
         customerId,
       },
+      include: {
+        Customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     return this.formatOutput(template);
@@ -118,6 +143,14 @@ export class TemplatesService {
     const updatedTemplate = await this.prisma.notificationTemplate.update({
       where: { id, deletedAt: null, customerId },
       data: { ...updateTemplateDto, customerId },
+      include: {
+        Customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     return this.formatOutput(updatedTemplate);
@@ -132,6 +165,14 @@ export class TemplatesService {
     const deletedTemplate = await this.prisma.notificationTemplate.update({
       where: { id, customerId, deletedAt: null },
       data: { deletedAt: new Date() },
+      include: {
+        Customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     return this.formatOutput(deletedTemplate);
@@ -149,6 +190,14 @@ export class TemplatesService {
 
     const template = await this.prisma.notificationTemplate.findUnique({
       where: { id: templateId, customerId, deletedAt: null },
+      include: {
+        Customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!template) {
@@ -206,6 +255,12 @@ export class TemplatesService {
         comment: true;
         channel: true;
         customerId: true;
+        Customer: {
+          select: {
+            id: true;
+            name: true;
+          };
+        };
         createdAt: true;
       };
     }>,
@@ -218,6 +273,7 @@ export class TemplatesService {
       comment: prismaItemTemplate.comment || undefined,
       channel: prismaItemTemplate.channel,
       customerId: prismaItemTemplate.customerId || undefined,
+      Customer: prismaItemTemplate.Customer,
       createdAt: prismaItemTemplate.createdAt,
     } as NotificationTemplateDto;
   }
