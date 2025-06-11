@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { SystemModulesService } from '@/system-modules/system-modules.service';
+import { FrontendPaths } from '@/common/helpers/frontend-paths';
 
 @Controller('system-modules')
 export class SystemModulesController {
@@ -90,6 +91,6 @@ export class SystemModulesController {
 
   @Get('test')
   test() {
-    return { status: 'ok' };
+    return { status: 'ok', frontendUrl: FrontendPaths };
   }
 }
