@@ -111,14 +111,12 @@ export class TemplatesService {
 
   async createTemplate(
     createTemplateDto: CreateTemplateDto,
-    customerId?: number,
   ): Promise<NotificationTemplateDto> {
     this.logger.log('Creating notification template');
 
     const template = await this.prisma.notificationTemplate.create({
       data: {
         ...createTemplateDto,
-        customerId,
       },
       include: {
         Customer: {
@@ -136,13 +134,12 @@ export class TemplatesService {
   async updateTemplate(
     id: number,
     updateTemplateDto: UpdateTemplateDto,
-    customerId?: number,
   ): Promise<NotificationTemplateDto> {
     this.logger.log(`Updating notification template with ID ${id}`);
 
     const updatedTemplate = await this.prisma.notificationTemplate.update({
-      where: { id, deletedAt: null, customerId },
-      data: { ...updateTemplateDto, customerId },
+      where: { id, deletedAt: null },
+      data: { ...updateTemplateDto },
       include: {
         Customer: {
           select: {
@@ -156,14 +153,11 @@ export class TemplatesService {
     return this.formatOutput(updatedTemplate);
   }
 
-  async remove(
-    id: number,
-    customerId?: number,
-  ): Promise<NotificationTemplateDto> {
+  async remove(id: number): Promise<NotificationTemplateDto> {
     this.logger.log(`Deleting notification template with ID ${id}`);
 
     const deletedTemplate = await this.prisma.notificationTemplate.update({
-      where: { id, customerId, deletedAt: null },
+      where: { id, deletedAt: null },
       data: { deletedAt: new Date() },
       include: {
         Customer: {
@@ -189,7 +183,7 @@ export class TemplatesService {
     const { customerId, userIds } = sendTemplateInputDto;
 
     const template = await this.prisma.notificationTemplate.findUnique({
-      where: { id: templateId, customerId, deletedAt: null },
+      where: { id: templateId, deletedAt: null },
       include: {
         Customer: {
           select: {

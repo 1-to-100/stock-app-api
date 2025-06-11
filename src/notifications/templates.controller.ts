@@ -41,18 +41,12 @@ export class TemplatesController {
   async findAllTemplates(
     @User() user: OutputUserDto,
     @Query() query: ListTemplatesInputDto,
-    @CustomerId() customerId: number | null,
   ): Promise<PaginatedOutputDto<NotificationTemplateDto>> {
     if (!user.isSuperadmin && !user.isCustomerSuccess) {
       throw new ForbiddenException(
         'User is not authorized to access notification templates',
       );
     }
-
-    query.customerId =
-      user.isSuperadmin && customerId
-        ? customerId
-        : user.customerId || undefined;
 
     return this.templatesService.findAll(query);
   }
@@ -66,7 +60,6 @@ export class TemplatesController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
     @User() user: OutputUserDto,
-    @CustomerId() customerId: number | null,
   ): Promise<NotificationTemplateDto> {
     if (!user.isSuperadmin && !user.isCustomerSuccess) {
       throw new ForbiddenException(
@@ -74,18 +67,8 @@ export class TemplatesController {
       );
     }
 
-    const attachCustomerId =
-      user.isSuperadmin && customerId
-        ? customerId
-        : user.customerId || undefined;
-
     try {
-      const template = await this.templatesService.findOne(
-        id,
-        attachCustomerId,
-      );
-
-      return template;
+      return await this.templatesService.findOne(id);
     } catch {
       throw new ForbiddenException(
         'Notification template not found or you do not have access to it',
@@ -101,27 +84,14 @@ export class TemplatesController {
   async createTemplate(
     @User() user: OutputUserDto,
     @Body() createTemplateDto: CreateTemplateDto,
-    @CustomerId() customerId: number | null,
   ): Promise<NotificationTemplateDto> {
     if (!user.isSuperadmin && !user.isCustomerSuccess) {
       throw new ForbiddenException(
         'User is not authorized to create notification templates',
       );
-    } else if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException(
-        'Customer success user must have a customerId to create templates',
-      );
     }
 
-    const attachCustomerId =
-      user.isSuperadmin && customerId
-        ? customerId
-        : user.customerId || undefined;
-
-    return this.templatesService.createTemplate(
-      createTemplateDto,
-      attachCustomerId,
-    );
+    return this.templatesService.createTemplate(createTemplateDto);
   }
 
   @Patch(':id')
@@ -133,28 +103,14 @@ export class TemplatesController {
     @Param('id', ParseIntPipe) id: number,
     @User() user: OutputUserDto,
     @Body() updateTemplateDto: UpdateTemplateDto,
-    @CustomerId() customerId: number | null,
   ): Promise<NotificationTemplateDto> {
     if (!user.isSuperadmin && !user.isCustomerSuccess) {
       throw new ForbiddenException(
         'User is not authorized to update notification templates',
       );
-    } else if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException(
-        'Customer success user must have a customerId to update templates',
-      );
     }
 
-    const attachCustomerId =
-      user.isSuperadmin && customerId
-        ? customerId
-        : user.customerId || undefined;
-
-    return this.templatesService.updateTemplate(
-      id,
-      updateTemplateDto,
-      attachCustomerId,
-    );
+    return this.templatesService.updateTemplate(id, updateTemplateDto);
   }
 
   @Delete(':id')
@@ -166,24 +122,14 @@ export class TemplatesController {
   async deleteTemplate(
     @Param('id', ParseIntPipe) id: number,
     @User() user: OutputUserDto,
-    @CustomerId() customerId: number | null,
   ) {
     if (!user.isSuperadmin && !user.isCustomerSuccess) {
       throw new ForbiddenException(
         'User is not authorized to delete notification templates',
       );
-    } else if (user.isCustomerSuccess && !user.customerId) {
-      throw new ForbiddenException(
-        'Customer success user must have a customerId to delete templates',
-      );
     }
 
-    const attachCustomerId =
-      user.isSuperadmin && customerId
-        ? customerId
-        : user.customerId || undefined;
-
-    return this.templatesService.remove(id, attachCustomerId);
+    return this.templatesService.remove(id);
   }
 
   @Post('/send/:templateId')
@@ -206,7 +152,7 @@ export class TemplatesController {
 
     if (!sendTemplateInputDto.userIds && !sendTemplateInputDto.customerId) {
       throw new ForbiddenException(
-        'Notification must be associated with a users or customer',
+        'Notification must be associated with a users or a customer',
       );
     }
 
