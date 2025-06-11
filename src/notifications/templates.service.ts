@@ -207,9 +207,9 @@ export class TemplatesService {
     }
 
     try {
-      if (customerId && (!userIds || userIds.length === 0)) {
+      if (customerId) {
         await this.notificationService.create({
-          customerId: template.customerId || undefined,
+          customerId: customerId,
           title: template.title,
           message: template.message || '',
           type: NotificationTypes.IN_APP,
@@ -219,7 +219,7 @@ export class TemplatesService {
         const sendPromises = (userIds || []).map((userId: number) =>
           this.notificationService.create({
             userId,
-            customerId: template.customerId || undefined,
+            customerId: customerId || undefined,
             title: template.title,
             message: template.message || '',
             type: NotificationTypes.IN_APP,
