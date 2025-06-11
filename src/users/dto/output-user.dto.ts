@@ -22,6 +22,19 @@ export class OutputUserDto {
   @IsOptional()
   customerId: number | null = null;
 
+  @ApiPropertyOptional({
+    description: 'Customer associated with the user',
+    type: 'object',
+    properties: {
+      id: { type: 'number', description: 'Customer ID' },
+      name: { type: 'string', description: 'Customer name' },
+    },
+  })
+  customer?: {
+    id: number;
+    name: string;
+  };
+
   @ApiProperty({ description: 'The role of the user' })
   @IsOptional()
   roleId: number | null = null;

@@ -262,7 +262,18 @@ export class UsersService {
     const paginate = createPaginator({ perPage });
     return paginate<OutputUserDto, Prisma.UserFindManyArgs>(
       this.prisma.user,
-      { where, orderBy: { id: 'desc' } },
+      {
+        where,
+        orderBy: { id: 'desc' },
+        include: {
+          customer: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
       { page },
     );
   }
