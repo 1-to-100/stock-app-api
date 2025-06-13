@@ -5,11 +5,11 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { DecodedIdToken } from 'firebase-admin/auth';
 import { RolesService } from '@/roles/roles.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { DecodedIdToken } from '@/common/types/decoded-token.type';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {

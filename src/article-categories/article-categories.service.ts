@@ -5,7 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { ArticleCategoryDto } from '@/article-categories/dto/article-category.dto';
 import { OutputArticleCategoryDto } from '@/article-categories/dto/output-article-category.dto';
 import { UpdateArticleCategoryDto } from '@/article-categories/dto/update-article-category.dto';
@@ -14,10 +13,7 @@ import { UpdateArticleCategoryDto } from '@/article-categories/dto/update-articl
 export class ArticleCategoriesService {
   private readonly logger = new Logger(ArticleCategoriesService.name);
 
-  constructor(
-    @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
   async create(
     createArticleCategoryDto: ArticleCategoryDto,
   ): Promise<OutputArticleCategoryDto> {

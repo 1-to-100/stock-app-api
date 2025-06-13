@@ -4,32 +4,14 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { FirebaseDecodedToken } from '@/common/types/forebase-decoded-token.type';
-import { FirebaseUser } from '@/common/decorators/firebase-user.decorator';
 import { SupabaseUser } from '@/common/decorators/supabase-user.decorator';
-import { AuthService } from '@/auth/auth.service';
 import { UsersService } from '@/users/users.service';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
 import { SupabaseDecodedToken } from '@/auth/guards/supabase-auth/supabase-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UsersService,
-  ) {}
-
-  @UseGuards(DynamicAuthGuard)
-  @Post('sync')
-  async syncUser(@FirebaseUser() user: FirebaseDecodedToken) {
-    if (!user) throw new UnauthorizedException();
-
-    const dbUser = await this.userService.createFirebaseUser(user);
-    return {
-      message: 'ok',
-      user: dbUser,
-    };
-  }
+  constructor(private readonly userService: UsersService) {}
 
   @UseGuards(DynamicAuthGuard)
   @Post('sync/supabase')
@@ -42,69 +24,4 @@ export class AuthController {
       user: dbUser,
     };
   }
-
-  //
-  // @UseGuards(FirebaseAuthGuard)
-  // @Post('set-role')
-  // async setUserRole(
-  //   @FirebaseUser() user: FirebaseDecodedToken,
-  //   @Body() body: { role?: string },
-  // ) {
-  //   if (!user) throw new UnauthorizedException();
-  //
-  //   const role = body.role || 'user';
-  //
-  //   const claims: {
-  //     role?: string;
-  //     permissions?: string[];
-  //   } = {};
-  //
-  //   if (user.permissions && user.permissions.length > 0) {
-  //     claims.permissions = user.permissions;
-  //   }
-  //   await this.authService.setUserClaims(user.uid, {
-  //     ...claims,
-  //     role,
-  //   });
-  //
-  //   return {
-  //     message: 'ok',
-  //   };
-  // }
-  //
-  // @UseGuards(FirebaseAuthGuard)
-  // @Post('set-permissions')
-  // async setUserPermissions(
-  //   @FirebaseUser() user: FirebaseDecodedToken,
-  //   @Body() body: { permissions?: string[] },
-  // ) {
-  //   if (!user) throw new UnauthorizedException();
-  //
-  //   const permissions = body.permissions || [];
-  //
-  //   const claims: {
-  //     role?: string;
-  //     permissions?: string[];
-  //   } = {};
-  //   if (user.role) {
-  //     claims.role = user.role;
-  //   }
-  //
-  //   await this.authService.setUserClaims(user.uid, {
-  //     ...claims,
-  //     permissions,
-  //   });
-  //
-  //   return {
-  //     message: 'ok',
-  //   };
-  // }
-  //
-  // @UseGuards(FirebaseAuthGuard)
-  // @Get('test')
-  // testUserClaims() {
-  //   return {
-  //     message: 'test',
-  //   };
-  // }
 }

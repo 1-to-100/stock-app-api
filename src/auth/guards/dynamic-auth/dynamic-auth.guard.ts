@@ -5,15 +5,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { getProviderFromToken } from '@/common/helpers/token-helpers';
-import { FirebaseAuthGuard } from '@/auth/guards/firebase-auth/firebase-auth.guard';
 import { SupabaseAuthGuard } from '@/auth/guards/supabase-auth/supabase-auth.guard';
 
 @Injectable()
 export class DynamicAuthGuard implements CanActivate {
-  constructor(
-    private readonly firebaseAuthGuard: FirebaseAuthGuard,
-    private readonly supabaseAuthGuard: SupabaseAuthGuard,
-  ) {}
+  constructor(private readonly supabaseAuthGuard: SupabaseAuthGuard) {}
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const request = context.switchToHttp().getRequest<{
@@ -27,9 +23,7 @@ export class DynamicAuthGuard implements CanActivate {
 
     const tokenProvider = getProviderFromToken(token);
 
-    if (tokenProvider == 'firebase') {
-      return this.firebaseAuthGuard.canActivate(context);
-    } else if (tokenProvider == 'supabase') {
+    if (tokenProvider == 'supabase') {
       return this.supabaseAuthGuard.canActivate(context);
     } else {
       throw new UnauthorizedException('Invalid token type');

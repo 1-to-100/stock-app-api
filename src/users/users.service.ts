@@ -5,8 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { FirebaseDecodedToken } from '@/common/types/forebase-decoded-token.type';
-import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
 import { createPaginator } from 'prisma-pagination';
 import { CustomerStatus, Prisma } from '@prisma/client';
@@ -32,10 +30,7 @@ import { SupabaseDecodedToken } from '@/auth/guards/supabase-auth/supabase-auth.
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor(
-    @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(
     createUserDto: CreateUserDto,
@@ -434,86 +429,6 @@ export class UsersService {
         uid,
       },
     });
-  }
-
-  async createFirebaseUser(
-    firebaseUser: FirebaseDecodedToken,
-    subscriptionId: number | null = null,
-  ) {
-    const firebaseUserProfile = await this.firebase.auth.getUser(
-      firebaseUser.uid,
-    );
-    console.log('firebaseUserProfile', firebaseUserProfile);
-
-    const existingUser = await this.findByUid(firebaseUser.uid);
-    if (existingUser) {
-      return existingUser;
-    }
-
-    let firstName: string | null = null;
-    let lastName: string | null = null;
-    if (firebaseUserProfile.displayName) {
-      const nameParts = firebaseUserProfile.displayName.split(' ');
-      firstName = nameParts[0];
-      lastName = nameParts.slice(1).join(' ');
-    }
-
-    const email = firebaseUserProfile.email!;
-    const domain = getDomainFromEmail(email);
-    if (!domain) {
-      throw new ConflictException(
-        'Email address does not contain a valid domain',
-      );
-    }
-    if (isPublicEmailDomain(domain)) {
-      throw new ConflictException(
-        'Please use your work email instead of a personal one (@gmail, @yahoo, etc.) to connect with your company. Personal email domains cannot join existing companies.',
-      );
-    }
-
-    let existingCustomer = await this.prisma.customer.findFirst({
-      where: { domain },
-    });
-
-    let newUser: OutputUserDto;
-    if (existingCustomer) {
-      newUser = await this.prisma.user.create({
-        data: {
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          customerId: existingCustomer.id,
-          uid: firebaseUser.uid,
-        },
-      });
-    } else {
-      newUser = await this.prisma.user.create({
-        data: {
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          uid: firebaseUser.uid,
-        },
-      });
-
-      existingCustomer = await this.prisma.customer.create({
-        data: {
-          name: domain,
-          email: email,
-          domain: domain,
-          ownerId: newUser.id,
-          subscriptionId: subscriptionId,
-        },
-      });
-
-      await this.prisma.user.update({
-        where: { id: newUser.id },
-        data: { customerId: existingCustomer.id },
-      });
-    }
-
-    await this.sendInviteEmail(newUser);
-    return newUser;
   }
 
   async createSupabaseUser(
