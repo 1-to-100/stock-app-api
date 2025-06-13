@@ -1,5 +1,5 @@
 const home = process.env.FRONTEND_URL as string;
-if (!home || !/^https?:\/\//.test(home)) {
+if (!home /* || !/^https?:\/\//.test(home)*/) {
   throw new Error('FRONTEND_URL is not defined or invalid.');
 }
 
