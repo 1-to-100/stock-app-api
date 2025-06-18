@@ -61,6 +61,7 @@ export class TemplatesService {
             select: {
               id: true,
               name: true,
+              ownerId: true,
             },
           },
         },
@@ -97,6 +98,7 @@ export class TemplatesService {
           select: {
             id: true,
             name: true,
+            ownerId: true,
           },
         },
       },
@@ -123,6 +125,7 @@ export class TemplatesService {
           select: {
             id: true,
             name: true,
+            ownerId: true,
           },
         },
       },
@@ -145,6 +148,7 @@ export class TemplatesService {
           select: {
             id: true,
             name: true,
+            ownerId: true,
           },
         },
       },
@@ -164,6 +168,7 @@ export class TemplatesService {
           select: {
             id: true,
             name: true,
+            ownerId: true,
           },
         },
       },
@@ -189,6 +194,7 @@ export class TemplatesService {
           select: {
             id: true,
             name: true,
+            ownerId: true,
           },
         },
       },
@@ -253,6 +259,7 @@ export class TemplatesService {
           select: {
             id: true;
             name: true;
+            ownerId: true;
           };
         };
         createdAt: true;

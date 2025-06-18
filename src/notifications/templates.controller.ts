@@ -24,12 +24,16 @@ import { CreateTemplateDto } from '@/notifications/dto/create-template.dto';
 import { UpdateTemplateDto } from '@/notifications/dto/update-template.dto';
 import { SendTemplatesInputDto } from '@/notifications/dto/send-templates-input.dto';
 import { NotificationTemplateDto } from '@/notifications/dto/notification-template.dto';
+import { PrismaService } from '@/common/prisma/prisma.service';
 
 @ApiTags('Notification Templates')
 @Controller('notification/templates')
 @UseGuards(DynamicAuthGuard)
 export class TemplatesController {
-  constructor(private readonly templatesService: TemplatesService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly templatesService: TemplatesService,
+  ) {}
 
   @Get()
   @ApiPaginatedResponse(NotificationTemplateDto)
@@ -158,18 +162,53 @@ export class TemplatesController {
 
     if (user.isSuperadmin && customerId) {
       sendTemplateInputDto.customerId = customerId;
-    } else if (user.isCustomerSuccess && !user.customerId) {
+    }
+
+    if (user.isCustomerSuccess && !user.customerId) {
       throw new ForbiddenException(
         'Customer success user must have a customerId to send notifications using templates',
       );
     } else if (
+      customerId !== null &&
       user.isCustomerSuccess &&
-      user.customerId != customerId &&
-      customerId !== null
+      user.customerId != customerId
     ) {
       throw new ForbiddenException(
         'Customer success user cannot send notifications for a different customer',
       );
+    } else if (
+      user.isCustomerSuccess &&
+      sendTemplateInputDto.customerId &&
+      user.customerId != sendTemplateInputDto.customerId
+    ) {
+      throw new ForbiddenException(
+        'Customer success user cannot send notifications for a different customer',
+      );
+    } else if (
+      user.isCustomerSuccess &&
+      !sendTemplateInputDto.customerId &&
+      sendTemplateInputDto.userIds &&
+      sendTemplateInputDto.userIds.length > 0
+    ) {
+      const foundUsers = await this.prisma.user.findMany({
+        where: {
+          id: { in: sendTemplateInputDto.userIds },
+        },
+      });
+
+      if (foundUsers.length === 0) {
+        throw new ForbiddenException(
+          'No users found for the provided user IDs',
+        );
+      }
+
+      for (const foundUser of foundUsers) {
+        if (foundUser.customerId !== user.customerId) {
+          throw new ForbiddenException(
+            'Customer success user cannot send notifications for users belonging to a different customer',
+          );
+        }
+      }
     }
 
     try {

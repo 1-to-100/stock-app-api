@@ -25,6 +25,7 @@ export class NotificationTemplateDto extends CreateTemplateDto {
   Customer?: {
     id: number;
     name: string;
+    ownerId?: number;
   };
 
   @IsDate()
