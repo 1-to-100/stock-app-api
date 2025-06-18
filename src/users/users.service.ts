@@ -265,6 +265,7 @@ export class UsersService {
             select: {
               id: true,
               name: true,
+              ownerId: true,
             },
           },
         },
@@ -305,6 +306,7 @@ export class UsersService {
             select: {
               id: true,
               name: true,
+              ownerId: true,
             },
           },
         },
@@ -335,6 +337,7 @@ export class UsersService {
           select: {
             id: true,
             name: true,
+            ownerId: true,
           },
         },
         manager: true,

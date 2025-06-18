@@ -86,7 +86,6 @@ export class UsersController {
     }
 
     if (!user.isSuperadmin && user.customerId) {
-      // user cannot set another customer when creating users, assign the same he belongs to
       inviteUserDto.customerId = user.customerId;
     }
 

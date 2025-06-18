@@ -152,8 +152,6 @@ export class NotificationsController {
       adminNotificationsInputDto.customerId = [user.customerId!];
     }
 
-    console.log('xxx', adminNotificationsInputDto);
-
     return this.notificationsService.findAllForAdmin(
       adminNotificationsInputDto,
     );
