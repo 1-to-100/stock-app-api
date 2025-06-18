@@ -24,6 +24,7 @@ import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { CreateNotificationDto } from '@/notifications/dto/create-notification.dto';
 import { ListNotificationsInputDto } from '@/notifications/dto/list-notifications-input.dto';
 import { ListAdminNotificationsInputDto } from '@/notifications/dto/list-admin-notifications-input.dto';
+import { CustomerId } from '@/common/decorators/customer-id.decorator';
 
 @Controller('notifications')
 @UseGuards(DynamicAuthGuard)
@@ -122,6 +123,7 @@ export class NotificationsController {
   async findAllNotificationsForAdmin(
     @User() user: OutputUserDto,
     @Query() adminNotificationsInputDto: ListAdminNotificationsInputDto,
+    @CustomerId() customerId: number,
   ) {
     if (!user.isSuperadmin && !user.isCustomerSuccess) {
       throw new ForbiddenException(
@@ -150,7 +152,16 @@ export class NotificationsController {
       );
     }
 
-    if (user.isCustomerSuccess && !adminNotificationsInputDto.customerId) {
+    if (
+      user.isSuperadmin &&
+      customerId &&
+      !adminNotificationsInputDto.customerId
+    ) {
+      adminNotificationsInputDto.customerId = [customerId];
+    } else if (
+      user.isCustomerSuccess &&
+      !adminNotificationsInputDto.customerId
+    ) {
       adminNotificationsInputDto.customerId = [user.customerId!];
     }
 
