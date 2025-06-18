@@ -77,6 +77,8 @@ export class NotificationsController {
 
       if (!foundUser || foundUser.customerId !== customerId) {
         throw new BadRequestException('User not linked to the customer');
+      } else if (foundUser.status !== 'active') {
+        throw new BadRequestException('User is not active');
       }
     }
 

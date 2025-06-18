@@ -25,6 +25,7 @@ import { UpdateTemplateDto } from '@/notifications/dto/update-template.dto';
 import { SendTemplatesInputDto } from '@/notifications/dto/send-templates-input.dto';
 import { NotificationTemplateDto } from '@/notifications/dto/notification-template.dto';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { UserStatus } from '@/common/constants/status';
 
 @ApiTags('Notification Templates')
 @Controller('notification/templates')
@@ -184,8 +185,9 @@ export class TemplatesController {
       throw new ForbiddenException(
         'Customer success user cannot send notifications for a different customer',
       );
-    } else if (
-      user.isCustomerSuccess &&
+    }
+
+    if (
       !sendTemplateInputDto.customerId &&
       sendTemplateInputDto.userIds &&
       sendTemplateInputDto.userIds.length > 0
@@ -196,14 +198,21 @@ export class TemplatesController {
         },
       });
 
-      if (foundUsers.length === 0) {
+      if (foundUsers && foundUsers.length === 0) {
         throw new ForbiddenException(
           'No users found for the provided user IDs',
         );
       }
 
+      if (foundUsers.some((user) => user.status !== UserStatus.ACTIVE)) {
+        throw new ForbiddenException('One or more users are not active');
+      }
+
       for (const foundUser of foundUsers) {
-        if (foundUser.customerId !== user.customerId) {
+        if (
+          user.isCustomerSuccess &&
+          foundUser.customerId !== user.customerId
+        ) {
           throw new ForbiddenException(
             'Customer success user cannot send notifications for users belonging to a different customer',
           );
