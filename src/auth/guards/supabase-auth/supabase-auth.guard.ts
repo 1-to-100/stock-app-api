@@ -52,10 +52,15 @@ export class SupabaseAuthGuard implements CanActivate {
     }
 
     const token = authHeader.split(' ')[1];
-    const decodedPayload = jwt.verify(
-      token,
-      this.supabaseSecret,
-    ) as supabaseJwtPayload;
+    let decodedPayload: supabaseJwtPayload;
+    try {
+      decodedPayload = jwt.verify(
+        token,
+        this.supabaseSecret,
+      ) as supabaseJwtPayload;
+    } catch {
+      throw new UnauthorizedException('Invalid token');
+    }
 
     if (!decodedPayload || typeof decodedPayload !== 'object') {
       throw new UnauthorizedException('Invalid token');
