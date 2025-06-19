@@ -1,36 +1,22 @@
-import {
-  IsEmail,
-  IsInt,
-  IsNotEmpty,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCustomerDto {
   @IsString()
   @IsNotEmpty()
-  @ApiProperty({ description: 'Customer name' })
+  @ApiProperty({ description: 'Customer name', required: true })
   @MaxLength(255)
   name: string;
 
-  @IsEmail()
-  @ApiProperty({ description: 'Email address' })
-  email: string;
-
   @IsInt()
-  @ApiProperty({ description: 'Subscription ID' })
+  @ApiProperty({ description: 'Subscription ID', required: true })
   subscriptionId: number;
 
   @IsInt()
-  @ApiProperty({ description: 'Manager ID' })
-  managerId: number | null = null;
+  @ApiProperty({ description: 'Manager ID', required: false })
+  managerId?: number;
 
   @IsInt()
-  @ApiProperty({ description: 'Customer Success ID' })
-  customerSuccessId: number | null = null;
-
-  @IsInt()
-  @ApiProperty({ description: 'Owner User ID' })
+  @ApiProperty({ description: 'Owner User ID', required: true })
   ownerId: number;
 }

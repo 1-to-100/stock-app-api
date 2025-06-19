@@ -4,11 +4,14 @@ import { UserStatusList, UserStatusType } from '@/common/constants/status';
 import { CreateCustomerDto } from '@/customers/dto/create-customer.dto';
 
 export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {
-  @IsEnum(UserStatusList)
+  @IsEnum(UserStatusList, {
+    message: `Status must be one of the following: ${Object.values(UserStatusList).join(', ')}`,
+  })
   @IsOptional()
   @ApiPropertyOptional({
     description: 'Status (optional). Default: inactive',
     enum: UserStatusList,
+    isArray: false,
   })
   status?: UserStatusType;
 }

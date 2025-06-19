@@ -50,55 +50,30 @@ export class CustomersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createCustomerDto: CreateCustomerDto) {
-    const { name, email, subscriptionId, managerId, ownerId } =
-      createCustomerDto;
+    const { name, subscriptionId, ownerId, managerId } = createCustomerDto;
     const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
-    if (!owner) {
-      throw new ConflictException(`Owner user not found with ID ${ownerId}`);
-    }
 
-    if (owner.customerId) {
-      throw new ConflictException(
-        'The user that is assigned as an owner should not belong to any other customer.',
-      );
-    }
+    await this.validateOwner(ownerId);
+    await this.validateCustomerOwner(owner!.email, ownerId, name);
+    await this.validateSubscription(subscriptionId);
+    await this.validateManger(managerId);
 
-    const existingCustomer = await this.prisma.customer.findFirst({
-      where: { OR: [{ name }, { email }, { ownerId }] },
-    });
-
-    if (existingCustomer) {
-      throw new ConflictException(
-        `Customer with the same ${existingCustomer.name === name ? 'name' : 'email'} already exists`,
-      );
-    }
-
-    const subscriptionExists = await this.prisma.subscription.findUnique({
-      where: { id: subscriptionId },
-    });
-    if (!subscriptionExists) {
-      throw new ConflictException(
-        'Subscription with the given ID does not exist',
-      );
-    }
-    const domain = getDomainFromEmail(email);
-    if (!domain) {
-      throw new ConflictException(
-        'Email address does not contain a valid domain',
-      );
-    }
-    if (isPublicEmailDomain(domain)) {
-      throw new ConflictException(
-        'Please use your work email instead of a personal one (@gmail, @yahoo, etc.) to connect with your company. Personal email domains cannot join existing companies.',
-      );
-    }
     const customer = await this.prisma.customer.create({
-      data: { name, email, subscriptionId, domain, ownerId, managerId },
+      data: {
+        name,
+        email: owner!.email,
+        subscriptionId,
+        domain: getDomainFromEmail(owner!.email),
+        customerSuccessId: managerId,
+        ownerId,
+      },
     });
+
     await this.prisma.user.update({
       where: { id: ownerId },
       data: { customerId: customer.id },
     });
+
     return customer;
   }
 
@@ -183,13 +158,6 @@ export class CustomersService {
               email: customer.CustomerSuccess.email,
             }
           : null,
-        manager: customer.Manager
-          ? {
-              id: customer.Manager?.id,
-              name: customer.Manager?.name,
-              email: customer.Manager?.Users[0].email || null,
-            }
-          : null,
         subscriptionId: customer.Subscription?.id,
         subscriptionName: customer.Subscription?.name,
         numberOfUsers: customer._count.Users,
@@ -219,13 +187,6 @@ export class CustomersService {
     const customer = await this.prisma.customer.findFirst({
       where: { id },
       include: {
-        Manager: {
-          select: {
-            id: true,
-            name: true,
-            Users: { select: { email: true }, take: 1 },
-          },
-        },
         CustomerSuccess: {
           select: { id: true, firstName: true, lastName: true },
         },
@@ -253,13 +214,6 @@ export class CustomersService {
             email: customer.CustomerSuccess.lastName,
           }
         : null,
-      manager: customer.Manager
-        ? {
-            id: customer.Manager?.id,
-            name: customer.Manager?.name,
-            email: customer.Manager?.Users[0].email ?? null,
-          }
-        : null,
       owner: customer.Owner
         ? {
             id: customer.Owner?.id,
@@ -274,14 +228,27 @@ export class CustomersService {
   }
 
   async update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    const { name, email, subscriptionId, ownerId } = updateCustomerDto;
+    const customer = await this.prisma.customer.findUnique({ where: { id } });
+    if (!customer) {
+      throw new NotFoundException(`Customer with ID ${id} not found`);
+    }
 
-    await this.validateCustomerName(id, name);
-    await this.validateCustomerEmail(id, email);
+    const { name, subscriptionId, ownerId } = updateCustomerDto;
     await this.validateSubscription(subscriptionId);
-    await this.validateOwner(id, ownerId);
 
-    if (ownerId) {
+    let ownerEmail = customer.email;
+    if (ownerId && ownerId !== customer.ownerId) {
+      const owner = await this.prisma.user.findUnique({
+        where: { id: ownerId },
+      });
+      await this.validateOwner(ownerId);
+      await this.validateCustomerOwner(
+        owner!.email,
+        ownerId,
+        name || customer.name,
+        customer.id,
+      );
+      ownerEmail = owner!.email;
       await this.prisma.user.update({
         where: { id: ownerId },
         data: { customerId: id },
@@ -290,30 +257,47 @@ export class CustomersService {
 
     return this.prisma.customer.update({
       where: { id },
-      data: updateCustomerDto,
+      data: { ...updateCustomerDto, email: ownerEmail },
     });
   }
 
-  private async validateCustomerName(id: number, name?: string) {
-    if (!name) return;
-
+  private async validateCustomerOwner(
+    email: string,
+    ownerId: number,
+    name: string,
+    ignoreCustomerId?: number,
+  ) {
     const existingCustomer = await this.prisma.customer.findFirst({
-      where: { name },
+      where: {
+        ...(ignoreCustomerId && { id: { not: ignoreCustomerId } }),
+        OR: [{ name }, { email }, { ownerId }],
+      },
     });
-    if (existingCustomer && existingCustomer.id !== id) {
-      throw new ConflictException('Customer with the same name already exists');
-    }
-  }
 
-  private async validateCustomerEmail(id: number, email?: string) {
-    if (!email) return;
-
-    const existingEmailCustomer = await this.prisma.customer.findFirst({
-      where: { email },
-    });
-    if (existingEmailCustomer && existingEmailCustomer.id !== id) {
+    if (existingCustomer && existingCustomer.name === name) {
       throw new ConflictException(
-        'Customer with the same email already exists',
+        `Customer with the same name already exists: ${name}`,
+      );
+    } else if (existingCustomer && existingCustomer.email === email) {
+      throw new ConflictException(
+        `Customer with the same email already exists: ${email}`,
+      );
+    } else if (existingCustomer && existingCustomer.ownerId === ownerId) {
+      throw new ConflictException(
+        `Customer with the same owner id already exists: ${ownerId}`,
+      );
+    }
+
+    const domainCustomer = await this.prisma.customer.findFirst({
+      where: {
+        ...(ignoreCustomerId && { id: { not: ignoreCustomerId } }),
+        domain: getDomainFromEmail(email),
+      },
+    });
+
+    if (domainCustomer) {
+      throw new ConflictException(
+        `Customer with the same domain already exists: ${domainCustomer.domain}`,
       );
     }
   }
@@ -331,23 +315,61 @@ export class CustomersService {
     }
   }
 
-  private async validateOwner(id: number, ownerId?: number) {
-    if (!ownerId) return;
+  private async validateManger(managerId?: number) {
+    if (!managerId) return;
 
-    const newOwner = await this.prisma.user.findUnique({
-      where: { id: ownerId },
+    const manager = await this.prisma.user.findUnique({
+      where: { id: managerId },
     });
-    if (!newOwner) {
-      throw new ConflictException('Owner with the given ID does not exist');
-    }
-    if (newOwner.customerId && newOwner.customerId !== id) {
+
+    if (!manager) {
       throw new ConflictException(
-        'The user that is assigned as an owner should either belong to this customer or do not belong to any',
+        `Manager user not found with ID: ${managerId}`,
+      );
+    }
+
+    if (!manager.isCustomerSuccess) {
+      throw new ConflictException(
+        'Manager user must have a customer success role',
+      );
+    }
+
+    const findCustomer = await this.prisma.customer.findFirst({
+      where: { customerSuccessId: managerId },
+    });
+
+    if (findCustomer) {
+      throw new ConflictException(
+        `Manager user with ID ${managerId} is already assigned to a customer: ${findCustomer.name}`,
+      );
+    }
+  }
+
+  private async validateOwner(ownerId?: number) {
+    const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
+
+    if (!owner) {
+      throw new ConflictException(`Owner user not found with ID: ${ownerId}`);
+    }
+
+    if (isPublicEmailDomain(owner.email)) {
+      throw new ConflictException(
+        'Owner email cannot be a public email domain',
+      );
+    } else if (owner.isSuperadmin) {
+      throw new ConflictException(
+        'Owner user cannot be a superadmin. Please assign a different user as the owner.',
+      );
+    } else if (owner.isCustomerSuccess) {
+      throw new ConflictException(
+        'Owner user cannot be a customer success role. Please assign a different user as the owner.',
       );
     }
   }
 
   remove(id: number) {
-    throw new ConflictException(`Customer with ${id} can not be deleted`);
+    throw new ConflictException(
+      `Delete operation with ${id} is not supported at the moment.`,
+    );
   }
 }
