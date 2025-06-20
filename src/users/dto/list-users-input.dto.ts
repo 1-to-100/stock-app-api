@@ -11,6 +11,7 @@ import {
 import {
   eachNumberTransformer,
   eachUserStatusTransformer,
+  toBoolean,
 } from '@/common/helpers/class-transform-helpers';
 
 export class ListUsersInputDto extends PaginatedInputDto {
@@ -51,4 +52,12 @@ export class ListUsersInputDto extends PaginatedInputDto {
   @IsString()
   @IsOptional()
   declare orderBy?: UserOrderByFieldsType;
+
+  @ApiPropertyOptional({
+    description: 'Filter by users who have customers',
+  })
+  @Type(() => String)
+  @IsOptional()
+  @Transform(toBoolean)
+  hasCustomer?: boolean;
 }

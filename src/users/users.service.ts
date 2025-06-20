@@ -237,6 +237,7 @@ export class UsersService {
     const {
       roleId,
       customerId,
+      hasCustomer,
       status,
       search,
       page,
@@ -244,11 +245,19 @@ export class UsersService {
       orderBy,
       orderDirection,
     } = listUsersInput;
+
+    console.log('xxx2', hasCustomer);
+
     this.logger.debug(status);
     this.logger.debug(listUsersInput);
     const where: Prisma.UserFindManyArgs['where'] = {
       ...(roleId && { roleId: { in: roleId } }),
       ...(customerId && { customerId: { in: customerId } }),
+      ...(hasCustomer == true
+        ? { customerId: { not: null } }
+        : hasCustomer == false
+          ? { customerId: null }
+          : {}),
       ...(status && { status: { in: status } }),
       ...(search && {
         OR: [
