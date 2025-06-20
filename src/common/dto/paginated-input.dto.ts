@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class PaginatedInputDto {
@@ -57,8 +57,15 @@ export class PaginatedInputDto {
   @IsOptional()
   orderBy?: string;
 
-  @ApiPropertyOptional({ description: 'Sort direction' })
+  @ApiPropertyOptional({
+    description: 'Sort direction',
+    example: 'desc',
+    isArray: false,
+    enum: ['asc', 'desc'],
+    required: false,
+  })
   @IsString()
   @IsOptional()
+  @IsIn(['asc', 'desc'])
   orderDirection?: string;
 }

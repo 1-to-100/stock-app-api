@@ -15,7 +15,7 @@ import {
 import { UserSystemRoles } from '@/common/constants/user-system-roles';
 import { supabaseClientAdmin } from '@/common/helpers/supabase-client';
 import { FrontendPaths } from '@/common/helpers/frontend-paths';
-import { UserStatus } from '@/common/constants/status';
+import { UserOrderByFields, UserStatus } from '@/common/constants/status';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { CreateSystemUserDto } from '@/users/dto/create-system-user.dto';
@@ -234,8 +234,16 @@ export class UsersService {
   async findAll(
     listUsersInput: ListUsersInputDto,
   ): Promise<PaginatedOutputDto<OutputUserDto>> {
-    const { roleId, customerId, status, search, perPage, page } =
-      listUsersInput;
+    const {
+      roleId,
+      customerId,
+      status,
+      search,
+      page,
+      perPage,
+      orderBy,
+      orderDirection,
+    } = listUsersInput;
     this.logger.debug(status);
     this.logger.debug(listUsersInput);
     const where: Prisma.UserFindManyArgs['where'] = {
@@ -253,13 +261,13 @@ export class UsersService {
         AND: [{ isSuperadmin: false }, { isCustomerSuccess: false }],
       },
     };
-
+    const applyOrderByField = this.applyOrderParams(orderBy, orderDirection);
     const paginate = createPaginator({ perPage });
     return paginate<OutputUserDto, Prisma.UserFindManyArgs>(
       this.prisma.user,
       {
         where,
-        orderBy: { id: 'desc' },
+        orderBy: applyOrderByField,
         include: {
           customer: {
             select: {
@@ -277,8 +285,16 @@ export class UsersService {
   async findAllSystemUsers(
     listUsersInput: ListUsersInputDto,
   ): Promise<PaginatedOutputDto<OutputUserDto>> {
-    const { roleId, customerId, status, search, perPage, page } =
-      listUsersInput;
+    const {
+      roleId,
+      customerId,
+      status,
+      search,
+      orderBy,
+      orderDirection,
+      perPage,
+      page,
+    } = listUsersInput;
     this.logger.debug(status);
     this.logger.debug(listUsersInput);
     const where: Prisma.UserFindManyArgs['where'] = {
@@ -295,12 +311,13 @@ export class UsersService {
       ...{ AND: { OR: [{ isSuperadmin: true }, { isCustomerSuccess: true }] } },
     };
 
+    const applyOrderByField = this.applyOrderParams(orderBy, orderDirection);
     const paginate = createPaginator({ perPage });
     return paginate<OutputUserDto, Prisma.UserFindManyArgs>(
       this.prisma.user,
       {
         where,
-        orderBy: { id: 'desc' },
+        orderBy: applyOrderByField,
         include: {
           customer: {
             select: {
@@ -560,6 +577,31 @@ export class UsersService {
       },
     });
     return true;
+  }
+
+  private applyOrderParams(
+    orderBy: 'id' | 'email' | 'name' | 'createdAt' | undefined,
+    orderDirection: string | undefined,
+  ) {
+    const orderByField = orderBy || 'id';
+    if (!Object.values(UserOrderByFields).includes(orderByField)) {
+      throw new ConflictException(
+        `Invalid order by field: ${orderByField}. Allowed fields are: ${Object.values(UserOrderByFields).join(', ')}`,
+      );
+    }
+
+    const applyOrderDirection = orderDirection
+      ? (orderDirection as Prisma.SortOrder)
+      : 'desc';
+
+    const applyOrderByField: Prisma.UserFindManyArgs['orderBy'] =
+      orderByField === 'name'
+        ? [
+            { firstName: applyOrderDirection },
+            { lastName: applyOrderDirection },
+          ]
+        : { [orderByField]: applyOrderDirection };
+    return applyOrderByField;
   }
 
   getRandomString(length: number) {

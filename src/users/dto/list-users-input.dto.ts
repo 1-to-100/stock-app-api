@@ -1,8 +1,13 @@
-import { IsArray, IsEnum, IsInt, IsOptional } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type, Transform } from 'class-transformer';
 import { PaginatedInputDto } from '@/common/dto/paginated-input.dto';
-import { UserStatusList, UserStatusType } from '@/common/constants/status';
+import {
+  UserOrderByFields,
+  UserOrderByFieldsType,
+  UserStatusList,
+  UserStatusType,
+} from '@/common/constants/status';
 import {
   eachNumberTransformer,
   eachUserStatusTransformer,
@@ -36,4 +41,14 @@ export class ListUsersInputDto extends PaginatedInputDto {
     isArray: true,
   })
   status?: UserStatusType[];
+
+  @ApiPropertyOptional({
+    description: 'Order by column',
+    isArray: false,
+    example: 'id',
+    enum: Object.values(UserOrderByFields),
+  })
+  @IsString()
+  @IsOptional()
+  declare orderBy?: UserOrderByFieldsType;
 }
