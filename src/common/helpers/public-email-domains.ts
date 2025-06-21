@@ -33,3 +33,7 @@ export const PUBLIC_EMAIL_DOMAINS = new Set([
   'titan.email',
   // add other public email domains here
 ]);
+
+export function isPublicEmailDomain(domain: string): boolean {
+  return PUBLIC_EMAIL_DOMAINS.has(domain.toLowerCase().trim());
+}

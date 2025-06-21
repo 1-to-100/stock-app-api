@@ -6,13 +6,11 @@ import {
   Param,
   ConflictException,
 } from '@nestjs/common';
-import {
-  getDomainFromEmail,
-  isPublicEmailDomain,
-} from '@/common/helpers/string-helpers';
+import { getDomainFromEmail } from '@/common/helpers/string-helpers';
 import { UsersService } from '@/users/users.service';
 import { RegisterService } from '@/register/register.service';
 import { RegisterDto } from '@/register/dto/register.dto';
+import { isPublicEmailDomain } from '@/common/helpers/public-email-domains';
 
 @Controller('register')
 export class RegisterController {

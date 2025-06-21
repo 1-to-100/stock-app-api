@@ -7,15 +7,13 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
 import { CustomerStatus, Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
-import {
-  getDomainFromEmail,
-  isPublicEmailDomain,
-} from '@/common/helpers/string-helpers';
+import { getDomainFromEmail } from '@/common/helpers/string-helpers';
 import { CreateCustomerDto } from '@/customers/dto/create-customer.dto';
 import { ListCustomersInputDto } from '@/customers/dto/list-customers-input.dto';
 import { ListCustomersOutputDto } from '@/customers/dto/list-customers-output.dto';
 import { OutputTaxonomyDto } from '@/taxonomies/dto/output-taxonomy.dto';
 import { UpdateCustomerDto } from '@/customers/dto/update-customer.dto';
+import { isPublicEmailDomain } from '@/common/helpers/public-email-domains';
 
 type SubscriptionDataType = {
   id: number;

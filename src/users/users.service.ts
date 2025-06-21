@@ -8,10 +8,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
 import { createPaginator } from 'prisma-pagination';
 import { CustomerStatus, Prisma } from '@prisma/client';
-import {
-  getDomainFromEmail,
-  isPublicEmailDomain,
-} from '@/common/helpers/string-helpers';
+import { getDomainFromEmail } from '@/common/helpers/string-helpers';
 import { UserSystemRoles } from '@/common/constants/user-system-roles';
 import { supabaseClientAdmin } from '@/common/helpers/supabase-client';
 import { FrontendPaths } from '@/common/helpers/frontend-paths';
@@ -25,6 +22,7 @@ import { CheckUserExistsDto } from '@/users/dto/check-user-exists.dto';
 import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
 import { UpdateUserDto } from '@/users/dto/update-user.dto';
 import { SupabaseDecodedToken } from '@/auth/guards/supabase-auth/supabase-auth.guard';
+import { isPublicEmailDomain } from '@/common/helpers/public-email-domains';
 
 @Injectable()
 export class UsersService {
@@ -245,8 +243,6 @@ export class UsersService {
       orderBy,
       orderDirection,
     } = listUsersInput;
-
-    console.log('xxx2', hasCustomer);
 
     this.logger.debug(status);
     this.logger.debug(listUsersInput);
