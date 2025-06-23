@@ -38,19 +38,27 @@ export class UsersService {
       throw new ConflictException('User with this email already exists');
     }
 
+    let user: OutputUserDto | null = null;
+
     try {
       this.logger.log(`Create user with email ${createUserDto.email}`);
-      const user = await this.prisma.user.create({ data: createUserDto });
-
-      if (!skipInvite && user) {
-        await this.sendInviteEmail(user);
-      }
-
-      return user;
+      user = await this.prisma.user.create({ data: createUserDto });
     } catch (error) {
       this.logger.error(`Error creating user: ${error}`);
-      throw new ConflictException('User cannot be created.');
+      if (typeof error == 'string') {
+        throw new ConflictException('User cannot be created.' + error);
+      } else if (error instanceof Error) {
+        throw new ConflictException('User cannot be created.' + error.message);
+      } else {
+        throw new ConflictException('User cannot be created.');
+      }
     }
+
+    if (!skipInvite && user) {
+      await this.sendInviteEmail(user);
+    }
+
+    return user;
   }
 
   async createSystemUser(
@@ -60,29 +68,30 @@ export class UsersService {
       throw new ConflictException('User with this email already exists');
     }
 
+    const { systemRole, ...makeUser } = createSystemUserDto;
+    const isSuperadmin = systemRole === UserSystemRoles.SYSTEM_ADMIN;
+    const isCustomerSuccess = systemRole === UserSystemRoles.CUSTOMER_SUCCESS;
+    if (!(isSuperadmin || isCustomerSuccess)) {
+      throw new ConflictException('Invalid system role');
+    }
+
+    if (isCustomerSuccess && !createSystemUserDto.customerId) {
+      throw new ConflictException(
+        'Customer ID is required for Customer Success role',
+      );
+    } else if (isCustomerSuccess && createSystemUserDto.customerId) {
+      const customer = await this.prisma.customer.findUnique({
+        where: { id: createSystemUserDto.customerId },
+      });
+      if (!customer) {
+        throw new ConflictException('Customer not found');
+      }
+    }
+
+    let user: OutputUserDto | null = null;
+
     try {
-      const { systemRole, ...makeUser } = createSystemUserDto;
-      const isSuperadmin = systemRole === UserSystemRoles.SYSTEM_ADMIN;
-      const isCustomerSuccess = systemRole === UserSystemRoles.CUSTOMER_SUCCESS;
-
-      if (!(isSuperadmin || isCustomerSuccess)) {
-        throw new ConflictException('Invalid system role');
-      }
-
-      if (isCustomerSuccess && !createSystemUserDto.customerId) {
-        throw new ConflictException(
-          'Customer ID is required for Customer Success role',
-        );
-      } else if (isCustomerSuccess && createSystemUserDto.customerId) {
-        const customer = await this.prisma.customer.findUnique({
-          where: { id: createSystemUserDto.customerId },
-        });
-        if (!customer) {
-          throw new ConflictException('Customer not found');
-        }
-      }
-
-      const user = await this.prisma.user.create({
+      user = await this.prisma.user.create({
         data: { ...makeUser, isSuperadmin, isCustomerSuccess },
       });
 
@@ -93,16 +102,22 @@ export class UsersService {
           data: { customerSuccessId: user.id },
         });
       }
-
-      if (user) {
-        await this.sendInviteEmail(user);
-      }
-
-      return user;
     } catch (error) {
       this.logger.error(`Error creating user: ${error}`);
-      throw new ConflictException('User cannot be created.');
+      if (typeof error == 'string') {
+        throw new ConflictException('User cannot be created.' + error);
+      } else if (error instanceof Error) {
+        throw new ConflictException('User cannot be created.' + error.message);
+      } else {
+        throw new ConflictException('User cannot be created.');
+      }
     }
+
+    if (user) {
+      await this.sendInviteEmail(user);
+    }
+
+    return user;
   }
 
   async updateSystemUser(
