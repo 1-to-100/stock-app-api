@@ -14,9 +14,17 @@ export const User = createParamDecorator(
       user: DecodedIdToken;
       headers: { authorization?: string };
       currentUser: null | OutputUserDto;
+      impersonatedUser?: OutputUserDto;
+      isImpersonating?: boolean;
     }>();
-    const user = request.currentUser;
 
+    if (request.isImpersonating && request.impersonatedUser) {
+      const user = request.impersonatedUser;
+      if (!user) return null;
+      return data ? user[data] : user;
+    }
+
+    const user = request.currentUser;
     if (!user) return null;
     return data ? user[data] : user;
   },
@@ -29,7 +37,7 @@ export const UserId = createParamDecorator(
       .getRequest<{ user?: FirebaseDecodedToken }>();
     const user = request.user;
 
-    if (!user || typeof user.uid !== 'string') {
+    if (!user) {
       return null;
     }
 

@@ -30,6 +30,9 @@ import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
 import { UpdateUserDto } from '@/users/dto/update-user.dto';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { UserStatus } from '@/common/constants/status';
+import { UserWithImpersonationDto } from '@/users/dto/user-with-impersonation.dto';
+import { IsImpersonating } from '@/common/decorators/is-impersonating.decorator';
+import { OriginalUser } from '@/common/decorators/original-user.decorator';
 
 @Controller('users')
 @UseGuards(DynamicAuthGuard, PermissionGuard)
@@ -202,7 +205,7 @@ export class UsersController {
     });
 
     const results = await Promise.all(invitePromises);
-    // Filter out null results as we don’t care about failed/skipped invites. Or care?
+    // Filter out null results as we don't care about failed/skipped invites. Or care?
     return results.filter((result) => result !== null);
   }
 
@@ -237,11 +240,57 @@ export class UsersController {
 
   @Get('/me')
   @ApiOkResponse({
-    description: 'User',
-    type: OutputUserDto,
+    description:
+      'User profile. If impersonating, includes impersonation information',
+    type: UserWithImpersonationDto,
   })
-  async findSelf(@User() user: OutputUserDto) {
-    return await this.usersService.findOne(user.id);
+  @ApiOkResponse({
+    description: 'User profile with impersonation info',
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/UserWithImpersonationDto' },
+        {
+          example: {
+            id: 1,
+            email: 'user@example.com',
+            firstName: 'John',
+            lastName: 'Doe',
+            isImpersonating: true,
+            impersonatedBy: {
+              id: 2,
+              email: 'admin@example.com',
+              firstName: 'Admin',
+              lastName: 'User',
+            },
+          },
+        },
+      ],
+    },
+  })
+  async findSelf(
+    @User() user: OutputUserDto,
+    @IsImpersonating() isImpersonating: boolean,
+    @OriginalUser() originalUser: OutputUserDto,
+  ) {
+    const userData = await this.usersService.findOne(user.id);
+
+    // Якщо це імперсонація, додаємо інформацію про неї
+    if (isImpersonating && originalUser) {
+      const response: UserWithImpersonationDto = {
+        ...userData,
+        isImpersonating: true,
+        impersonatedBy: {
+          id: originalUser.id,
+          email: originalUser.email,
+          firstName: originalUser.firstName,
+          lastName: originalUser.lastName,
+        },
+      };
+
+      return response;
+    }
+
+    return userData;
   }
 
   @Patch('/me')
