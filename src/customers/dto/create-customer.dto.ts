@@ -13,8 +13,8 @@ export class CreateCustomerDto {
   subscriptionId: number;
 
   @IsInt()
-  @ApiProperty({ description: 'Manager ID', required: false })
-  managerId?: number;
+  @ApiProperty({ description: 'Customer Manager ID', required: false })
+  customerSuccessId?: number;
 
   @IsInt()
   @ApiProperty({ description: 'Owner User ID', required: true })

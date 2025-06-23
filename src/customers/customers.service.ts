@@ -48,13 +48,14 @@ export class CustomersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createCustomerDto: CreateCustomerDto) {
-    const { name, subscriptionId, ownerId, managerId } = createCustomerDto;
+    const { name, subscriptionId, ownerId, customerSuccessId } =
+      createCustomerDto;
     const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
 
     await this.validateOwner(ownerId);
     await this.validateCustomerOwner(owner!.email, ownerId, name);
     await this.validateSubscription(subscriptionId);
-    await this.validateManger(managerId);
+    await this.validateManger(customerSuccessId);
 
     const customer = await this.prisma.customer.create({
       data: {
@@ -62,7 +63,7 @@ export class CustomersService {
         email: owner!.email,
         subscriptionId,
         domain: getDomainFromEmail(owner!.email),
-        customerSuccessId: managerId,
+        customerSuccessId,
         ownerId,
       },
     });
