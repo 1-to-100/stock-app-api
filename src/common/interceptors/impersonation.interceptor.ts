@@ -53,6 +53,8 @@ export class ImpersonationInterceptor implements NestInterceptor {
         );
       } else if (impersonatedUser.status !== UserStatus.ACTIVE) {
         throw new ForbiddenException('You cannot impersonate an inactive user');
+      } else if (impersonatedUser.id === request.currentUser.id) {
+        throw new ForbiddenException('You cannot impersonate yourself');
       }
 
       if (
