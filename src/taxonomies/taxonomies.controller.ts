@@ -4,6 +4,7 @@ import { UserStatusList } from '@/common/constants/status';
 import { User } from '@/common/decorators/user.decorator';
 import { UserSystemRolesList } from '@/common/constants/user-system-roles';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { CustomersService } from '@/customers/customers.service';
 import { RolesService } from '@/roles/roles.service';
 import { ManagersService } from '@/managers/managers.service';
@@ -15,7 +16,7 @@ import { NotificationChannelList } from '@/notifications/constants/notification-
 import { OutputNotificationsTaxonomyDto } from '@/taxonomies/dto/output-notifications-taxonomy.dto';
 
 @Controller('taxonomies')
-@UseGuards(DynamicAuthGuard)
+@UseGuards(DynamicAuthGuard, ImpersonationGuard)
 export class TaxonomiesController {
   constructor(
     private readonly customersService: CustomersService,

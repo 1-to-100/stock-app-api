@@ -4,11 +4,12 @@ import { CustomersService } from '@/customers/customers.service';
 import { RolesService } from '@/roles/roles.service';
 import { ManagersService } from '@/managers/managers.service';
 import { SubscriptionsService } from '@/subscriptions/subscriptions.service';
-import { UsersService } from '@/users/users.service';
+import { UsersModule } from '@/users/users.module';
 import { TaxonomiesService } from '@/taxonomies/taxonomies.service';
 import { TaxonomiesController } from '@/taxonomies/taxonomies.controller';
 
 @Module({
+  imports: [UsersModule],
   controllers: [TaxonomiesController],
   providers: [
     TaxonomiesService,
@@ -17,7 +18,6 @@ import { TaxonomiesController } from '@/taxonomies/taxonomies.controller';
     ManagersService,
     SubscriptionsService,
     PrismaService,
-    UsersService,
   ],
   exports: [TaxonomiesService],
 })

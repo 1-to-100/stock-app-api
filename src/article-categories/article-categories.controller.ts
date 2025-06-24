@@ -17,6 +17,7 @@ import { User } from '@/common/decorators/user.decorator';
 import { CustomerId } from '@/common/decorators/customer-id.decorator';
 import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { ArticleCategoryDto } from '@/article-categories/dto/article-category.dto';
 import { ArticleCategoriesService } from '@/article-categories/article-categories.service';
@@ -25,7 +26,7 @@ import { CreateArticleCategoryDto } from '@/article-categories/dto/create-articl
 import { UpdateArticleCategoryDto } from '@/article-categories/dto/update-article-category.dto';
 
 @Controller('documents/categories')
-@UseGuards(DynamicAuthGuard, PermissionGuard)
+@UseGuards(DynamicAuthGuard, ImpersonationGuard, PermissionGuard)
 export class ArticleCategoriesController {
   private readonly logger = new Logger(ArticleCategoriesController.name);
   constructor(

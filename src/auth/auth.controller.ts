@@ -8,12 +8,13 @@ import { SupabaseUser } from '@/common/decorators/supabase-user.decorator';
 import { UsersService } from '@/users/users.service';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
 import { SupabaseDecodedToken } from '@/auth/guards/supabase-auth/supabase-auth.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 
 @Controller('auth')
+@UseGuards(DynamicAuthGuard, ImpersonationGuard)
 export class AuthController {
   constructor(private readonly userService: UsersService) {}
 
-  @UseGuards(DynamicAuthGuard)
   @Post('sync/supabase')
   async syncSupabaseUser(@SupabaseUser() user: SupabaseDecodedToken) {
     if (!user) throw new UnauthorizedException();

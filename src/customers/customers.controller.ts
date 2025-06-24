@@ -14,13 +14,14 @@ import { User } from '@/common/decorators/user.decorator';
 import { CustomerId } from '@/common/decorators/customer-id.decorator';
 import { CustomersService } from '@/customers/customers.service';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { CreateCustomerDto } from '@/customers/dto/create-customer.dto';
 import { ListCustomersInputDto } from '@/customers/dto/list-customers-input.dto';
 import { UpdateCustomerDto } from '@/customers/dto/update-customer.dto';
 
 @Controller('customers')
-@UseGuards(DynamicAuthGuard)
+@UseGuards(DynamicAuthGuard, ImpersonationGuard)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 

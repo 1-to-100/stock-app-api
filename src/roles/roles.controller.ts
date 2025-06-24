@@ -15,6 +15,7 @@ import { RequiredSuperUser } from '@/common/decorators/superuser.decorator';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
 import { RequireSuperuserGuard } from '@/auth/guards/require-superuser/require-superuser.guard';
 import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { RolesService } from '@/roles/roles.service';
 import { CreateRoleDto } from '@/roles/dto/create-role.dto';
 import { ListRolesDto } from '@/roles/dto/list-roles.dto';
@@ -23,7 +24,12 @@ import { UpdateRoleDto } from '@/roles/dto/update-role.dto';
 import { UpdateRolePermissionsByNameDto } from '@/roles/dto/update-role-permissions-by-name.dto';
 
 @Controller('roles')
-@UseGuards(DynamicAuthGuard, RequireSuperuserGuard, PermissionGuard)
+@UseGuards(
+  DynamicAuthGuard,
+  ImpersonationGuard,
+  RequireSuperuserGuard,
+  PermissionGuard,
+)
 export class RolesController {
   constructor(
     private readonly rolesService: RolesService,

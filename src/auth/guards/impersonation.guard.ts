@@ -1,31 +1,24 @@
 import {
-  Injectable,
-  NestInterceptor,
+  CanActivate,
   ExecutionContext,
-  CallHandler,
+  Injectable,
   ForbiddenException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { UsersService } from '@/users/users.service';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
-import { Request } from 'express';
 import { UserStatus } from '@/common/constants/status';
 
 @Injectable()
-export class ImpersonationInterceptor implements NestInterceptor {
+export class ImpersonationGuard implements CanActivate {
   constructor(private readonly usersService: UsersService) {}
 
-  async intercept(
-    context: ExecutionContext,
-    next: CallHandler,
-  ): Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest<
-      Request & {
-        currentUser?: OutputUserDto;
-        impersonatedUser?: OutputUserDto;
-        isImpersonating?: boolean;
-      }
-    >();
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<{
+      currentUser?: OutputUserDto;
+      impersonatedUser?: OutputUserDto;
+      isImpersonating?: boolean;
+      headers: { 'x-impersonate-user-id'?: string };
+    }>();
 
     const impersonateUserIdHeader = request.headers['x-impersonate-user-id'];
     const impersonateUserId = Number(impersonateUserIdHeader);
@@ -35,8 +28,7 @@ export class ImpersonationInterceptor implements NestInterceptor {
     }
 
     if (impersonateUserId && request.currentUser) {
-      const { isSuperadmin, isCustomerSuccess, customerId } =
-        request.currentUser;
+      const { isSuperadmin, isCustomerSuccess, customerId } = request.currentUser;
 
       if (!isSuperadmin && !isCustomerSuccess) {
         throw new ForbiddenException(
@@ -44,8 +36,7 @@ export class ImpersonationInterceptor implements NestInterceptor {
         );
       }
 
-      const impersonatedUser =
-        await this.usersService.findOne(impersonateUserId);
+      const impersonatedUser = await this.usersService.findOne(impersonateUserId);
 
       if (impersonatedUser.isSuperadmin) {
         throw new ForbiddenException(
@@ -70,6 +61,6 @@ export class ImpersonationInterceptor implements NestInterceptor {
       }
     }
 
-    return next.handle();
+    return true;
   }
-}
+} 

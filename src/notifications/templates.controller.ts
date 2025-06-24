@@ -17,6 +17,7 @@ import { CustomerId } from '@/common/decorators/customer-id.decorator';
 import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { TemplatesService } from '@/notifications/templates.service';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { ListTemplatesInputDto } from '@/notifications/dto/list-templates-input.dto';
@@ -29,7 +30,7 @@ import { UserStatus } from '@/common/constants/status';
 
 @ApiTags('Notification Templates')
 @Controller('notification/templates')
-@UseGuards(DynamicAuthGuard)
+@UseGuards(DynamicAuthGuard, ImpersonationGuard)
 export class TemplatesController {
   constructor(
     private readonly prisma: PrismaService,

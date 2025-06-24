@@ -36,19 +36,26 @@ export class PermissionGuard implements CanActivate {
       user: DecodedIdToken;
       headers: { authorization?: string };
       currentUser: null | OutputUserDto;
+      impersonatedUser?: OutputUserDto;
+      isImpersonating?: boolean;
     }>();
 
-    const user = request.currentUser;
-    if (!user) {
+    const effectiveUser =
+      request.isImpersonating && request.impersonatedUser
+        ? request.impersonatedUser
+        : request.currentUser;
+
+    if (!effectiveUser) {
       throw new ForbiddenException('Access denied: user not found');
     }
-    if (user.isSuperadmin) {
+
+    if (effectiveUser.isSuperadmin) {
       return true;
     }
 
     // треба придумати кращий метод для ролі CustomerSuccess, ніж харкодити деякі доступа
     if (
-      user.isCustomerSuccess &&
+      effectiveUser.isCustomerSuccess &&
       allowedPermissions.some(
         (permission) =>
           [
@@ -64,22 +71,22 @@ export class PermissionGuard implements CanActivate {
 
     const customer = await this.prisma.customer.findFirst({
       where: {
-        id: user.customerId!,
+        id: effectiveUser.customerId!,
       },
     });
     console.log('======================');
     console.log(customer);
-    console.log(user);
+    console.log(effectiveUser);
     console.log('======================');
     // allow customer owner to access its endpoints
-    if (customer && user.id == customer.ownerId) {
+    if (customer && effectiveUser.id == customer.ownerId) {
       return true;
     }
-    if (!user.roleId) {
+    if (!effectiveUser.roleId) {
       throw new ForbiddenException('Access denied: user has no role assigned');
     }
 
-    const userRole = await this.rolesService.findOne(user.roleId);
+    const userRole = await this.rolesService.findOne(effectiveUser.roleId);
     if (!userRole) {
       throw new ForbiddenException('Access denied: role not found');
     }
@@ -96,12 +103,15 @@ export class PermissionGuard implements CanActivate {
     });
 
     if (!allowed) {
+      const userContext = request.isImpersonating
+        ? `impersonated user (${effectiveUser.email})`
+        : `user (${effectiveUser.email})`;
       throw new ForbiddenException(
-        `Access denied: required permission(s): ${allowedPermissions.join(', ')}`,
+        `Access denied for ${userContext}: required permission(s): ${allowedPermissions.join(', ')}`,
       );
     }
 
-    console.log('user', user);
+    console.log('effectiveUser', effectiveUser);
     return true;
   }
 }

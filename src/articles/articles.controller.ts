@@ -18,6 +18,7 @@ import { CustomerId } from '@/common/decorators/customer-id.decorator';
 import { ApiOkResponse, ApiConflictResponse, ApiParam } from '@nestjs/swagger';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
 import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { ArticlesService } from '@/articles/articles.service';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { CreateArticleDto } from '@/articles/dto/create-article.dto';
@@ -26,7 +27,7 @@ import { UpdateArticleDto } from '@/articles/dto/update-article.dto';
 import { ArticleDto } from '@/articles/dto/article.dto';
 
 @Controller('documents/articles')
-@UseGuards(DynamicAuthGuard, PermissionGuard)
+@UseGuards(DynamicAuthGuard, ImpersonationGuard, PermissionGuard)
 export class ArticlesController {
   private readonly logger = new Logger(ArticlesController.name);
 

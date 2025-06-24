@@ -18,6 +18,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { NotificationDto } from '@/notifications/dto/notification.dto';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
@@ -27,7 +28,7 @@ import { ListAdminNotificationsInputDto } from '@/notifications/dto/list-admin-n
 import { CustomerId } from '@/common/decorators/customer-id.decorator';
 
 @Controller('notifications')
-@UseGuards(DynamicAuthGuard)
+@UseGuards(DynamicAuthGuard, ImpersonationGuard)
 export class NotificationsController {
   private readonly logger = new Logger(NotificationsController.name);
 

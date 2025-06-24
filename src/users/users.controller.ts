@@ -19,6 +19,7 @@ import { User } from '@/common/decorators/user.decorator';
 import { CustomerId } from '@/common/decorators/customer-id.decorator';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
 import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { UsersService } from '@/users/users.service';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
@@ -35,7 +36,7 @@ import { IsImpersonating } from '@/common/decorators/is-impersonating.decorator'
 import { OriginalUser } from '@/common/decorators/original-user.decorator';
 
 @Controller('users')
-@UseGuards(DynamicAuthGuard, PermissionGuard)
+@UseGuards(DynamicAuthGuard, ImpersonationGuard, PermissionGuard)
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
   constructor(

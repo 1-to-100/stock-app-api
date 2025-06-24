@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 import { UsersModule } from '@/users/users.module';
@@ -16,7 +15,6 @@ import { RegisterModule } from '@/register/register.module';
 import { ArticleCategoriesModule } from '@/article-categories/article-categories.module';
 import { ArticlesModule } from '@/articles/articles.module';
 import { NotificationsModule } from '@/notifications/notifications.module';
-import { ImpersonationInterceptor } from '@/common/interceptors/impersonation.interceptor';
 
 @Module({
   imports: [
@@ -36,13 +34,6 @@ import { ImpersonationInterceptor } from '@/common/interceptors/impersonation.in
     NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    PrismaService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ImpersonationInterceptor,
-    },
-  ],
+  providers: [AppService, PrismaService],
 })
 export class AppModule {}

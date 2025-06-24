@@ -1,8 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import {
-  DecodedIdToken,
-  FirebaseDecodedToken,
-} from '@/common/types/decoded-token.type';
+import { FirebaseDecodedToken } from '@/common/types/decoded-token.type';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 
 export const User = createParamDecorator(
@@ -11,36 +8,25 @@ export const User = createParamDecorator(
     ctx: ExecutionContext,
   ): any => {
     const request = ctx.switchToHttp().getRequest<{
-      user: DecodedIdToken;
-      headers: { authorization?: string };
-      currentUser: null | OutputUserDto;
+      currentUser: OutputUserDto | null;
       impersonatedUser?: OutputUserDto;
       isImpersonating?: boolean;
     }>();
 
-    if (request.isImpersonating && request.impersonatedUser) {
-      const user = request.impersonatedUser;
-      if (!user) return null;
-      return data ? user[data] : user;
-    }
-
-    const user = request.currentUser;
+    const user = request.isImpersonating
+      ? request.impersonatedUser
+      : request.currentUser;
     if (!user) return null;
+
     return data ? user[data] : user;
   },
 );
 
 export const UserId = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): string | null => {
-    const request = ctx
+    const user = ctx
       .switchToHttp()
-      .getRequest<{ user?: FirebaseDecodedToken }>();
-    const user = request.user;
-
-    if (!user) {
-      return null;
-    }
-
-    return user.uid;
+      .getRequest<{ user?: FirebaseDecodedToken }>().user;
+    return user?.uid || null;
   },
 );

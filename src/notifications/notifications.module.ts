@@ -4,9 +4,11 @@ import { NotificationsService } from '@/notifications/notifications.service';
 import { TemplatesService } from '@/notifications/templates.service';
 import { NotificationsController } from '@/notifications/notifications.controller';
 import { TemplatesController } from '@/notifications/templates.controller';
+import { UsersModule } from '@/users/users.module';
 
 @Global()
 @Module({
+  imports: [UsersModule],
   providers: [PrismaService, NotificationsService, TemplatesService],
   controllers: [NotificationsController, TemplatesController],
   exports: [NotificationsService],

@@ -18,6 +18,7 @@ import { Permissions } from '@/common/decorators/permissions.decorator';
 import { CustomerId } from '@/common/decorators/customer-id.decorator';
 import { DynamicAuthGuard } from '@/auth/guards/dynamic-auth/dynamic-auth.guard';
 import { PermissionGuard } from '@/auth/guards/permission/permission.guard';
+import { ImpersonationGuard } from '@/auth/guards/impersonation.guard';
 import { UsersService } from '@/users/users.service';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
@@ -25,7 +26,7 @@ import { CreateSystemUserDto } from '@/users/dto/create-system-user.dto';
 import { UpdateSystemUserDto } from '@/users/dto/update-system-user.dto';
 
 @Controller('system-users')
-@UseGuards(DynamicAuthGuard, PermissionGuard)
+@UseGuards(DynamicAuthGuard, ImpersonationGuard, PermissionGuard)
 export class SystemUsersController {
   private readonly logger = new Logger(SystemUsersController.name);
 
