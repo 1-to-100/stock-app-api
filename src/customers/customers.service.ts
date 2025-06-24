@@ -187,7 +187,7 @@ export class CustomersService {
       where: { id },
       include: {
         CustomerSuccess: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, email: true },
         },
         Subscription: { select: { id: true, name: true } },
         Owner: { select: { id: true, firstName: true, lastName: true } },
@@ -210,7 +210,7 @@ export class CustomersService {
         ? {
             id: customer.CustomerSuccess.id,
             name: `${customer.CustomerSuccess.firstName ?? ''} ${customer.CustomerSuccess.lastName ?? ''}`.trim(),
-            email: customer.CustomerSuccess.lastName,
+            email: customer.CustomerSuccess.email,
           }
         : null,
       owner: customer.Owner
