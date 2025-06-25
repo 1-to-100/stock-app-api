@@ -10,7 +10,10 @@ import { createPaginator } from 'prisma-pagination';
 import { CustomerStatus, Prisma } from '@prisma/client';
 import { getDomainFromEmail } from '@/common/helpers/string-helpers';
 import { UserSystemRoles } from '@/common/constants/user-system-roles';
-import { supabaseClientAdmin } from '@/common/helpers/supabase-client';
+import {
+  supabaseClientAdmin,
+  supabaseClientAuth,
+} from '@/common/helpers/supabase-client';
 import { FrontendPaths } from '@/common/helpers/frontend-paths';
 import { UserOrderByFields, UserStatus } from '@/common/constants/status';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
@@ -657,5 +660,36 @@ export class UsersService {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
+  }
+
+  async resetPassword(
+    email: string,
+  ): Promise<{ status: string; message: string }> {
+    const user = await this.prisma.user.findFirst({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User with this email does not exist');
+    }
+
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new ConflictException(
+        'User with this email is not active. Please contact support.',
+      );
+    }
+
+    const { error } = await supabaseClientAuth.resetPasswordForEmail(email, {
+      redirectTo: FrontendPaths.updatePassword,
+    });
+
+    if (error) {
+      this.logger.error(`Error sending reset password email: ${error.message}`);
+      throw new ConflictException(
+        `Error sending reset password email: ${error.message}`,
+      );
+    }
+
+    return { status: 'ok', message: 'Password reset link sent to your email.' };
   }
 }

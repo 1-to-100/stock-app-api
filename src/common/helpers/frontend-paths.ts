@@ -7,6 +7,7 @@ export const FrontendPaths = {
   home,
   dashboardOverview: new URL('/dashboard/user-management', home).href,
   setNewPassword: new URL('/auth/supabase/set-new-password', home).href,
+  updatePassword: new URL('/auth/supabase/update-password', home).href,
   callbackPkce: (() => {
     const callbackPkceUrl = new URL('/auth/supabase/callback/pkce', home);
     callbackPkceUrl.searchParams.set('next', '/dashboard/user-management');
