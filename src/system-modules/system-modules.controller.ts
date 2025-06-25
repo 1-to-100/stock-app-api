@@ -91,6 +91,10 @@ export class SystemModulesController {
 
   @Get('test')
   test() {
+    // const result: { id: string | null; email_confirmed_at: string | null }[] =
+    //   await this.prisma
+    //     .$queryRaw`SELECT * FROM auth.users WHERE email = 'alina.shevchuk+67213@huboxt.com';`;
+
     return { status: 'ok', frontendUrl: FrontendPaths };
   }
 }

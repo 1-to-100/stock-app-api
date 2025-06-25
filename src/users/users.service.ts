@@ -548,6 +548,31 @@ export class UsersService {
   }
 
   async sendInviteEmail(user: OutputUserDto) {
+    const foundUser = await this.prisma.user.findFirst({
+      where: { email: user.email },
+    });
+
+    if (foundUser) {
+      if (
+        foundUser.status === UserStatus.ACTIVE ||
+        foundUser.uid ||
+        foundUser.emailVerified
+      ) {
+        throw new ConflictException('Please use forgot password flow');
+      }
+
+      const rawQueryResult = await this.prisma.$queryRaw<
+        { id: string | null }[]
+      >`SELECT * FROM auth.users WHERE email = ${user.email};`;
+
+      if (rawQueryResult?.length) {
+        const supabaseUserId = rawQueryResult[0]?.id;
+        if (supabaseUserId) {
+          await supabaseClientAdmin.deleteUser(supabaseUserId);
+        }
+      }
+    }
+
     const { error } = await supabaseClientAdmin.inviteUserByEmail(user.email, {
       data: {
         ...(user?.firstName && { firstName: user.firstName }),
