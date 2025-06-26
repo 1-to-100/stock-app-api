@@ -195,6 +195,7 @@ export class TemplatesController {
     ) {
       const foundUsers = await this.prisma.user.findMany({
         where: {
+          deletedAt: null,
           id: { in: sendTemplateInputDto.userIds },
         },
       });

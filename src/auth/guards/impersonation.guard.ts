@@ -28,7 +28,8 @@ export class ImpersonationGuard implements CanActivate {
     }
 
     if (impersonateUserId && request.currentUser) {
-      const { isSuperadmin, isCustomerSuccess, customerId } = request.currentUser;
+      const { isSuperadmin, isCustomerSuccess, customerId } =
+        request.currentUser;
 
       if (!isSuperadmin && !isCustomerSuccess) {
         throw new ForbiddenException(
@@ -36,7 +37,8 @@ export class ImpersonationGuard implements CanActivate {
         );
       }
 
-      const impersonatedUser = await this.usersService.findOne(impersonateUserId);
+      const impersonatedUser =
+        await this.usersService.findOne(impersonateUserId);
 
       if (impersonatedUser.isSuperadmin) {
         throw new ForbiddenException(
@@ -63,4 +65,4 @@ export class ImpersonationGuard implements CanActivate {
 
     return true;
   }
-} 
+}

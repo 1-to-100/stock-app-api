@@ -10,6 +10,7 @@ import {
   UseGuards,
   ForbiddenException,
   BadRequestException,
+  Delete,
 } from '@nestjs/common';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 import { ApiConflictResponse, ApiOkResponse } from '@nestjs/swagger';
@@ -342,5 +343,28 @@ export class UsersController {
     }
 
     return this.usersService.update(+id, updateUserDto);
+  }
+
+  @Delete(':id')
+  @ApiOkResponse({
+    description: 'User soft deleted',
+    type: OutputUserDto,
+  })
+  @Permissions('UserManagement:deleteUser')
+  async softDelete(@Param('id') id: number, @User() user: OutputUserDto) {
+    if (user.id === +id) {
+      throw new BadRequestException('You cannot delete yourself.');
+    }
+
+    if (!user.isSuperadmin && !user.customerId) {
+      throw new ForbiddenException('You have no access to delete users.');
+    }
+
+    let customerId: number | null = null;
+    if (!user.isSuperadmin) {
+      customerId = user.customerId;
+    }
+
+    return await this.usersService.softDelete(+id, customerId);
   }
 }

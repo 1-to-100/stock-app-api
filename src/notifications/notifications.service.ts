@@ -31,7 +31,9 @@ export class NotificationsService {
     const { userId, customerId } = createNotification;
 
     if (!userId && customerId) {
-      const users = await this.prisma.user.findMany({ where: { customerId } });
+      const users = await this.prisma.user.findMany({
+        where: { customerId, deletedAt: null },
+      });
 
       if (!users.length) {
         throw new ConflictException('No users found for the customer');

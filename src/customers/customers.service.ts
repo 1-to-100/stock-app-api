@@ -50,7 +50,9 @@ export class CustomersService {
   async create(createCustomerDto: CreateCustomerDto) {
     const { name, subscriptionId, ownerId, customerSuccessId } =
       createCustomerDto;
-    const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId, deletedAt: null },
+    });
 
     await this.validateOwner(ownerId);
     await this.validateCustomerOwner(owner!.email, ownerId, name);
@@ -69,7 +71,7 @@ export class CustomersService {
     });
 
     await this.prisma.user.update({
-      where: { id: ownerId },
+      where: { id: ownerId, deletedAt: null },
       data: { customerId: customer.id },
     });
 
@@ -238,7 +240,7 @@ export class CustomersService {
     let ownerEmail = customer.email;
     if (ownerId && ownerId !== customer.ownerId) {
       const owner = await this.prisma.user.findUnique({
-        where: { id: ownerId },
+        where: { id: ownerId, deletedAt: null },
       });
       await this.validateOwner(ownerId);
       await this.validateCustomerOwner(
@@ -249,7 +251,7 @@ export class CustomersService {
       );
       ownerEmail = owner!.email;
       await this.prisma.user.update({
-        where: { id: ownerId },
+        where: { id: ownerId, deletedAt: null },
         data: { customerId: id },
       });
     }
@@ -318,7 +320,7 @@ export class CustomersService {
     if (!managerId) return;
 
     const manager = await this.prisma.user.findUnique({
-      where: { id: managerId },
+      where: { id: managerId, deletedAt: null },
     });
 
     if (!manager) {
@@ -345,7 +347,9 @@ export class CustomersService {
   }
 
   private async validateOwner(ownerId?: number) {
-    const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId, deletedAt: null },
+    });
 
     if (!owner) {
       throw new ConflictException(`Owner user not found with ID: ${ownerId}`);

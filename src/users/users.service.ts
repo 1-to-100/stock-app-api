@@ -160,7 +160,7 @@ export class UsersService {
       }
 
       const user = await this.prisma.user.update({
-        where: { id },
+        where: { id, deletedAt: null },
         data: {
           ...updateUser,
           ...(systemRole ? { isSuperadmin, isCustomerSuccess } : {}),
@@ -209,7 +209,7 @@ export class UsersService {
 
   async resendInviteEmail(email: string): Promise<OutputUserDto> {
     const user = await this.prisma.user.findFirst({
-      where: { email },
+      where: { email, deletedAt: null },
     });
 
     if (!user) {
@@ -238,6 +238,7 @@ export class UsersService {
     const existingEmails = await this.prisma.user.findMany({
       select: { email: true },
       where: {
+        deletedAt: null,
         email: {
           in: emails,
         },
@@ -283,6 +284,7 @@ export class UsersService {
       ...{
         AND: [{ isSuperadmin: false }, { isCustomerSuccess: false }],
       },
+      deletedAt: null,
     };
     const applyOrderByField = this.applyOrderParams(orderBy, orderDirection);
     const paginate = createPaginator({ perPage });
@@ -332,6 +334,7 @@ export class UsersService {
         ],
       }),
       ...{ AND: { OR: [{ isSuperadmin: true }, { isCustomerSuccess: true }] } },
+      deletedAt: null,
     };
 
     const applyOrderByField = this.applyOrderParams(orderBy, orderDirection);
@@ -359,19 +362,12 @@ export class UsersService {
     id: number,
     customerId: number | null = null,
   ): Promise<OutputUserDto> {
-    const where = customerId ? { AND: [{ id }, { customerId }] } : { id };
+    const where = customerId
+      ? { AND: [{ id }, { customerId }, { deletedAt: null }] }
+      : { AND: [{ id }, { deletedAt: null }] };
     const user = await this.prisma.user.findFirst({
       where,
       include: {
-        // role: {
-        //   include: {
-        //     permissions: {
-        //       include: {
-        //         permission: true,
-        //       },
-        //     },
-        //   },
-        // },
         role: true,
         customer: {
           select: {
@@ -413,6 +409,7 @@ export class UsersService {
       ...{
         OR: [{ isSuperadmin: true }, { isCustomerSuccess: true }],
       },
+      deletedAt: null,
     };
 
     const user = await this.prisma.user.findFirst({
@@ -444,7 +441,7 @@ export class UsersService {
     }
     try {
       const existingUser = await this.prisma.user.findFirst({
-        where: { id, customerId: updateUserDto.customerId },
+        where: { id, customerId: updateUserDto.customerId, deletedAt: null },
       });
 
       if (!existingUser) {
@@ -461,10 +458,6 @@ export class UsersService {
       throw new ConflictException('Error updating user');
     }
   }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} user`;
-  // }
 
   async findByUid(uid: string) {
     return this.prisma.user.findUnique({
@@ -554,7 +547,7 @@ export class UsersService {
 
   async sendInviteEmail(user: OutputUserDto) {
     const foundUser = await this.prisma.user.findFirst({
-      where: { email: user.email },
+      where: { email: user.email, deletedAt: null },
     });
 
     if (foundUser) {
@@ -668,7 +661,7 @@ export class UsersService {
     email: string,
   ): Promise<{ status: string; message: string }> {
     const user = await this.prisma.user.findFirst({
-      where: { email },
+      where: { email, deletedAt: null },
     });
 
     if (!user) {
@@ -693,5 +686,70 @@ export class UsersService {
     }
 
     return { status: 'ok', message: 'Password reset link sent to your email.' };
+  }
+
+  async softDelete(
+    id: number,
+    customerId: number | null = null,
+  ): Promise<OutputUserDto> {
+    const where = customerId
+      ? { AND: [{ id }, { customerId }, { deletedAt: null }] }
+      : { AND: [{ id }, { deletedAt: null }] };
+
+    const user = await this.prisma.user.findFirst({
+      where,
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        'No user with given ID exists or user is already deleted',
+      );
+    } else if (user && (user.isSuperadmin || user.isCustomerSuccess)) {
+      throw new ConflictException(
+        'Not supported operation for superadmin or customer success user',
+      );
+    }
+
+    if (user.customerId) {
+      const customer = await this.prisma.customer.findFirst({
+        where: { ownerId: user.id },
+      });
+      if (customer) {
+        throw new ConflictException(
+          'Cannot delete user who is a customer owner',
+        );
+      }
+    }
+
+    if (user.isCustomerSuccess) {
+      const customerWithSuccess = await this.prisma.customer.findFirst({
+        where: { customerSuccessId: user.id },
+      });
+      if (customerWithSuccess) {
+        throw new ConflictException(
+          'Cannot delete user who is a customer success manager',
+        );
+      }
+    }
+
+    const deletedAt = new Date();
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        email: `__deleted__${user.email}`,
+        deletedAt: deletedAt,
+        status: UserStatus.SUSPENDED,
+        emailVerified: false,
+      },
+    });
+
+    // Remove user from Supabase
+    if (updatedUser.uid) {
+      await supabaseClientAdmin.deleteUser(updatedUser.uid);
+    }
+
+    this.logger.log(`User ${id} soft deleted at ${deletedAt.toISOString()}`);
+
+    return updatedUser;
   }
 }
