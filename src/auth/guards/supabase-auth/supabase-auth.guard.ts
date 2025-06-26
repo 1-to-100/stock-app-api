@@ -81,7 +81,17 @@ export class SupabaseAuthGuard implements CanActivate {
       picture,
     };
 
-    request.currentUser = await this.usersService.findByUid(request.user.uid);
+    const currentUser = await this.usersService.findByUid(request.user.uid);
+    if (currentUser) {
+      request.currentUser = currentUser;
+    } else {
+      // sync supabse user if not found
+      const updatedCurrentUser = await this.usersService.createSupabaseUser(
+        request.user,
+      );
+
+      request.currentUser = updatedCurrentUser;
+    }
 
     return true;
   }
