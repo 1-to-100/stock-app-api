@@ -744,8 +744,15 @@ export class UsersService {
     });
 
     // Remove user from Supabase
-    if (updatedUser.uid) {
-      await supabaseClientAdmin.deleteUser(updatedUser.uid);
+    const rawQueryResult = await this.prisma.$queryRaw<
+      { id: string | null }[]
+    >`SELECT * FROM auth.users WHERE email = ${user.email};`;
+
+    if (rawQueryResult?.length) {
+      const supabaseUserId = rawQueryResult[0]?.id;
+      if (supabaseUserId) {
+        await supabaseClientAdmin.deleteUser(supabaseUserId);
+      }
     }
 
     this.logger.log(`User ${id} soft deleted at ${deletedAt.toISOString()}`);
