@@ -506,6 +506,8 @@ export class UsersService {
         data: {
           uid: supabaseUser.uid,
           status: UserStatus.ACTIVE,
+          firstName,
+          lastName,
         },
       });
       return existingUserEmailUpdated;
