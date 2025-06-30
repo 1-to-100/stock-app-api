@@ -19,5 +19,5 @@ export class InviteUserDto {
   @ApiPropertyOptional({ description: 'Manager ID' })
   @IsOptional()
   @IsInt()
-  managerId: number;
+  managerId?: number;
 }

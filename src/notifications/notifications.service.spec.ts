@@ -1,31 +1,14 @@
-import { SupabaseService } from '@/common/supabase/supabase.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotificationsService } from '@/notifications/notifications.service';
+import { NotificationsService } from './notifications.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { SupabaseService } from '@/common/supabase/supabase.service';
+import { Logger, ConflictException, NotFoundException } from '@nestjs/common';
 import { NotificationTypes } from '@/notifications/constants/notification-types';
-import { NotificationChannel } from '@/notifications/constants/notification-channel';
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
   let prismaService: PrismaService;
   let supabaseService: SupabaseService;
-
-  const mockPrismaService = {
-    notification: {
-      create: jest.fn(),
-      createMany: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
-      updateMany: jest.fn(),
-      count: jest.fn(),
-    },
-    user: {
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-    },
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -33,12 +16,32 @@ describe('NotificationsService', () => {
         NotificationsService,
         {
           provide: PrismaService,
-          useValue: mockPrismaService,
+          useValue: {
+            user: {
+              findMany: jest.fn(),
+            },
+            notification: {
+              create: jest.fn(),
+              createMany: jest.fn(),
+              findUnique: jest.fn(),
+              count: jest.fn(),
+              update: jest.fn(),
+              updateMany: jest.fn(),
+            },
+          },
         },
         {
           provide: SupabaseService,
           useValue: {
             sendNotification: jest.fn(),
+          },
+        },
+        {
+          provide: Logger,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
           },
         },
       ],
@@ -47,278 +50,391 @@ describe('NotificationsService', () => {
     service = module.get<NotificationsService>(NotificationsService);
     prismaService = module.get<PrismaService>(PrismaService);
     supabaseService = module.get<SupabaseService>(SupabaseService);
-    jest.clearAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
   describe('create', () => {
-    const mockCreateNotificationDto = {
-      type: NotificationTypes.IN_APP,
-      title: 'Test Notification',
-      message: 'Test message',
-      channel: NotificationChannel.info,
-    };
-
-    it('should create notification for a specific user', async () => {
-      const userId = 1;
-      const mockNotification = {
-        id: 1,
-        userId,
-        ...mockCreateNotificationDto,
-        isRead: false,
-        createdAt: new Date(),
-      };
-
-      mockPrismaService.notification.create.mockResolvedValue(mockNotification);
-      jest
-        .spyOn(supabaseService, 'sendNotification')
-        .mockResolvedValue(undefined);
-
-      const result = await service.create({
-        ...mockCreateNotificationDto,
-        userId,
+    it('should create notifications for all users of a customer if only customerId is provided', async () => {
+      const createNotificationDto = {
         customerId: 1,
-      });
-
-      expect(result).toEqual(mockNotification);
-      expect(mockPrismaService.notification.create).toHaveBeenCalledWith({
-        data: {
-          ...mockCreateNotificationDto,
-          userId,
-          customerId: 1,
-        },
-      });
-      expect(supabaseService.sendNotification).toHaveBeenCalledTimes(2);
-    });
-
-    it('should create notifications for all users of a customer', async () => {
-      const customerId = 1;
+        title: 'Test Notification',
+        message: 'This is a test notification',
+        type: NotificationTypes.IN_APP,
+        channel: 'IN_APP',
+      };
       const mockUsers = [
-        { id: 1, customerId },
-        { id: 2, customerId },
+        { id: 1, customerId: 1 },
+        { id: 2, customerId: 1 },
       ];
 
-      mockPrismaService.user.findMany.mockResolvedValue(mockUsers);
-      mockPrismaService.notification.createMany.mockResolvedValue({ count: 2 });
+      (prismaService.user.findMany as jest.Mock).mockResolvedValue(mockUsers);
+      (prismaService.notification.createMany as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+      (service.sendUnreadCountNotification as jest.Mock) = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      (service.sendInAppNotification as jest.Mock) = jest
+        .fn()
+        .mockResolvedValue(undefined);
 
-      const result = await service.create({
-        ...mockCreateNotificationDto,
-        customerId,
+      const result = await service.create(createNotificationDto);
+
+      expect(prismaService.user.findMany).toHaveBeenCalledWith({
+        where: {
+          customerId: createNotificationDto.customerId,
+          deletedAt: null,
+        },
       });
-
+      expect(prismaService.notification.createMany).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({ userId: 1, customerId: 1 }),
+          expect.objectContaining({ userId: 2, customerId: 1 }),
+        ]),
+      });
       expect(result).toBeDefined();
-      expect(mockPrismaService.user.findMany).toHaveBeenCalledWith({
-        where: { customerId },
+    });
+
+    it('should create a single notification if userId is provided', async () => {
+      const createNotificationDto = {
+        userId: 1,
+        title: 'Test Notification',
+        message: 'This is a test notification',
+        type: NotificationTypes.IN_APP,
+        channel: 'IN_APP',
+      };
+
+      (prismaService.notification.create as jest.Mock).mockResolvedValue(
+        createNotificationDto,
+      );
+      (service.sendUnreadCountNotification as jest.Mock) = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      (service.sendInAppNotification as jest.Mock) = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      const result = await service.create(createNotificationDto);
+
+      expect(prismaService.notification.create).toHaveBeenCalledWith({
+        data: createNotificationDto,
       });
-      expect(mockPrismaService.notification.createMany).toHaveBeenCalled();
+      expect(result).toEqual(createNotificationDto);
     });
 
-    it('should throw ConflictException when no users found for customer', async () => {
-      const customerId = 1;
-      mockPrismaService.user.findMany.mockResolvedValue([]);
+    it('should throw ConflictException if no users found for customer', async () => {
+      const createNotificationDto = {
+        customerId: 1,
+        title: 'Test Notification',
+        message: 'This is a test notification',
+        type: NotificationTypes.IN_APP,
+        channel: 'IN_APP',
+      };
 
-      await expect(
-        service.create({
-          ...mockCreateNotificationDto,
-          customerId,
-        }),
-      ).rejects.toThrow(ConflictException);
-    });
+      (prismaService.user.findMany as jest.Mock).mockResolvedValue([]);
 
-    it('should throw ConflictException when neither userId nor customerId provided', async () => {
-      await expect(service.create(mockCreateNotificationDto)).rejects.toThrow(
+      await expect(service.create(createNotificationDto)).rejects.toThrow(
         ConflictException,
       );
+      expect(prismaService.user.findMany).toHaveBeenCalled();
+    });
+
+    it('should throw ConflictException if neither userId nor customerId is provided', async () => {
+      const createNotificationDto = {
+        title: 'Test Notification',
+        message: 'This is a test notification',
+        type: NotificationTypes.IN_APP,
+        channel: 'IN_APP',
+      };
+
+      await expect(
+        service.create(createNotificationDto as any),
+      ).rejects.toThrow(ConflictException);
     });
   });
 
   describe('findOne', () => {
-    it('should return notification by id and userId', async () => {
+    it('should return a notification if found', async () => {
       const mockNotification = {
         id: 1,
         userId: 1,
+        title: 'Test Notification',
+        message: 'Message',
         type: NotificationTypes.IN_APP,
-        title: 'Test',
-        message: 'Test message',
+        channel: 'IN_APP',
         isRead: false,
         createdAt: new Date(),
         User: {
           id: 1,
           email: 'test@example.com',
-          firstName: 'Test',
-          lastName: 'User',
+          firstName: 'John',
+          lastName: 'Doe',
         },
+        Customer: null,
       };
 
-      mockPrismaService.notification.findUnique.mockResolvedValue(
+      (prismaService.notification.findUnique as jest.Mock).mockResolvedValue(
         mockNotification,
       );
 
       const result = await service.findOne(1, 1);
 
       expect(result).toEqual(mockNotification);
-      expect(mockPrismaService.notification.findUnique).toHaveBeenCalledWith({
+      expect(prismaService.notification.findUnique).toHaveBeenCalledWith({
         where: { id: 1, userId: 1 },
-        include: {
-          User: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-            },
-          },
-          Customer: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
+        include: expect.any(Object),
       });
     });
 
-    it('should throw NotFoundException when notification not found', async () => {
-      mockPrismaService.notification.findUnique.mockResolvedValue(null);
+    it('should throw NotFoundException if notification not found', async () => {
+      (prismaService.notification.findUnique as jest.Mock).mockResolvedValue(
+        null,
+      );
 
-      await expect(service.findOne(1, 1)).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(1, 999)).rejects.toThrow(NotFoundException);
+      expect(prismaService.notification.findUnique).toHaveBeenCalled();
     });
   });
 
   describe('findAll', () => {
-    it('should return paginated notifications for user', async () => {
-      const mockPaginatedResult = {
-        data: [
-          {
-            id: 1,
-            userId: 1,
-            type: NotificationTypes.IN_APP,
-            title: 'Test',
-            message: 'Test message',
-            isRead: false,
-            createdAt: new Date(),
-          },
-        ],
-        meta: {
-          total: 1,
-          lastPage: 1,
-          currentPage: 1,
-          perPage: 10,
+    it('should return a paginated list of notifications for a user', async () => {
+      const mockNotifications = [
+        {
+          id: 1,
+          userId: 1,
+          title: 'Test Notification 1',
+          message: 'Message 1',
+          type: NotificationTypes.IN_APP,
+          channel: 'IN_APP',
+          isRead: false,
+          createdAt: new Date(),
+          User: null,
+          Customer: null,
         },
-      };
+      ];
 
-      mockPrismaService.notification.findMany.mockResolvedValue(
-        mockPaginatedResult.data,
-      );
-      mockPrismaService.notification.count.mockResolvedValue(1);
+      (prismaService.notification as any).findMany = jest
+        .fn()
+        .mockResolvedValue(mockNotifications);
+      (prismaService.notification as any).count = jest
+        .fn()
+        .mockResolvedValue(1);
 
-      const result = await service.findAll(1, {
-        page: 1,
-        perPage: 10,
-        type: NotificationTypes.IN_APP,
-        isRead: false,
-        channel: NotificationChannel.info,
-      });
+      const query = { page: 1, perPage: 10 };
+      const result = await service.findAll(1, query);
 
-      expect(result).toBeDefined();
-      expect(result.data).toHaveLength(1);
-      expect(result.meta.total).toBe(1);
+      expect(result.data).toEqual(mockNotifications);
+      expect(result.meta).toBeDefined();
+      expect(prismaService.notification.findMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllForAdmin', () => {
+    it('should return a paginated list of notifications for admin', async () => {
+      const mockNotifications = [
+        {
+          id: 1,
+          userId: 1,
+          title: 'Admin Notification 1',
+          message: 'Message 1',
+          type: NotificationTypes.IN_APP,
+          channel: 'IN_APP',
+          isRead: false,
+          createdAt: new Date(),
+          User: null,
+          Customer: null,
+          Sender: null,
+        },
+      ];
+
+      (prismaService.notification as any).findMany = jest
+        .fn()
+        .mockResolvedValue(mockNotifications);
+      (prismaService.notification as any).count = jest
+        .fn()
+        .mockResolvedValue(1);
+
+      const query = { page: 1, perPage: 10 };
+      const result = await service.findAllForAdmin(query);
+
+      expect(result.data).toEqual(mockNotifications);
+      expect(result.meta).toBeDefined();
+      expect(prismaService.notification.findMany).toHaveBeenCalled();
     });
   });
 
   describe('markAsRead', () => {
-    it('should mark notification as read', async () => {
+    it('should mark a notification as read', async () => {
       const mockNotification = {
         id: 1,
         userId: 1,
+        isRead: false,
+        readAt: null,
+      };
+      const updatedNotification = {
+        ...mockNotification,
         isRead: true,
         readAt: new Date(),
       };
 
-      mockPrismaService.notification.update.mockResolvedValue(mockNotification);
-      jest
-        .spyOn(supabaseService, 'sendNotification')
+      (prismaService.notification.update as jest.Mock).mockResolvedValue(
+        updatedNotification,
+      );
+      (service.sendUnreadCountNotification as jest.Mock) = jest
+        .fn()
         .mockResolvedValue(undefined);
 
       const result = await service.markAsRead(1, 1);
 
-      expect(result).toEqual(mockNotification);
-      expect(mockPrismaService.notification.update).toHaveBeenCalledWith({
+      expect(result.isRead).toBe(true);
+      expect(prismaService.notification.update).toHaveBeenCalledWith({
         where: { id: 1, userId: 1 },
-        data: { isRead: true, readAt: new Date() },
+        data: { isRead: true, readAt: expect.any(Date) },
       });
-      expect(supabaseService.sendNotification).toHaveBeenCalled();
+      expect(service.sendUnreadCountNotification).toHaveBeenCalledWith(1);
     });
 
-    it('should throw NotFoundException when notification not found', async () => {
-      mockPrismaService.notification.update.mockResolvedValue(null);
+    it('should throw NotFoundException if notification not found', async () => {
+      (prismaService.notification.update as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.markAsRead(1, 1)).rejects.toThrow(NotFoundException);
+      await expect(service.markAsRead(1, 999)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(prismaService.notification.update).toHaveBeenCalled();
     });
   });
 
   describe('markAllAsRead', () => {
-    it('should mark all notifications as read for user', async () => {
-      mockPrismaService.notification.updateMany.mockResolvedValue({ count: 2 });
-      jest
-        .spyOn(supabaseService, 'sendNotification')
+    it('should mark all unread notifications for a user as read', async () => {
+      (prismaService.notification.updateMany as jest.Mock).mockResolvedValue({
+        count: 2,
+      });
+      (service.sendUnreadCountNotification as jest.Mock) = jest
+        .fn()
         .mockResolvedValue(undefined);
 
       await service.markAllAsRead(1);
 
-      expect(mockPrismaService.notification.updateMany).toHaveBeenCalledWith({
+      expect(prismaService.notification.updateMany).toHaveBeenCalledWith({
         where: { isRead: false, userId: 1 },
-        data: { isRead: true, readAt: new Date() },
+        data: { isRead: true, readAt: expect.any(Date) },
       });
-      expect(supabaseService.sendNotification).toHaveBeenCalled();
+      expect(service.sendUnreadCountNotification).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('marksAsReadMultiple', () => {
+    it('should mark multiple notifications as read', async () => {
+      const idsToMark = [1, 2];
+      (prismaService.notification.updateMany as jest.Mock).mockResolvedValue({
+        count: 2,
+      });
+      (service.sendUnreadCountNotification as jest.Mock) = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await service.marksAsReadMultiple(1, idsToMark);
+
+      expect(prismaService.notification.updateMany).toHaveBeenCalledWith({
+        where: { id: { in: idsToMark }, isRead: false, userId: 1 },
+        data: { isRead: true, readAt: expect.any(Date) },
+      });
+      expect(service.sendUnreadCountNotification).toHaveBeenCalledWith(1);
     });
   });
 
   describe('unreadCount', () => {
-    it('should return count of unread notifications', async () => {
-      mockPrismaService.notification.count.mockResolvedValue(5);
+    it('should return the count of unread notifications for a user', async () => {
+      (prismaService.notification.count as jest.Mock).mockResolvedValue(5);
 
-      const result = await service.unreadCount(1);
+      const count = await service.unreadCount(1);
 
-      expect(result).toBe(5);
-      expect(mockPrismaService.notification.count).toHaveBeenCalledWith({
+      expect(count).toBe(5);
+      expect(prismaService.notification.count).toHaveBeenCalledWith({
         where: { isRead: false, userId: 1 },
       });
     });
   });
 
   describe('sendInAppNotification', () => {
-    it('should send in-app notification', async () => {
-      const mockNotification = {
+    it('should send an in-app notification if conditions are met', async () => {
+      const notification = {
         userId: 1,
         customerId: 1,
+        title: 'In-App',
+        message: 'Test',
         type: NotificationTypes.IN_APP,
-        title: 'Test',
-        message: 'Test message',
+        channel: 'IN_APP',
       };
 
-      jest
-        .spyOn(supabaseService, 'sendNotification')
-        .mockResolvedValue(undefined);
-
-      await service.sendInAppNotification(mockNotification);
+      await service.sendInAppNotification(notification);
 
       expect(supabaseService.sendNotification).toHaveBeenCalledWith(
-        `main-notifications:${mockNotification.userId}`,
+        `main-notifications:${notification.userId}`,
         'new',
-        mockNotification,
+        notification,
       );
     });
 
-    it('should not send notification if conditions are not met', async () => {
-      const mockNotification = {
-        type: NotificationTypes.EMAIL,
-        title: 'Test',
-        message: 'Test message',
+    it('should not send an in-app notification if userId is missing', async () => {
+      const notification = {
+        customerId: 1,
+        title: 'In-App',
+        message: 'Test',
+        type: NotificationTypes.IN_APP,
+        channel: 'IN_APP',
       };
 
-      await service.sendInAppNotification(mockNotification);
+      await service.sendInAppNotification(notification as any);
 
       expect(supabaseService.sendNotification).not.toHaveBeenCalled();
+    });
+
+    it('should not send an in-app notification if customerId is missing', async () => {
+      const notification = {
+        userId: 1,
+        title: 'In-App',
+        message: 'Test',
+        type: NotificationTypes.IN_APP,
+        channel: 'IN_APP',
+      };
+
+      await service.sendInAppNotification(notification as any);
+
+      expect(supabaseService.sendNotification).not.toHaveBeenCalled();
+    });
+
+    it('should not send an in-app notification if type is not IN_APP', async () => {
+      const notification = {
+        userId: 1,
+        customerId: 1,
+        title: 'Email',
+        message: 'Test',
+        type: NotificationTypes.EMAIL,
+        channel: 'EMAIL',
+      };
+
+      await service.sendInAppNotification(notification as any);
+
+      expect(supabaseService.sendNotification).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sendUnreadCountNotification', () => {
+    it('should send unread count notification', async () => {
+      (service.unreadCount as jest.Mock) = jest.fn().mockResolvedValue(3);
+
+      await service.sendUnreadCountNotification(1);
+
+      expect(service.unreadCount).toHaveBeenCalledWith(1);
+      expect(supabaseService.sendNotification).toHaveBeenCalledWith(
+        `unread-notifications:1`,
+        'unread_count',
+        { count: 3 },
+      );
     });
   });
 });

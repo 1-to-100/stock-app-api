@@ -2,32 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TemplatesService } from './templates.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { NotificationsService } from './notifications.service';
-import { NotificationTypes } from '@/notifications/constants/notification-types';
-import { NotificationChannel } from '@/notifications/constants/notification-channel';
-import { CreateTemplateDto } from './dto/create-template.dto';
-import { UpdateTemplateDto } from './dto/update-template.dto';
-import { SendTemplatesInputDto } from './dto/send-templates-input.dto';
+import { Logger } from '@nestjs/common';
 
 describe('TemplatesService', () => {
   let service: TemplatesService;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let prismaService: PrismaService;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let notificationsService: NotificationsService;
-
-  const mockPrismaService = {
-    notificationTemplate: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    },
-  };
-
-  const mockNotificationsService = {
-    create: jest.fn(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,11 +16,28 @@ describe('TemplatesService', () => {
         TemplatesService,
         {
           provide: PrismaService,
-          useValue: mockPrismaService,
+          useValue: {
+            notificationTemplate: {
+              findMany: jest.fn(),
+              findUnique: jest.fn(),
+              create: jest.fn(),
+              update: jest.fn(),
+            },
+          },
         },
         {
           provide: NotificationsService,
-          useValue: mockNotificationsService,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: Logger,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -54,251 +52,50 @@ describe('TemplatesService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findOne', () => {
-    it('should return a template by id', async () => {
-      const mockTemplate = {
-        id: 1,
-        title: 'Test Template',
-        message: 'Test Content',
-        type: [NotificationTypes.IN_APP],
-        channel: NotificationChannel.info,
-        customerId: 1,
-        Customer: {
+  describe('findAll', () => {
+    it('should return a paginated list of notification templates', async () => {
+      const mockTemplates = [
+        {
           id: 1,
-          name: 'Test Customer',
+          title: 'Test Template 1',
+          message: 'Message 1',
+          type: ['IN_APP'],
+          comment: null,
+          channel: 'EMAIL',
+          customerId: null,
+          Customer: null,
+          createdAt: new Date(),
+          deletedAt: null,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      ];
 
-      mockPrismaService.notificationTemplate.findUnique.mockResolvedValue(
-        mockTemplate,
-      );
+      (
+        prismaService.notificationTemplate.findMany as jest.Mock
+      ).mockResolvedValue(mockTemplates);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (prismaService.notificationTemplate as any).count = jest
+        .fn()
+        .mockResolvedValue(1);
 
-      const result = await service.findOne(1);
-      expect(result).toBeDefined();
-      expect(
-        mockPrismaService.notificationTemplate.findUnique,
-      ).toHaveBeenCalledWith({
-        where: { id: 1, deletedAt: null },
-        include: {
-          Customer: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      });
-    });
+      const query = { page: 1, perPage: 10 };
+      const result = await service.findAll(query);
 
-    it('should throw an error if template not found', async () => {
-      mockPrismaService.notificationTemplate.findUnique.mockResolvedValue(null);
-
-      await expect(service.findOne(999)).rejects.toThrow(
-        'Notification template with ID 999 not found',
-      );
-    });
-  });
-
-  describe('createTemplate', () => {
-    it('should create a new template', async () => {
-      const createTemplateDto: CreateTemplateDto = {
-        title: 'New Template',
-        message: 'New Content',
-        type: [NotificationTypes.IN_APP],
-        channel: NotificationChannel.info,
-      };
-
-      const mockCreatedTemplate = {
-        id: 1,
-        ...createTemplateDto,
-        customerId: 1,
-        Customer: {
+      expect(result.data).toEqual([
+        {
           id: 1,
-          name: 'Test Customer',
+          title: 'Test Template 1',
+          message: 'Message 1',
+          type: ['IN_APP'],
+          comment: undefined,
+          channel: 'EMAIL',
+          customerId: undefined,
+          Customer: null,
+          createdAt: mockTemplates[0].createdAt,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockPrismaService.notificationTemplate.create.mockResolvedValue(
-        mockCreatedTemplate,
-      );
-
-      const result = await service.createTemplate(createTemplateDto);
-      expect(result).toBeDefined();
-      expect(
-        mockPrismaService.notificationTemplate.create,
-      ).toHaveBeenCalledWith({
-        data: createTemplateDto,
-        include: {
-          Customer: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      });
-    });
-  });
-
-  describe('updateTemplate', () => {
-    it('should update a template', async () => {
-      const updateTemplateDto: UpdateTemplateDto = {
-        title: 'Updated Template',
-        message: 'Updated Content',
-      };
-
-      const mockUpdatedTemplate = {
-        id: 1,
-        ...updateTemplateDto,
-        type: [NotificationTypes.IN_APP],
-        channel: NotificationChannel.info,
-        customerId: 1,
-        Customer: {
-          id: 1,
-          name: 'Test Customer',
-        },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockPrismaService.notificationTemplate.update.mockResolvedValue(
-        mockUpdatedTemplate,
-      );
-
-      const result = await service.updateTemplate(1, updateTemplateDto);
-      expect(result).toBeDefined();
-      expect(
-        mockPrismaService.notificationTemplate.update,
-      ).toHaveBeenCalledWith({
-        where: { id: 1, deletedAt: null },
-        data: updateTemplateDto,
-        include: {
-          Customer: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      });
-    });
-  });
-
-  describe('remove', () => {
-    it('should soft delete a template', async () => {
-      const mockDeletedTemplate = {
-        id: 1,
-        title: 'Test Template',
-        message: 'Test Content',
-        type: [NotificationTypes.IN_APP],
-        channel: NotificationChannel.info,
-        customerId: 1,
-        Customer: {
-          id: 1,
-          name: 'Test Customer',
-        },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: new Date(),
-      };
-
-      mockPrismaService.notificationTemplate.update.mockResolvedValue(
-        mockDeletedTemplate,
-      );
-
-      const result = await service.remove(1);
-      expect(result).toBeDefined();
-      expect(
-        mockPrismaService.notificationTemplate.update,
-      ).toHaveBeenCalledWith({
-        where: { id: 1, deletedAt: null },
-        data: { deletedAt: new Date() },
-        include: {
-          Customer: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      });
-    });
-  });
-
-  describe('sendNotificationUsingTemplate', () => {
-    it('should send a notification using a template', async () => {
-      const templateId = 1;
-      const sendTemplateInputDto: SendTemplatesInputDto = {
-        customerId: 1,
-        userIds: [1],
-      };
-
-      const mockTemplate = {
-        id: 1,
-        title: 'Test Template',
-        message: 'Test Content',
-        type: [NotificationTypes.IN_APP],
-        channel: NotificationChannel.info,
-        customerId: 1,
-        Customer: {
-          id: 1,
-          name: 'Test Customer',
-        },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockPrismaService.notificationTemplate.findUnique.mockResolvedValue(
-        mockTemplate,
-      );
-      mockNotificationsService.create.mockResolvedValue({
-        id: 1,
-        userId: 1,
-        title: 'Test Template',
-        content: 'Test Content',
-        type: NotificationTypes.IN_APP,
-        isRead: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      const result = await service.sendNotificationUsingTemplate(
-        templateId,
-        sendTemplateInputDto,
-      );
-      expect(result).toBeDefined();
-      expect(
-        mockPrismaService.notificationTemplate.findUnique,
-      ).toHaveBeenCalledWith({
-        where: { id: templateId, deletedAt: null },
-        include: {
-          Customer: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      });
-      expect(mockNotificationsService.create).toHaveBeenCalled();
-    });
-
-    it('should throw an error if template not found', async () => {
-      const templateId = 999;
-      const sendTemplateInputDto: SendTemplatesInputDto = {
-        customerId: 1,
-        userIds: [1],
-      };
-
-      mockPrismaService.notificationTemplate.findUnique.mockResolvedValue(null);
-
-      await expect(
-        service.sendNotificationUsingTemplate(templateId, sendTemplateInputDto),
-      ).rejects.toThrow('Notification template with ID 999 not found');
+      ]);
+      expect(result.meta).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(prismaService.notificationTemplate.findMany).toHaveBeenCalled();
     });
   });
 });

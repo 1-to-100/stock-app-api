@@ -53,7 +53,6 @@ export class ArticlesService {
     listArticlesInputDto: ListArticlesInputDto,
   ): Promise<PaginatedOutputDto<ListArticlesOutputDto>> {
     const { categoryId, status, search, perPage, page } = listArticlesInputDto;
-    console.log('listArticlesInputDto', listArticlesInputDto);
     const where: Prisma.ArticleFindManyArgs['where'] = {
       customerId,
       ...(categoryId && { articleCategoryId: { in: categoryId } }),
