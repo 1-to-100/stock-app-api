@@ -8,17 +8,21 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { PaginatedOutputDto } from '@/common/dto/paginated-output.dto';
 import { createPaginator } from 'prisma-pagination';
 import { Prisma } from '@prisma/client';
-import { sendSupabaseNotification } from '@/common/helpers/supabase-client';
+
 import { CreateNotificationDto } from '@/notifications/dto/create-notification.dto';
 import { ListNotificationsInputDto } from '@/notifications/dto/list-notifications-input.dto';
 import { NotificationDto } from '@/notifications/dto/notification.dto';
 import { NotificationTypes } from '@/notifications/constants/notification-types';
 import { ListAdminNotificationsInputDto } from '@/notifications/dto/list-admin-notifications-input.dto';
+import { SupabaseService } from '@/common/supabase/supabase.service';
 
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private supabaseService: SupabaseService,
+  ) {}
 
   async create(
     createNotification: CreateNotificationDto & {
@@ -281,7 +285,7 @@ export class NotificationsService {
       return;
     }
 
-    return sendSupabaseNotification(
+    return this.supabaseService.sendNotification(
       `main-notifications:${notification.userId}`,
       'new',
       notification,
@@ -290,7 +294,7 @@ export class NotificationsService {
 
   async sendUnreadCountNotification(userId: number) {
     const count = await this.unreadCount(userId);
-    await sendSupabaseNotification(
+    await this.supabaseService.sendNotification(
       `unread-notifications:${userId}`,
       'unread_count',
       { count },

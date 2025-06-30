@@ -7,6 +7,7 @@ import {
 import * as jwt from 'jsonwebtoken';
 import { UsersService } from '@/users/users.service';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
+import { ConfigService } from '@nestjs/config';
 
 export type SupabaseDecodedToken = {
   uid: string; // sub
@@ -33,9 +34,16 @@ type supabaseJwtPayload =
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
-  private readonly supabaseSecret: string = process.env.SUPABASE_JWT_SECRET!;
+  private readonly supabaseSecret: string;
 
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
+  ) {
+    this.supabaseSecret = this.configService.get<string>(
+      'SUPABASE_JWT_SECRET',
+    )!;
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{

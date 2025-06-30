@@ -1,18 +1,15 @@
+import { SupabaseService } from '@/common/supabase/supabase.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationsService } from '@/notifications/notifications.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { NotificationTypes } from '@/notifications/constants/notification-types';
 import { NotificationChannel } from '@/notifications/constants/notification-channel';
-import * as supabaseClient from '@/common/helpers/supabase-client';
-
-jest.mock('@/common/helpers/supabase-client', () => ({
-  sendSupabaseNotification: jest.fn(),
-}));
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
   let prismaService: PrismaService;
+  let supabaseService: SupabaseService;
 
   const mockPrismaService = {
     notification: {
@@ -38,11 +35,18 @@ describe('NotificationsService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: SupabaseService,
+          useValue: {
+            sendNotification: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<NotificationsService>(NotificationsService);
     prismaService = module.get<PrismaService>(PrismaService);
+    supabaseService = module.get<SupabaseService>(SupabaseService);
     jest.clearAllMocks();
   });
 
@@ -66,7 +70,7 @@ describe('NotificationsService', () => {
 
       mockPrismaService.notification.create.mockResolvedValue(mockNotification);
       jest
-        .spyOn(supabaseClient, 'sendSupabaseNotification')
+        .spyOn(supabaseService, 'sendNotification')
         .mockResolvedValue(undefined);
 
       const result = await service.create({
@@ -83,7 +87,7 @@ describe('NotificationsService', () => {
           customerId: 1,
         },
       });
-      expect(supabaseClient.sendSupabaseNotification).toHaveBeenCalledTimes(2);
+      expect(supabaseService.sendNotification).toHaveBeenCalledTimes(2);
     });
 
     it('should create notifications for all users of a customer', async () => {
@@ -232,7 +236,7 @@ describe('NotificationsService', () => {
 
       mockPrismaService.notification.update.mockResolvedValue(mockNotification);
       jest
-        .spyOn(supabaseClient, 'sendSupabaseNotification')
+        .spyOn(supabaseService, 'sendNotification')
         .mockResolvedValue(undefined);
 
       const result = await service.markAsRead(1, 1);
@@ -242,7 +246,7 @@ describe('NotificationsService', () => {
         where: { id: 1, userId: 1 },
         data: { isRead: true, readAt: new Date() },
       });
-      expect(supabaseClient.sendSupabaseNotification).toHaveBeenCalled();
+      expect(supabaseService.sendNotification).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when notification not found', async () => {
@@ -256,7 +260,7 @@ describe('NotificationsService', () => {
     it('should mark all notifications as read for user', async () => {
       mockPrismaService.notification.updateMany.mockResolvedValue({ count: 2 });
       jest
-        .spyOn(supabaseClient, 'sendSupabaseNotification')
+        .spyOn(supabaseService, 'sendNotification')
         .mockResolvedValue(undefined);
 
       await service.markAllAsRead(1);
@@ -265,7 +269,7 @@ describe('NotificationsService', () => {
         where: { isRead: false, userId: 1 },
         data: { isRead: true, readAt: new Date() },
       });
-      expect(supabaseClient.sendSupabaseNotification).toHaveBeenCalled();
+      expect(supabaseService.sendNotification).toHaveBeenCalled();
     });
   });
 
@@ -293,12 +297,12 @@ describe('NotificationsService', () => {
       };
 
       jest
-        .spyOn(supabaseClient, 'sendSupabaseNotification')
+        .spyOn(supabaseService, 'sendNotification')
         .mockResolvedValue(undefined);
 
       await service.sendInAppNotification(mockNotification);
 
-      expect(supabaseClient.sendSupabaseNotification).toHaveBeenCalledWith(
+      expect(supabaseService.sendNotification).toHaveBeenCalledWith(
         `main-notifications:${mockNotification.userId}`,
         'new',
         mockNotification,
@@ -314,7 +318,7 @@ describe('NotificationsService', () => {
 
       await service.sendInAppNotification(mockNotification);
 
-      expect(supabaseClient.sendSupabaseNotification).not.toHaveBeenCalled();
+      expect(supabaseService.sendNotification).not.toHaveBeenCalled();
     });
   });
 });

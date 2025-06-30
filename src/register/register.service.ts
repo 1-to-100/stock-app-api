@@ -1,17 +1,19 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { getDomainFromEmail } from '@/common/helpers/string-helpers';
-import { supabaseClientAuth } from '@/common/helpers/supabase-client';
-import { FrontendPaths } from '@/common/helpers/frontend-paths';
 import { UsersService } from '@/users/users.service';
 import { RegisterDto } from '@/register/dto/register.dto';
 import { isPublicEmailDomain } from '@/common/helpers/public-email-domains';
+import { SupabaseService } from '@/common/supabase/supabase.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RegisterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
+    private readonly supabaseService: SupabaseService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -55,18 +57,14 @@ export class RegisterService {
     }
 
     // Sign up in Supabase
-    await this.signUpInSupabase(registerDto);
-
-    return newUser;
-  }
-
-  // TODO: Винести в окремий сервіс
-  private async signUpInSupabase(registerDto: RegisterDto) {
-    const { data, error } = await supabaseClientAuth.signUp({
+    // await this.signUpInSupabase(registerDto);
+    const { error } = await this.supabaseService.auth.signUp({
       email: registerDto.email,
       password: registerDto.password,
       options: {
-        emailRedirectTo: FrontendPaths.callbackImplicit,
+        emailRedirectTo: `${this.configService.get<string>(
+          'FRONTEND_URL',
+        )}/callback/implicit`,
         data: {
           firstName: registerDto.firstName,
           lastName: registerDto.lastName,
@@ -74,6 +72,12 @@ export class RegisterService {
       },
     });
 
-    console.log('signUpInSupabase', data, error);
+    if (error) {
+      throw new ConflictException(
+        `Failed to sign up in Supabase: ${error.message}`,
+      );
+    }
+
+    return newUser;
   }
 }

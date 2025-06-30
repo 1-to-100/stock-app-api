@@ -1,13 +1,14 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { SystemModulesService } from '@/system-modules/system-modules.service';
-import { FrontendPaths } from '@/common/helpers/frontend-paths';
+import { FrontendPathsService } from '@/common/helpers/frontend-paths.service';
 
 @Controller('system-modules')
 export class SystemModulesController {
   constructor(
     private readonly systemModulesService: SystemModulesService,
     private readonly prisma: PrismaService,
+    private readonly frontendPathsService: FrontendPathsService,
   ) {}
 
   @Get()
@@ -95,6 +96,9 @@ export class SystemModulesController {
     //   await this.prisma
     //     .$queryRaw`SELECT * FROM auth.users WHERE email = 'alina.shevchuk+67213@huboxt.com';`;
 
-    return { status: 'ok', frontendUrl: FrontendPaths };
+    return {
+      status: 'ok',
+      frontendUrl: this.frontendPathsService.getFrontendUrl(),
+    };
   }
 }

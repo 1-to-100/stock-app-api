@@ -15,12 +15,20 @@ import { RegisterModule } from '@/register/register.module';
 import { ArticleCategoriesModule } from '@/article-categories/article-categories.module';
 import { ArticlesModule } from '@/articles/articles.module';
 import { NotificationsModule } from '@/notifications/notifications.module';
+import { SupabaseModule } from '@/common/supabase/supabase.module';
+import { validate } from '@/common/config/config.validation';
+import { FrontendPathsService } from '@/common/helpers/frontend-paths.service';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env', `.env.${process.env.NODE_ENV || 'development'}`],
+      validate,
+    }),
+    SupabaseModule,
     SystemModulesModule,
     RolesModule,
     ManagersModule,
@@ -34,6 +42,6 @@ import { NotificationsModule } from '@/notifications/notifications.module';
     NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService, PrismaService, FrontendPathsService],
 })
 export class AppModule {}

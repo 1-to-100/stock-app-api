@@ -10,11 +10,6 @@ import { createPaginator } from 'prisma-pagination';
 import { CustomerStatus, Prisma } from '@prisma/client';
 import { getDomainFromEmail } from '@/common/helpers/string-helpers';
 import { UserSystemRoles } from '@/common/constants/user-system-roles';
-import {
-  supabaseClientAdmin,
-  supabaseClientAuth,
-} from '@/common/helpers/supabase-client';
-import { FrontendPaths } from '@/common/helpers/frontend-paths';
 import { UserOrderByFields, UserStatus } from '@/common/constants/status';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
@@ -26,12 +21,18 @@ import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
 import { UpdateUserDto } from '@/users/dto/update-user.dto';
 import { SupabaseDecodedToken } from '@/auth/guards/supabase-auth/supabase-auth.guard';
 import { isPublicEmailDomain } from '@/common/helpers/public-email-domains';
+import { SupabaseService } from '@/common/supabase/supabase.service';
+import { FrontendPathsService } from '@/common/helpers/frontend-paths.service';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly supabaseService: SupabaseService,
+    private readonly frontendPathsService: FrontendPathsService,
+  ) {}
 
   async create(
     createUserDto: CreateUserDto,
@@ -566,18 +567,21 @@ export class UsersService {
       if (rawQueryResult?.length) {
         const supabaseUserId = rawQueryResult[0]?.id;
         if (supabaseUserId) {
-          await supabaseClientAdmin.deleteUser(supabaseUserId);
+          await this.supabaseService.admin.deleteUser(supabaseUserId);
         }
       }
     }
 
-    const { error } = await supabaseClientAdmin.inviteUserByEmail(user.email, {
-      data: {
-        ...(user?.firstName && { firstName: user.firstName }),
-        ...(user?.lastName && { lastName: user.lastName }),
+    const { error } = await this.supabaseService.admin.inviteUserByEmail(
+      user.email,
+      {
+        data: {
+          ...(user?.firstName && { firstName: user.firstName }),
+          ...(user?.lastName && { lastName: user.lastName }),
+        },
+        redirectTo: this.frontendPathsService.getSetNewPasswordUrl(),
       },
-      redirectTo: FrontendPaths.setNewPassword,
-    });
+    );
 
     if (error) {
       this.logger.error(`Error sending invite email: ${error.message}`);
@@ -674,9 +678,12 @@ export class UsersService {
       );
     }
 
-    const { error } = await supabaseClientAuth.resetPasswordForEmail(email, {
-      redirectTo: FrontendPaths.updatePassword,
-    });
+    const { error } = await this.supabaseService.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: this.frontendPathsService.getUpdatePasswordUrl(),
+      },
+    );
 
     if (error) {
       this.logger.error(`Error sending reset password email: ${error.message}`);
@@ -751,7 +758,7 @@ export class UsersService {
     if (rawQueryResult?.length) {
       const supabaseUserId = rawQueryResult[0]?.id;
       if (supabaseUserId) {
-        await supabaseClientAdmin.deleteUser(supabaseUserId);
+        await this.supabaseService.admin.deleteUser(supabaseUserId);
       }
     }
 
