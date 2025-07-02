@@ -46,6 +46,11 @@ export const SYSTEM_MODULES: SystemModule[] = [
         label: 'Edit User',
         order: 4,
       },
+      {
+        name: permissionWithPrefix('deleteUser', USER_MANAGEMENT_MODULE),
+        label: 'Delete User',
+        order: 5,
+      },
     ],
   },
   {
