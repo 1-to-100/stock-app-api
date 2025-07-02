@@ -352,7 +352,7 @@ export class UsersController {
   })
   @Permissions('UserManagement:deleteUser')
   async softDelete(@Param('id') id: number, @User() user: OutputUserDto) {
-    if (user.id === +id) {
+    if (user.id === id) {
       throw new BadRequestException('You cannot delete yourself.');
     }
 
@@ -360,11 +360,8 @@ export class UsersController {
       throw new ForbiddenException('You have no access to delete users.');
     }
 
-    let customerId: number | null = null;
-    if (!user.isSuperadmin) {
-      customerId = user.customerId;
-    }
+    const customerId = user.isSuperadmin ? null : user.customerId;
 
-    return await this.usersService.softDelete(+id, customerId);
+    return await this.usersService.softDelete(id, customerId);
   }
 }

@@ -10,6 +10,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { DecodedIdToken } from '@/common/types/decoded-token.type';
+import { SYSTEM_MODULES } from '@/system-modules/system-modules.data';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -53,19 +54,20 @@ export class PermissionGuard implements CanActivate {
       return true;
     }
 
-    // треба придумати кращий метод для ролі CustomerSuccess, ніж харкодити деякі доступа
-    if (
+    const userManagementPermissions =
+      SYSTEM_MODULES.find(
+        (module) => module.name === 'UserManagement',
+      )?.permissions?.map((permission) => permission.name) || [];
+
+    const hasCustomerSuccessAccess =
       effectiveUser.isCustomerSuccess &&
       allowedPermissions.some(
         (permission) =>
-          [
-            'UserManagement:viewUsers',
-            'UserManagement:createUser',
-            'UserManagement:inviteUser',
-            'UserManagement:editUser',
-          ].includes(permission) || permission.startsWith('Documents:'),
-      )
-    ) {
+          userManagementPermissions.includes(permission) ||
+          permission.startsWith('Documents:'),
+      );
+
+    if (hasCustomerSuccessAccess) {
       return true;
     }
 
