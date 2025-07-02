@@ -747,6 +747,7 @@ export class UsersService {
         deletedAt: deletedAt,
         status: UserStatus.SUSPENDED,
         emailVerified: false,
+        roleId: null,
       },
     });
 
