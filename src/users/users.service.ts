@@ -208,6 +208,12 @@ export class UsersService {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<OutputUserDto | null> {
+    return this.prisma.user.findFirst({
+      where: { email, deletedAt: null },
+    });
+  }
+
   async resendInviteEmail(email: string): Promise<OutputUserDto> {
     const user = await this.prisma.user.findFirst({
       where: { email, deletedAt: null },

@@ -732,6 +732,7 @@ describe('UsersService', () => {
           deletedAt: expect.any(Date),
           status: UserStatus.SUSPENDED,
           emailVerified: false,
+          roleId: null,
         },
       });
       expect(result).toEqual(deletedUser);

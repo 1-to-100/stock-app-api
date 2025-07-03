@@ -30,7 +30,6 @@ import { CheckUserExistsDto } from '@/users/dto/check-user-exists.dto';
 import { InviteMultipleUsersDto } from '@/users/dto/invite-multiple-users.dto';
 import { ListUsersInputDto } from '@/users/dto/list-users-input.dto';
 import { UpdateUserDto } from '@/users/dto/update-user.dto';
-import { PrismaService } from '@/common/prisma/prisma.service';
 import { UserStatus } from '@/common/constants/status';
 import { UserWithImpersonationDto } from '@/users/dto/user-with-impersonation.dto';
 import { IsImpersonating } from '@/common/decorators/is-impersonating.decorator';
@@ -40,10 +39,7 @@ import { OriginalUser } from '@/common/decorators/original-user.decorator';
 @UseGuards(DynamicAuthGuard, ImpersonationGuard, PermissionGuard)
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   @ApiOkResponse({
@@ -111,9 +107,9 @@ export class UsersController {
       throw new ForbiddenException('You have no access to resend invites.');
     }
 
-    const foundUser = await this.prisma.user.findFirst({
-      where: { email: resendInviteUserDto.email },
-    });
+    const foundUser = await this.usersService.getUserByEmail(
+      resendInviteUserDto.email,
+    );
 
     if (!foundUser) {
       throw new BadRequestException(
