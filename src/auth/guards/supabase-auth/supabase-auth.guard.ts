@@ -8,6 +8,7 @@ import * as jwt from 'jsonwebtoken';
 import { UsersService } from '@/users/users.service';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { ConfigService } from '@nestjs/config';
+import { UserStatus } from '@/common/constants/status';
 
 export type SupabaseDecodedToken = {
   uid: string; // sub
@@ -92,6 +93,9 @@ export class SupabaseAuthGuard implements CanActivate {
     const currentUser = await this.usersService.findByUid(request.user.uid);
     if (currentUser) {
       request.currentUser = currentUser;
+      if (currentUser.deletedAt) {
+        throw new UnauthorizedException('User not found');
+      }
     } else {
       // sync supabse user if not found
       const updatedCurrentUser = await this.usersService.createSupabaseUser(
@@ -99,6 +103,19 @@ export class SupabaseAuthGuard implements CanActivate {
       );
 
       request.currentUser = updatedCurrentUser;
+    }
+
+    if (!request.currentUser) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (
+      UserStatus.INACTIVE === request.currentUser.status ||
+      UserStatus.SUSPENDED === request.currentUser.status
+    ) {
+      throw new UnauthorizedException(
+        'User is not active. Please contact support.',
+      );
     }
 
     return true;

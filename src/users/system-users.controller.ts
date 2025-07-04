@@ -102,6 +102,6 @@ export class SystemUsersController {
       throw new ForbiddenException('You have no access to create users.');
     }
 
-    return this.usersService.updateSystemUser(+id, updateSystemUserDto);
+    return this.usersService.updateSystemUser(+id, updateSystemUserDto, user);
   }
 }

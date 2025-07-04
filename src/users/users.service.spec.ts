@@ -4,7 +4,7 @@ import { UsersService } from './users.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { SupabaseService } from '@/common/supabase/supabase.service';
 import { FrontendPathsService } from '@/common/helpers/frontend-paths.service';
-import { CustomerStatus, Prisma } from '@prisma/client';
+import { CustomerStatus } from '@prisma/client';
 import { UserSystemRoles } from '@/common/constants/user-system-roles';
 import { UserStatus } from '@/common/constants/status';
 
@@ -321,12 +321,31 @@ describe('UsersService', () => {
       expect(result).toEqual(updatedUser);
     });
 
-    it('should throw ConflictException if user not found', async () => {
+    it('should throw NotFoundException if user not found', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
 
       await expect(
         service.updateSystemUser(999, updateSystemUserDto),
-      ).rejects.toThrow(ConflictException);
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ConflictException when user tries to change their own status', async () => {
+      const updateUserDtoWithStatus = {
+        ...updateSystemUserDto,
+        status: UserStatus.SUSPENDED,
+      };
+      const existingUser = { ...mockUser, isSuperadmin: true };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(
+        existingUser,
+      );
+
+      await expect(
+        service.updateSystemUser(
+          existingUser.id,
+          updateUserDtoWithStatus,
+          existingUser,
+        ),
+      ).rejects.toThrow('You cannot change your own status');
     });
   });
 
@@ -531,12 +550,24 @@ describe('UsersService', () => {
       expect(result).toEqual(updatedUser);
     });
 
-    it('should throw ConflictException if user not found', async () => {
+    it('should throw NotFoundException if user not found', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
 
       await expect(service.update(999, updateUserDto)).rejects.toThrow(
-        ConflictException,
+        NotFoundException,
       );
+    });
+
+    it('should throw ConflictException when user tries to change their own status', async () => {
+      const updateUserDtoWithStatus = {
+        ...updateUserDto,
+        status: UserStatus.SUSPENDED,
+      };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(mockUser);
+
+      await expect(
+        service.update(mockUser.id, updateUserDtoWithStatus, mockUser),
+      ).rejects.toThrow('You cannot change your own status');
     });
   });
 

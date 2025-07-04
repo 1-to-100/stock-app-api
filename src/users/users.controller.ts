@@ -301,7 +301,7 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     updateUserDto.customerId = user.customerId!; // do not allow to change customer
-    return this.usersService.update(+user.id, updateUserDto);
+    return this.usersService.update(+user.id, updateUserDto, user);
   }
 
   @Get(':id')
@@ -338,7 +338,7 @@ export class UsersController {
       updateUserDto.customerId = user.customerId;
     }
 
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(+id, updateUserDto, user);
   }
 
   @Delete(':id')

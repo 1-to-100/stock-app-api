@@ -124,71 +124,6 @@ export class UsersService {
     return user;
   }
 
-  async updateSystemUser(
-    id: number,
-    updateSystemUserDto: UpdateSystemUserDto,
-  ): Promise<OutputUserDto> {
-    if (updateSystemUserDto.email) {
-      updateSystemUserDto.email = undefined;
-    }
-    try {
-      const existingUser = await this.findOneSystemUser(id);
-      if (!existingUser) {
-        throw new NotFoundException('No user with given ID exists');
-      }
-
-      const { systemRole, ...updateUser } = updateSystemUserDto;
-      const isSuperadmin = systemRole === UserSystemRoles.SYSTEM_ADMIN;
-      const isCustomerSuccess = systemRole === UserSystemRoles.CUSTOMER_SUCCESS;
-
-      if (systemRole) {
-        if (!(isSuperadmin || isCustomerSuccess)) {
-          throw new ConflictException('Invalid system role');
-        }
-
-        if (isCustomerSuccess && !updateSystemUserDto.customerId) {
-          throw new ConflictException(
-            'Customer ID is required for Customer Success role',
-          );
-        } else if (isCustomerSuccess && updateSystemUserDto.customerId) {
-          const customer = await this.prisma.customer.findUnique({
-            where: { id: updateSystemUserDto.customerId },
-          });
-          if (!customer) {
-            throw new ConflictException('Customer not found');
-          }
-        }
-      }
-
-      const user = await this.prisma.user.update({
-        where: { id, deletedAt: null },
-        data: {
-          ...updateUser,
-          ...(systemRole ? { isSuperadmin, isCustomerSuccess } : {}),
-          ...(isSuperadmin ? { customerId: null } : {}),
-        },
-      });
-
-      // attach customer success to customer
-      if (isSuperadmin) {
-        await this.prisma.customer.updateMany({
-          where: { customerSuccessId: id },
-          data: { customerSuccessId: null },
-        });
-      } else if (isCustomerSuccess && updateSystemUserDto.customerId) {
-        await this.prisma.customer.update({
-          where: { id: updateSystemUserDto.customerId },
-          data: { customerSuccessId: user.id },
-        });
-      }
-
-      return user;
-    } catch (error) {
-      this.logger.error(`Error updating user: ${error}`);
-      throw new ConflictException('Error updating user');
-    }
-  }
-
   async invite(inviteUserDto: InviteUserDto): Promise<OutputUserDto> {
     if (await this.emailExists({ email: inviteUserDto.email })) {
       throw new ConflictException('User with this email already exists');
@@ -442,28 +377,98 @@ export class UsersService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
+    updatedBy?: OutputUserDto,
   ): Promise<OutputUserDto> {
     if (updateUserDto.email) {
       updateUserDto.email = undefined;
     }
-    try {
-      const existingUser = await this.prisma.user.findFirst({
-        where: { id, customerId: updateUserDto.customerId, deletedAt: null },
-      });
+    const existingUser = await this.prisma.user.findFirst({
+      where: { id, customerId: updateUserDto.customerId, deletedAt: null },
+    });
 
-      if (!existingUser) {
-        throw new NotFoundException('No user with given ID exists');
+    if (!existingUser) {
+      throw new NotFoundException('No user with given ID exists');
+    }
+
+    if (updatedBy && updateUserDto.status) {
+      if (updatedBy.id === id) {
+        throw new ConflictException('You cannot change your own status');
+      }
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id, customerId: updateUserDto.customerId },
+      data: updateUserDto,
+    });
+
+    return user;
+  }
+
+  async updateSystemUser(
+    id: number,
+    updateSystemUserDto: UpdateSystemUserDto,
+    updatedBy?: OutputUserDto,
+  ): Promise<OutputUserDto> {
+    if (updateSystemUserDto.email) {
+      updateSystemUserDto.email = undefined;
+    }
+    const existingUser = await this.findOneSystemUser(id);
+    if (!existingUser) {
+      throw new NotFoundException('No user with given ID exists');
+    }
+
+    if (updatedBy && updateSystemUserDto.status) {
+      if (updatedBy.id === id) {
+        throw new ConflictException('You cannot change your own status');
+      }
+    }
+
+    const { systemRole, ...updateUser } = updateSystemUserDto;
+    const isSuperadmin = systemRole === UserSystemRoles.SYSTEM_ADMIN;
+    const isCustomerSuccess = systemRole === UserSystemRoles.CUSTOMER_SUCCESS;
+
+    if (systemRole) {
+      if (!(isSuperadmin || isCustomerSuccess)) {
+        throw new ConflictException('Invalid system role');
       }
 
-      const user = await this.prisma.user.update({
-        where: { id, customerId: updateUserDto.customerId },
-        data: updateUserDto,
-      });
-      return user;
-    } catch (error) {
-      this.logger.error(`Error updating user: ${error}`);
-      throw new ConflictException('Error updating user');
+      if (isCustomerSuccess && !updateSystemUserDto.customerId) {
+        throw new ConflictException(
+          'Customer ID is required for Customer Success role',
+        );
+      } else if (isCustomerSuccess && updateSystemUserDto.customerId) {
+        const customer = await this.prisma.customer.findUnique({
+          where: { id: updateSystemUserDto.customerId },
+        });
+        if (!customer) {
+          throw new ConflictException('Customer not found');
+        }
+      }
     }
+
+    const user = await this.prisma.user.update({
+      where: { id, deletedAt: null },
+      data: {
+        ...updateUser,
+        ...(systemRole ? { isSuperadmin, isCustomerSuccess } : {}),
+        ...(isSuperadmin ? { customerId: null } : {}),
+      },
+    });
+
+    // attach customer success to customer
+    if (isSuperadmin) {
+      await this.prisma.customer.updateMany({
+        where: { customerSuccessId: id },
+        data: { customerSuccessId: null },
+      });
+    } else if (isCustomerSuccess && updateSystemUserDto.customerId) {
+      await this.prisma.customer.update({
+        where: { id: updateSystemUserDto.customerId },
+        data: { customerSuccessId: user.id },
+      });
+    }
+
+    return user;
   }
 
   async findByUid(uid: string) {
@@ -772,5 +777,12 @@ export class UsersService {
     this.logger.log(`User ${id} soft deleted at ${deletedAt.toISOString()}`);
 
     return updatedUser;
+  }
+
+  async isUserDeleted(uid: string): Promise<boolean> {
+    const deletedUserCount = await this.prisma.user.count({
+      where: { uid, deletedAt: { not: null } },
+    });
+    return deletedUserCount > 0;
   }
 }
