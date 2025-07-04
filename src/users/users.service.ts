@@ -393,6 +393,10 @@ export class UsersService {
     if (updatedBy && updateUserDto.status) {
       if (updatedBy.id === id) {
         throw new ConflictException('You cannot change your own status');
+      } else if (existingUser.isSuperadmin || existingUser.isCustomerSuccess) {
+        throw new ConflictException(
+          'You cannot change status of superadmin or customer success user',
+        );
       }
     }
 
