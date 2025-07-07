@@ -71,4 +71,24 @@ export class SupabaseService implements OnModuleInit {
     await channel.send({ type: 'broadcast', event, payload });
     await channel.unsubscribe();
   }
+
+  async banUser(uuid: string): Promise<void> {
+    const { error: banError } = await this.admin.updateUserById(uuid, {
+      ban_duration: '876000h', // 100 years
+    });
+
+    if (banError) {
+      throw new Error(`Failed to ban user: ${banError.message}`);
+    }
+  }
+
+  async unbanUser(uuid: string): Promise<void> {
+    const { error: unbanError } = await this.admin.updateUserById(uuid, {
+      ban_duration: 'none',
+    });
+
+    if (unbanError) {
+      throw new Error(`Failed to unban user: ${unbanError.message}`);
+    }
+  }
 }

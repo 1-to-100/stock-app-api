@@ -397,6 +397,22 @@ export class UsersService {
         throw new ConflictException(
           'You cannot change status of superadmin or customer success user',
         );
+      } else if (!existingUser.uid) {
+        throw new ConflictException(
+          'You cannot change status of user without Supabase UID',
+        );
+      }
+
+      if (
+        updateUserDto.status === UserStatus.SUSPENDED &&
+        existingUser.status == UserStatus.ACTIVE
+      ) {
+        await this.supabaseService.banUser(existingUser.uid);
+      } else if (
+        updateUserDto.status === UserStatus.ACTIVE &&
+        existingUser.status == UserStatus.SUSPENDED
+      ) {
+        await this.supabaseService.unbanUser(existingUser.uid);
       }
     }
 
