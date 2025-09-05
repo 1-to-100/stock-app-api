@@ -28,17 +28,17 @@ class EnvironmentVariables {
   @IsOptional()
   DIRECT_URL?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  DATABASE_USER: string;
-
-  @IsString()
-  @IsNotEmpty()
-  DATABASE_PASSWORD: string;
-
-  @IsString()
-  @IsNotEmpty()
-  DATABASE_NAME: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // DATABASE_USER: string;
+  //
+  // @IsString()
+  // @IsNotEmpty()
+  // DATABASE_PASSWORD: string;
+  //
+  // @IsString()
+  // @IsNotEmpty()
+  // DATABASE_NAME: string;
 
   @IsString()
   @IsNotEmpty()
