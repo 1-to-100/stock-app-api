@@ -26,6 +26,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'http://localhost:3001',
+      'http://localhost:3002',
       'https://dev-app-381393991104.us-central1.run.app',
       'https://baseplate.huboxt.com',
     ],
@@ -37,10 +38,10 @@ async function bootstrap() {
     // optionsSuccessStatus: 204,
   });
   const config = new DocumentBuilder()
-    .setTitle('stockApp API')
-    .setDescription('The stockApp API description')
+    .setTitle('Baseplate API')
+    .setDescription('The Baseplate API description')
     .setVersion('0.1.0')
-    .addTag('stockApp')
+    .addTag('baseplate')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

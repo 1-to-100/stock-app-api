@@ -55,4 +55,16 @@ export class CreateUserDto {
   @IsOptional()
   @IsIn(['inactive', 'active', 'suspended'])
   status?: string;
+
+  @ApiPropertyOptional({
+    description: 'Is superadmin user',
+  })
+  @IsOptional()
+  isSuperadmin?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Is customer success user',
+  })
+  @IsOptional()
+  isCustomerSuccess?: boolean;
 }
