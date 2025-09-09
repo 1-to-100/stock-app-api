@@ -5,11 +5,14 @@ import { CustomersService } from '@/customers/customers.service';
 import { ArticlesService } from '@/articles/articles.service';
 import { ArticleCategoriesService } from '@/article-categories/article-categories.service';
 import { NotificationsService } from '@/notifications/notifications.service';
+import { TemplatesService } from '@/notifications/templates.service';
 import { SubscriptionSeederService } from '../services/subscription-seeder.service';
 import { CustomerStatus, NotificationType } from '@prisma/client';
 import { OutputUserDto } from '@/users/dto/output-user.dto';
 import { OutputArticleCategoryDto } from '@/article-categories/dto/output-article-category.dto';
 import { UserSystemRoles } from '@/common/constants/user-system-roles';
+import { NotificationTypes } from '@/notifications/constants/notification-types';
+import { NotificationChannel } from '@/notifications/constants/notification-channel';
 
 @Injectable()
 export class SeedCommand {
@@ -22,6 +25,7 @@ export class SeedCommand {
     private readonly articlesService: ArticlesService,
     private readonly articleCategoriesService: ArticleCategoriesService,
     private readonly notificationsService: NotificationsService,
+    private readonly templatesService: TemplatesService,
     private readonly subscriptionSeederService: SubscriptionSeederService,
   ) {}
 
@@ -69,11 +73,15 @@ export class SeedCommand {
       // Create notifications
       await this.createNotifications(customer.id, users);
 
+      // Create notification templates
+      const templates = await this.createNotificationTemplates(customer.id);
+
       this.logger.log('Test data seeding completed successfully!');
       this.logger.log(`Created customer: ${customer.name} (ID: ${customer.id})`);
       this.logger.log(`Created ${users.length} users`);
       this.logger.log(`Created ${categories.length} article categories`);
       this.logger.log(`Created ${articles.length} articles`);
+      this.logger.log(`Created ${templates.length} notification templates`);
       this.logger.log(`Created customer success user: ${customerSuccess.email}`);
 
     } catch (error) {
@@ -363,12 +371,14 @@ docker compose up</code></pre>
   private async createNotifications(customerId: number, users: OutputUserDto[]) {
     this.logger.log('Creating notifications...');
     
-    const notifications = [
+    // Define notification types and their corresponding channels
+    const notificationTypes = ['info', 'alert', 'warning', 'article'];
+    const notificationTemplates = [
       {
         title: 'Welcome to Test Customer Platform',
         message: 'Welcome! Your account has been set up successfully.',
         type: 'IN_APP' as NotificationType,
-        channel: 'welcome',
+        channel: this.getRandomNotificationType(),
         customerId,
         generatedBy: 'system (seed)',
       },
@@ -376,27 +386,165 @@ docker compose up</code></pre>
         title: 'New Feature Available',
         message: 'Check out our new document management features.',
         type: 'IN_APP' as NotificationType,
-        channel: 'feature',
+        channel: this.getRandomNotificationType(),
+        customerId,
+        generatedBy: 'system (seed)',
+      },
+      {
+        title: 'System Maintenance Scheduled',
+        message: 'We will be performing scheduled maintenance on Sunday at 2 AM.',
+        type: 'IN_APP' as NotificationType,
+        channel: this.getRandomNotificationType(),
+        customerId,
+        generatedBy: 'system (seed)',
+      },
+      {
+        title: 'Security Alert',
+        message: 'Your account has been accessed from a new device.',
+        type: 'IN_APP' as NotificationType,
+        channel: this.getRandomNotificationType(),
         customerId,
         generatedBy: 'system (seed)',
       },
     ];
 
-    for (const notification of notifications) {
+    for (const notification of notificationTemplates) {
       await this.notificationsService.create(notification);
     }
 
-    // Create user-specific notifications
+    // Create user-specific notifications with random types
     for (const user of users) {
+      const notificationTypes = ['info', 'alert', 'warning', 'article'];
+      const randomType = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
+      
       await this.notificationsService.create({
         title: 'Personal Welcome',
         message: `Welcome ${user.firstName}! We're excited to have you on board.`,
         type: 'IN_APP' as NotificationType,
-        channel: 'personal',
+        channel: randomType,
         customerId,
         userId: user.id,
         generatedBy: 'system (seed)',
       });
+
+      // Create additional random notifications for each user
+      const additionalNotifications = [
+        {
+          title: 'Profile Update Reminder',
+          message: 'Please complete your profile information to get the most out of our platform.',
+          type: 'IN_APP' as NotificationType,
+          channel: this.getRandomNotificationType(),
+          customerId,
+          userId: user.id,
+          generatedBy: 'system (seed)',
+        },
+        {
+          title: 'New Article Published',
+          message: 'A new article has been published in your area of interest.',
+          type: 'IN_APP' as NotificationType,
+          channel: this.getRandomNotificationType(),
+          customerId,
+          userId: user.id,
+          generatedBy: 'system (seed)',
+        },
+      ];
+
+      for (const notification of additionalNotifications) {
+        await this.notificationsService.create(notification);
+      }
     }
+  }
+
+  private getRandomNotificationType(): string {
+    const notificationTypes = ['info', 'alert', 'warning', 'article'];
+    return notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
+  }
+
+  private async createNotificationTemplates(customerId: number) {
+    this.logger.log('Creating notification templates...');
+    const templates: any[] = [];
+
+    const templateData = [
+      {
+        title: 'Welcome Notification',
+        message: 'Welcome to our platform! We\'re excited to have you on board. Get started by exploring our features and resources.',
+        comment: 'Sent to new users upon registration',
+        type: [NotificationTypes.IN_APP, NotificationTypes.EMAIL],
+        channel: NotificationChannel.info,
+      },
+      {
+        title: 'Security Alert',
+        message: 'We detected unusual activity on your account. Please review your recent login activity and contact support if you don\'t recognize these actions.',
+        comment: 'Sent when suspicious activity is detected',
+        type: [NotificationTypes.IN_APP, NotificationTypes.EMAIL],
+        channel: NotificationChannel.alert,
+      },
+      {
+        title: 'System Maintenance Warning',
+        message: 'Scheduled maintenance will begin in 30 minutes. Some features may be temporarily unavailable. We apologize for any inconvenience.',
+        comment: 'Sent before scheduled maintenance',
+        type: [NotificationTypes.IN_APP],
+        channel: NotificationChannel.warning,
+      },
+      {
+        title: 'New Article Published',
+        message: 'A new article "{articleTitle}" has been published in your area of interest. Click here to read it now.',
+        comment: 'Sent when new content is published',
+        type: [NotificationTypes.IN_APP],
+        channel: NotificationChannel.article,
+      },
+      {
+        title: 'Account Verification Required',
+        message: 'Please verify your email address to complete your account setup. Check your inbox for the verification link.',
+        comment: 'Sent to unverified accounts',
+        type: [NotificationTypes.EMAIL],
+        channel: NotificationChannel.info,
+      },
+      {
+        title: 'Password Reset Request',
+        message: 'You requested a password reset. Click the link below to create a new password. This link will expire in 24 hours.',
+        comment: 'Sent when password reset is requested',
+        type: [NotificationTypes.EMAIL],
+        channel: NotificationChannel.alert,
+      },
+      {
+        title: 'Feature Update Available',
+        message: 'New features are now available! Check out our latest updates including improved dashboard and enhanced security features.',
+        comment: 'Sent when new features are released',
+        type: [NotificationTypes.IN_APP],
+        channel: NotificationChannel.info,
+      },
+      {
+        title: 'Subscription Expiring Soon',
+        message: 'Your subscription will expire in 7 days. Renew now to continue enjoying all features without interruption.',
+        comment: 'Sent before subscription expires',
+        type: [NotificationTypes.IN_APP, NotificationTypes.EMAIL],
+        channel: NotificationChannel.warning,
+      },
+      {
+        title: 'Document Shared',
+        message: 'A document "{documentTitle}" has been shared with you. You can access it from your dashboard.',
+        comment: 'Sent when a document is shared',
+        type: [NotificationTypes.IN_APP],
+        channel: NotificationChannel.article,
+      },
+      {
+        title: 'Account Suspended',
+        message: 'Your account has been temporarily suspended due to policy violations. Please contact support for assistance.',
+        comment: 'Sent when account is suspended',
+        type: [NotificationTypes.EMAIL],
+        channel: NotificationChannel.alert,
+      },
+    ];
+
+    for (const templateInfo of templateData) {
+      const template = await this.templatesService.createTemplate(
+        templateInfo,
+        customerId,
+      );
+      templates.push(template);
+    }
+
+    return templates;
   }
 }

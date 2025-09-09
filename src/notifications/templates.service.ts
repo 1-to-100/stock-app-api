@@ -113,12 +113,14 @@ export class TemplatesService {
 
   async createTemplate(
     createTemplateDto: CreateTemplateDto,
+    customerId?: number,
   ): Promise<NotificationTemplateDto> {
     this.logger.log('Creating notification template');
 
     const template = await this.prisma.notificationTemplate.create({
       data: {
         ...createTemplateDto,
+        customerId,
       },
       include: {
         Customer: {

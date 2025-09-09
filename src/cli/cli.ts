@@ -38,7 +38,7 @@ program
 
 program
   .command('cleanup')
-  .description('Remove all test data from the database')
+  .description('Permanently delete all test data from the database (HARD DELETE)')
   .action(async () => {
     const logger = new Logger('CLI');
     try {

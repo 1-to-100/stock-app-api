@@ -1,8 +1,7 @@
-# Use Node.js version 20 as the base image
-FROM node:lts-alpine3.22
+FROM node:22-alpine
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
@@ -10,13 +9,19 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install --force
 
+# Copy the entire project
 COPY . .
 
-# Generate Prisma client (if using Prisma)
-RUN npx prisma generate
+# Generate Prisma client
+RUN npm run prisma:generate
 
-# Build the NestJS application
+# Build the application (including CLI)
 RUN npm run build
 
-# Run database migrations and start the application
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+# Make CLI executable
+RUN chmod +x dist/cli/cli.js
+
+EXPOSE 3001
+
+CMD ["npm", "run", "start:dev"]
+# CMD ["sh", "-c", "npm run start:dev"]

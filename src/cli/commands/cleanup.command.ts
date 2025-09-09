@@ -12,7 +12,8 @@ export class CleanupCommand {
   ) {}
 
   async execute(): Promise<void> {
-    this.logger.log('Starting test data cleanup...');
+    this.logger.log('Starting HARD DELETE cleanup for test data...');
+    this.logger.warn('⚠️  WARNING: This will permanently delete test users and customers from the database!');
 
     try {
       // Find test customer
@@ -64,39 +65,71 @@ export class CleanupCommand {
       deletedCount += deletedCategories.count;
       this.logger.log(`Deleted ${deletedCategories.count} article categories`);
 
-      // 5. Delete users (soft delete by setting deletedAt and nullifying customerId)
-      const usersToDelete = await this.prisma.user.findMany({
-        where: { customerId: testCustomer.id },
+      // 5. Use raw SQL to handle foreign key constraints properly
+      // First, find all users associated with this customer
+      const allUsers = await this.prisma.user.findMany({
+        where: { 
+          OR: [
+            { customerId: testCustomer.id },
+            { id: testCustomer.ownerId },
+            { email: { contains: '@testcustomer.com' } }
+          ]
+        },
         select: { id: true, email: true },
       });
 
-      for (const user of usersToDelete) {
-        await this.prisma.user.update({
+      // First, update all users to remove customerId reference
+      await this.prisma.user.updateMany({
+        where: { customerId: testCustomer.id },
+        data: { customerId: null },
+      });
+      this.logger.log('Removed customerId references from users');
+
+      // Delete all related data for each user
+      for (const user of allUsers) {
+        // Delete notifications
+        await this.prisma.notification.deleteMany({
+          where: { senderId: user.id },
+        });
+
+        await this.prisma.notification.deleteMany({
+          where: { userId: user.id },
+        });
+
+        // Delete articles
+        await this.prisma.article.deleteMany({
+          where: { createdBy: user.id },
+        });
+
+        // Delete article categories
+        await this.prisma.articleCategory.deleteMany({
+          where: { createdBy: user.id },
+        });
+
+        // Update any users that reference this user as manager
+        await this.prisma.user.updateMany({
+          where: { managerId: user.id },
+          data: { managerId: null },
+        });
+      }
+
+      // Now delete the customer
+      await this.prisma.customer.delete({
+        where: { id: testCustomer.id },
+      });
+      deletedCount += 1;
+      this.logger.log(`Deleted customer: ${testCustomer.name}`);
+
+      // Now delete all the users
+      for (const user of allUsers) {
+        await this.prisma.user.delete({
           where: { id: user.id },
-          data: {
-            deletedAt: new Date(),
-            email: `__deleted__${user.id}_${new Date().getTime()}@deleted.com`,
-            status: 'suspended',
-            customerId: null, // Remove foreign key reference
-          },
         });
       }
-      deletedCount += usersToDelete.length;
-      this.logger.log(`Soft deleted ${usersToDelete.length} users`);
+      deletedCount += allUsers.length;
+      this.logger.log(`Hard deleted ${allUsers.length} users`);
 
-      // 6. Delete customer
-      try {
-        await this.prisma.customer.delete({
-          where: { id: testCustomer.id },
-        });
-        deletedCount += 1;
-        this.logger.log(`Deleted customer: ${testCustomer.name}`);
-      } catch (error) {
-        this.logger.error(`Failed to delete customer ${testCustomer.name}:`, error);
-        // Continue with cleanup even if customer deletion fails
-      }
-
-      // 7. Clean up test subscription only (keep other subscriptions)
+      // 8. Clean up test subscription only (keep other subscriptions)
       const testSubscription = await this.prisma.subscription.findFirst({
         where: { name: 'Test Subscription' },
       });
@@ -109,32 +142,8 @@ export class CleanupCommand {
         this.logger.log(`Deleted test subscription: ${testSubscription.name}`);
       }
 
-      // 8. Clean up any orphaned users (users without customerId that might be test users)
-      const orphanedUsers = await this.prisma.user.findMany({
-        where: {
-          email: {
-            contains: '@testcustomer.com',
-          },
-          customerId: null,
-        },
-      });
-
-      if (orphanedUsers.length > 0) {
-        for (const user of orphanedUsers) {
-          await this.prisma.user.update({
-            where: { id: user.id },
-            data: {
-              deletedAt: new Date(),
-              email: `__deleted__${user.id}_${new Date().getTime()}@deleted.com`,
-              status: 'suspended',
-            },
-          });
-        }
-        deletedCount += orphanedUsers.length;
-        this.logger.log(`Soft deleted ${orphanedUsers.length} orphaned test users`);
-      }
-
-      this.logger.log(`Test data cleanup completed successfully! Total items deleted: ${deletedCount}`);
+      this.logger.log(`Test data cleanup completed successfully! Total items deleted: ${deletedCount} (HARD DELETE)`);
+      this.logger.warn('⚠️  All test data has been permanently removed from the database.');
 
     } catch (error) {
       this.logger.error('Error during cleanup:', error);
